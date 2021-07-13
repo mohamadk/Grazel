@@ -38,13 +38,13 @@ import javax.inject.Inject
 internal open class GenerateRootBazelScriptsTask @Inject constructor(
     objectFactory: ObjectFactory
 ) : DefaultTask() {
-    @Input
+    @get:Input
     internal val migrationChecker = objectFactory.property<MigrationChecker>()
 
-    @Input
+    @get:Input
     internal val workspaceBuilderFactory = objectFactory.property<WorkspaceBuilder.Factory>()
 
-    @Input
+    @get:Input
     internal val rootBazelBuilder = objectFactory.property<RootBazelFileBuilder>()
 
     @TaskAction
