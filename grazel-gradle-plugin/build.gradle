@@ -23,7 +23,7 @@ buildscript {
 
 plugins {
     id "java-gradle-plugin"
-    id "org.gradle.kotlin.kotlin-dsl" version "1.4.9"
+    id "org.gradle.kotlin.kotlin-dsl" version "2.1.4"
     id "com.gradle.plugin-publish" version "0.14.0"
     id "maven-publish"
     id "idea"
