@@ -18,20 +18,22 @@ package com.grab.grazel.dozer
 
 import com.grab.grazel.GrazelExtension
 import com.grab.grazel.gradle.DefaultGradleProjectInfo
+import com.grab.grazel.gradle.dependencies.DependencyGraphs
 import com.grab.grazel.migrate.WorkspaceModifier
 import org.gradle.api.logging.Logger
 import org.gradle.process.internal.ExecException
 
 internal fun createDozerWorkspaceModifier(
     gradleProjectInfo: DefaultGradleProjectInfo,
-    extension: GrazelExtension
+    extension: GrazelExtension,
+    dependencyGraphs: DependencyGraphs
 ): WorkspaceModifier {
     val dozerUpdates = listOf<DozerUpdate>(
         AddedMavenDependency(gradleProjectInfo.rootProject),
         ReplaceMavenDependency(gradleProjectInfo.rootProject)
     )
     val tempFileManager = DefaultTempFileManager(gradleProjectInfo.rootProject.rootDir)
-    val bazelDependencyAnalytics = QueryBazelDependencyAnalytics(gradleProjectInfo, extension)
+    val bazelDependencyAnalytics = QueryBazelDependencyAnalytics(gradleProjectInfo, dependencyGraphs, extension)
     return DozerWorkspaceModifier(
         dozerUpdates, tempFileManager,
         bazelDependencyAnalytics, gradleProjectInfo.rootProject.logger

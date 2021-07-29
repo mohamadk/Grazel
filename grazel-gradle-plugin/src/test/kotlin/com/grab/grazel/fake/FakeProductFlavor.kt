@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.grab.grazel.util
+package com.grab.grazel.fake
 
 import com.android.build.gradle.api.BaseVariant
 import com.android.builder.model.ApiVersion
@@ -23,16 +23,16 @@ import com.android.builder.model.ProductFlavor
 import com.android.builder.model.SigningConfig
 import com.android.builder.model.VectorDrawablesOptions
 import com.grab.grazel.extension.VariantFilter
-import com.grab.grazel.gradle.AndroidBuildVariantDataSource
+import com.grab.grazel.gradle.AndroidVariantDataSource
 import org.gradle.api.Action
 import org.gradle.api.Project
 import java.io.File
 
-class FakeAndroidBuildVariantDataSource(
+class FakeAndroidVariantDataSource(
     var ignoreFlavorsName: List<String> = emptyList(),
     var ignoreVariantName: List<Pair<String, String?>> = emptyList(),
     override val variantFilter: Action<VariantFilter>? = null
-) : AndroidBuildVariantDataSource {
+) : AndroidVariantDataSource {
     override fun getIgnoredFlavors(project: Project): List<ProductFlavor> =
         ignoreFlavorsName.map { FakeProductFlavor(it) }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.grab.grazel.util
+package com.grab.grazel.fake
 
 import com.android.build.gradle.api.BaseVariant
 import com.android.build.gradle.api.BaseVariantOutput

@@ -18,6 +18,7 @@ package com.grab.grazel.dozer
 
 import com.grab.grazel.GrazelExtension
 import com.grab.grazel.gradle.DefaultGradleProjectInfo
+import com.grab.grazel.gradle.dependencies.DependencyGraphs
 import com.grab.grazel.hybrid.bazelCommand
 import org.gradle.api.artifacts.Dependency
 import java.io.ByteArrayOutputStream
@@ -29,12 +30,12 @@ interface BazelDependencyAnalytics {
 
 internal class QueryBazelDependencyAnalytics(
     private val gradleProjectInfo: DefaultGradleProjectInfo,
+    private val dependencyGraphs : DependencyGraphs,
     extension: GrazelExtension
 ) : BazelDependencyAnalytics {
-    private val mavenDeps = gradleProjectInfo.projectGraph
-        .nodes()
+    private val mavenDeps = dependencyGraphs.nodes()
         .asSequence()
-        .flatMap(gradleProjectInfo.dependenciesDataSource::mavenDependencies)
+        .flatMap{ gradleProjectInfo.dependenciesDataSource.mavenDependencies(it) }
         .filter { artifact ->
             !(extension.dependencies.ignoreArtifacts.get()
                 .any { ignore -> "${artifact.group}:${artifact.name}" == ignore })

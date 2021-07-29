@@ -88,15 +88,3 @@ fun Project.buildTargetName(isIntermediate: Boolean = false): String {
 
 fun Project.booleanProperty(name: String): Boolean =
     findProperty(name)?.toString()?.toBoolean() ?: false
-
-internal fun Project.dependenciesSubGraph(
-    projectDependencyGraph: ImmutableValueGraph<Project, Configuration>
-): Sequence<Project> {
-    return Graphs.reachableNodes(projectDependencyGraph.asGraph(), this).asSequence()
-}
-
-internal fun Project.getBazelModuleTargets(
-    projectDependencyGraph: ImmutableValueGraph<Project, Configuration>
-) = projectDependencyGraph.successors(this)
-    .map { BazelDependency.ProjectDependency(it) }
-    .toList()

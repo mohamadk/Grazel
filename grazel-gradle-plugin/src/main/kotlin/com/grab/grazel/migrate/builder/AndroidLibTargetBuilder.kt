@@ -16,6 +16,7 @@
 
 package com.grab.grazel.migrate.builder
 
+import com.grab.grazel.extension.TestExtension
 import com.grab.grazel.gradle.isAndroid
 import com.grab.grazel.gradle.isAndroidApplication
 import com.grab.grazel.gradle.isKotlin
@@ -24,6 +25,8 @@ import com.grab.grazel.migrate.TargetBuilder
 import com.grab.grazel.migrate.android.AndroidLibraryData
 import com.grab.grazel.migrate.android.AndroidLibraryDataExtractor
 import com.grab.grazel.migrate.android.AndroidLibraryTarget
+import com.grab.grazel.migrate.android.AndroidUnitTestDataExtractor
+import com.grab.grazel.migrate.android.toUnitTestTarget
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoSet
@@ -40,13 +43,21 @@ internal interface AndroidLibTargetBuilderModule {
 
 @Singleton
 internal class AndroidLibTargetBuilder @Inject constructor(
-    private val projectDataExtractor: AndroidLibraryDataExtractor
+    private val projectDataExtractor: AndroidLibraryDataExtractor,
+    private val unitTestDataExtractor: AndroidUnitTestDataExtractor,
+    private val testExtension: TestExtension
 ) : TargetBuilder {
 
     override fun build(project: Project): List<BazelTarget> {
-        return listOf(projectDataExtractor.extract(project).toAndroidLibTarget())
+        return if (testExtension.enableTestMigration) {
+            listOf(
+                projectDataExtractor.extract(project).toAndroidLibTarget(),
+                unitTestDataExtractor.extract(project).toUnitTestTarget(testExtension)
+            )
+        } else {
+            listOf(projectDataExtractor.extract(project).toAndroidLibTarget())
+        }
     }
-
 
     override fun canHandle(project: Project): Boolean = with(project) {
         isAndroid && !isKotlin && !isAndroidApplication

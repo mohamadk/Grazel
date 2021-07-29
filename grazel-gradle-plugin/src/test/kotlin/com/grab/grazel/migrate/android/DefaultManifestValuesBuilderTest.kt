@@ -27,10 +27,11 @@ import com.grab.grazel.GrazelExtension
 import com.grab.grazel.GrazelExtension.Companion.GRAZEL_EXTENSION
 import com.grab.grazel.GrazelPluginTest
 import com.grab.grazel.buildProject
+import com.grab.grazel.fake.FakeDependencyGraphs
 import com.grab.grazel.gradle.ANDROID_APPLICATION_PLUGIN
 import com.grab.grazel.gradle.ANDROID_LIBRARY_PLUGIN
-import com.grab.grazel.gradle.AndroidBuildVariantDataSource
-import com.grab.grazel.gradle.DefaultAndroidBuildVariantDataSource
+import com.grab.grazel.gradle.AndroidVariantDataSource
+import com.grab.grazel.gradle.DefaultAndroidVariantDataSource
 import com.grab.grazel.util.doEvaluate
 import dagger.Lazy
 import org.gradle.api.Project
@@ -87,21 +88,11 @@ class DefaultManifestValuesBuilderTest : GrazelPluginTest() {
             }
         }
 
-        val dependencyGraph: MutableValueGraph<Project, Configuration> = ValueGraphBuilder
-            .directed()
-            .allowsSelfLoops(false)
-            .expectedNodeCount(rootProject.subprojects.size)
-            .build()
-        with(dependencyGraph) {
-            val configuration = ConfigurationStub()
-            addNode(androidBinary)
-            addNode(androidLibrary)
-            putEdgeValue(androidBinary, androidLibrary, configuration)
-        }
+        val dependencyGraphs = FakeDependencyGraphs(dependenciesSubGraph = setOf(androidLibrary))
 
-        val variantDataSource: AndroidBuildVariantDataSource = DefaultAndroidBuildVariantDataSource()
+        val variantDataSource: AndroidVariantDataSource = DefaultAndroidVariantDataSource()
         defaultManifestValuesBuilder = DefaultManifestValuesBuilder(
-            { ImmutableValueGraph.copyOf(dependencyGraph) },
+            { dependencyGraphs },
             variantDataSource
         )
     }

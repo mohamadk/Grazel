@@ -16,11 +16,12 @@
 
 package com.grab.grazel.migrate.kotlin
 
-import com.google.common.graph.ImmutableValueGraph
 import com.grab.grazel.bazel.rules.KOTLIN_PARCELIZE_TARGET
 import com.grab.grazel.bazel.starlark.BazelDependency
+import com.grab.grazel.gradle.ConfigurationScope
 import com.grab.grazel.gradle.dependencies.DependenciesDataSource
-import com.grab.grazel.gradle.getBazelModuleTargets
+import com.grab.grazel.gradle.dependencies.DependencyGraphs
+import com.grab.grazel.gradle.dependencies.directProjectDependencies
 import com.grab.grazel.gradle.hasKotlinAndroidExtensions
 import com.grab.grazel.migrate.android.SourceSetType
 import com.grab.grazel.migrate.android.collectMavenDeps
@@ -28,8 +29,6 @@ import com.grab.grazel.migrate.android.filterValidPaths
 import dagger.Lazy
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
-import org.gradle.api.artifacts.Configuration
-import org.gradle.api.internal.artifacts.dependencies.DefaultSelfResolvingDependency
 import org.gradle.kotlin.dsl.the
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
@@ -44,20 +43,21 @@ internal interface KotlinProjectDataExtractor {
 @Singleton
 internal class DefaultKotlinProjectDataExtractor @Inject constructor(
     private val dependenciesDataSource: DependenciesDataSource,
-    private val dependencyGraphProvider: Lazy<ImmutableValueGraph<Project, Configuration>>
+    private val dependencyGraphsProvider: Lazy<DependencyGraphs>
 ) : KotlinProjectDataExtractor {
 
-    private val projectDependencyGraph get() = dependencyGraphProvider.get()
+    private val projectDependencyGraphs get() = dependencyGraphsProvider.get()
 
     override fun extract(project: Project): KotlinProjectData {
         val sourceSets = project.the<KotlinJvmProjectExtension>().sourceSets
         val srcs = project.kotlinSources(sourceSets, SourceSetType.JAVA_KOTLIN).toList()
         val resources = project.kotlinSources(sourceSets, SourceSetType.RESOURCES).toList()
 
-        val deps = project.getBazelModuleTargets(projectDependencyGraph) +
-                dependenciesDataSource.collectMavenDeps(project) +
-                project.androidJarDeps() +
-                project.kotlinParcelizeDeps()
+        val deps =
+            projectDependencyGraphs.directProjectDependencies(project, ConfigurationScope.BUILD) +
+                    dependenciesDataSource.collectMavenDeps(project) +
+                    project.androidJarDeps() +
+                    project.kotlinParcelizeDeps()
 
         return KotlinProjectData(
             name = project.name,
@@ -87,18 +87,6 @@ internal class DefaultKotlinProjectDataExtractor @Inject constructor(
             .filter { !it.name.toLowerCase().contains("test") } // TODO Consider enabling later.
             .flatMap(sourceSetChoosers)
         return filterValidPaths(dirs, sourceSetType.patterns)
-    }
-
-    private fun Project.androidJarDeps(): List<BazelDependency> {
-        return if (configurations.findByName("compileOnly")
-                ?.dependencies
-                ?.filterIsInstance<DefaultSelfResolvingDependency>()
-                ?.any { dep -> dep.files.any { it.name.contains("android.jar") } } == true
-        ) {
-            listOf(BazelDependency.StringDependency("//shared_versions:android_sdk"))
-        } else {
-            emptyList()
-        }
     }
 }
 

@@ -16,13 +16,12 @@
 
 package com.grab.grazel.di
 
-import com.google.common.graph.ImmutableValueGraph
 import com.grab.grazel.GrazelExtension
 import com.grab.grazel.di.qualifiers.RootProject
-import com.grab.grazel.gradle.AndroidBuildVariantDataSource
+import com.grab.grazel.gradle.AndroidVariantDataSource
 import com.grab.grazel.gradle.AndroidVariantsExtractor
 import com.grab.grazel.gradle.ConfigurationDataSource
-import com.grab.grazel.gradle.DefaultAndroidBuildVariantDataSource
+import com.grab.grazel.gradle.DefaultAndroidVariantDataSource
 import com.grab.grazel.gradle.DefaultAndroidVariantsExtractor
 import com.grab.grazel.gradle.DefaultConfigurationDataSource
 import com.grab.grazel.gradle.DefaultGradleProjectInfo
@@ -30,9 +29,10 @@ import com.grab.grazel.gradle.DefaultRepositoryDataSource
 import com.grab.grazel.gradle.GradleProjectInfo
 import com.grab.grazel.gradle.MigrationChecker
 import com.grab.grazel.gradle.MigrationCriteriaModule
-import com.grab.grazel.gradle.ProjectDependencyGraphBuilder
 import com.grab.grazel.gradle.RepositoryDataSource
+import com.grab.grazel.gradle.dependencies.DependenciesGraphsBuilder
 import com.grab.grazel.gradle.dependencies.DependenciesModule
+import com.grab.grazel.gradle.dependencies.DependencyGraphs
 import com.grab.grazel.migrate.builder.AndroidBinaryTargetBuilderModule
 import com.grab.grazel.migrate.builder.AndroidLibTargetBuilderModule
 import com.grab.grazel.migrate.builder.KtAndroidLibTargetBuilderModule
@@ -46,7 +46,6 @@ import dagger.Component
 import dagger.Module
 import dagger.Provides
 import org.gradle.api.Project
-import org.gradle.api.artifacts.Configuration
 import org.gradle.internal.logging.progress.ProgressLogger
 import org.gradle.internal.logging.progress.ProgressLoggerFactory
 import org.gradle.kotlin.dsl.support.serviceOf
@@ -106,18 +105,20 @@ internal object GrazelModule {
 
     @Provides
     @Singleton
-    fun provideDependencyGraph(builder: ProjectDependencyGraphBuilder): ImmutableValueGraph<Project, Configuration> {
-        return builder.build()
-    }
+    fun DependenciesGraphsBuilder.provideDependencyGraphs(): DependencyGraphs = build()
 
     @Provides
     @Singleton
-    fun GrazelExtension.provideAndroidBuildVariantDataSource(): AndroidBuildVariantDataSource =
-        DefaultAndroidBuildVariantDataSource(variantFilter = android.variantFilter)
+    fun GrazelExtension.provideAndroidVariantDataSource(): AndroidVariantDataSource =
+        DefaultAndroidVariantDataSource(variantFilter = android.variantFilter)
 
     @Provides
     @Singleton
-    fun GrazelExtension.provideKotlinConfiguration() = rules.kotlin
+    fun GrazelExtension.provideKotlinExtension() = rules.kotlin
+
+    @Provides
+    @Singleton
+    fun GrazelExtension.provideTestExtension() = rules.test
 }
 
 @Module

@@ -146,6 +146,7 @@ sealed class KotlinProjectType {
     data class Android(val hasDatabinding: Boolean = false) : KotlinProjectType()
 }
 
+
 fun StatementsBuilder.ktLibrary(
     name: String,
     kotlinProjectType: KotlinProjectType = Jvm,
@@ -204,6 +205,47 @@ fun StatementsBuilder.ktLibrary(
             "assets_dir" eq assetsDir.quote()
         }
 
+        tags.notEmpty {
+            "tags" eq array(tags.map(String::quote))
+        }
+    }
+}
+
+enum class TestSize(val value: String) {
+    ENORMOUS("enormous"),
+    LARGE("large"),
+    MEDIUM("medium"),
+    SMALL("small")
+}
+
+fun StatementsBuilder.grabKtJvmTest(
+    name: String,
+    size: TestSize,
+    srcs: List<String> = emptyList(),
+    srcsGlob: List<String> = emptyList(),
+    visibility: Visibility = Public,
+    deps: List<BazelDependency> = emptyList(),
+    plugins: List<BazelDependency> = emptyList(),
+    tags: List<String> = emptyList()
+) {
+    load("@grab_bazel_common//tools/test:test.bzl", "grab_kt_jvm_test")
+
+    rule("grab_kt_jvm_test") {
+        "name" eq name.quote()
+        "size" eq size.value.quote()
+        srcs.notEmpty {
+            "srcs" eq srcs.map(String::quote)
+        }
+        srcsGlob.notEmpty {
+            "srcs" eq glob(srcsGlob.map(String::quote))
+        }
+        "visibility" eq array(visibility.rule.quote())
+        deps.notEmpty {
+            "deps" eq array(deps.map(BazelDependency::toString).map(String::quote))
+        }
+        plugins.notEmpty {
+            "plugins" eq array(plugins.map(BazelDependency::toString).map(String::quote))
+        }
         tags.notEmpty {
             "tags" eq array(tags.map(String::quote))
         }

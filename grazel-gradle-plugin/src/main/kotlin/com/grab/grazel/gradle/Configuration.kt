@@ -21,6 +21,11 @@ import org.gradle.api.artifacts.Configuration
 import javax.inject.Inject
 import javax.inject.Singleton
 
+internal enum class ConfigurationScope {
+    BUILD, TEST, ANDROID_TEST;
+}
+
+
 internal interface ConfigurationDataSource {
     /**
      * Return a sequence of the configurations which are filtered out by the ignore flavors & build variants
@@ -29,35 +34,55 @@ internal interface ConfigurationDataSource {
     fun resolvedConfigurations(project: Project): Sequence<Configuration>
 
     /**
-     * Return a sequence of the configurations which are filtered out by the ignore flavors & build variants
+     * Return a sequence of the configurations filtered out by the ignore flavors, build variants and the configuration scopes
+     * If the scopes is empty, the build scope will be used by default.
      */
-    fun configurations(project: Project): Sequence<Configuration>
+    fun configurations(project: Project, vararg scopes: ConfigurationScope): Sequence<Configuration>
 }
 
 @Singleton
 internal class DefaultConfigurationDataSource @Inject constructor(
-    private val androidBuildVariantDataSource: AndroidBuildVariantDataSource
+    private val androidVariantDataSource: AndroidVariantDataSource
 ) : ConfigurationDataSource {
 
-    override fun configurations(project: Project): Sequence<Configuration> {
-        val ignoreFlavors = androidBuildVariantDataSource.getIgnoredFlavors(project)
-        val ignoreVariants = androidBuildVariantDataSource.getIgnoredVariants(project)
+    override fun configurations(project: Project, vararg scopes: ConfigurationScope): Sequence<Configuration> {
+        val ignoreFlavors = androidVariantDataSource.getIgnoredFlavors(project)
+        val ignoreVariants = androidVariantDataSource.getIgnoredVariants(project)
         return project.configurations
             .asSequence()
             .filter { !it.name.contains("classpath", true) && !it.name.contains("lint") }
-            .filter { !it.name.contains("test", true) } // TODO Remove when tests are supported
             .filter { !it.name.contains("coreLibraryDesugaring") }
             .filter { !it.name.contains("_internal_aapt2_binary") }
             .filter { !it.name.contains("archives") }
+            .filter {
+                when{
+                    scopes.isEmpty() -> it.isNotTest() // If the scopes is empty, the build scope will be used by default.
+                    else -> {
+                        scopes.any { scope ->
+                            when (scope) {
+                                ConfigurationScope.TEST -> !it.isAndroidTest()
+                                ConfigurationScope.ANDROID_TEST -> !it.isUnitTest()
+                                ConfigurationScope.BUILD -> it.isNotTest()
+                            }
+                        }
+                    }
+                }
+            }
+            .distinct()
             .filter { config ->
                 !config.name.let { configurationName ->
                     ignoreFlavors.any { configurationName.contains(it.name, true) }
                             || ignoreVariants.any { configurationName.contains(it.name, true) }
                 }
             }
+
     }
 
     override fun resolvedConfigurations(project: Project): Sequence<Configuration> {
         return configurations(project).filter { it.isCanBeResolved }
     }
 }
+
+internal fun Configuration.isUnitTest() = name.contains("UnitTest", true) || name.startsWith("test")
+internal fun Configuration.isAndroidTest() = name.contains("androidTest", true)
+internal fun Configuration.isNotTest() = !name.contains("test", true)

@@ -16,15 +16,14 @@
 
 package com.grab.grazel.gradle
 
-import com.google.common.graph.ImmutableValueGraph
 import com.grab.grazel.GrazelExtension
 import com.grab.grazel.gradle.dependencies.DependenciesDataSource
+import com.grab.grazel.gradle.dependencies.DependencyGraphs
 import dagger.Lazy
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.ElementsIntoSet
 import org.gradle.api.Project
-import org.gradle.api.artifacts.Configuration
 import java.util.concurrent.ConcurrentSkipListMap
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -50,7 +49,7 @@ internal object MigrationCriteriaModule {
 
 @Singleton
 internal class MigrationChecker @Inject constructor(
-    private val projectDependencyGraph: Lazy<ImmutableValueGraph<Project, Configuration>>,
+    private val dependencyGraphsProvider: Lazy<DependencyGraphs>,
     private val migrationCriteria: Set<@JvmSuppressWildcards MigrationCriteria>
 ) : MigrationCriteria {
     /**
@@ -68,9 +67,10 @@ internal class MigrationChecker @Inject constructor(
 
         return when {
             canMigrateInternal(project) -> true
-            else -> project
-                .dependenciesSubGraph(projectDependencyGraph.get())
-                .all(::canMigrateInternal)
+            else -> {
+                dependencyGraphsProvider.get().dependenciesSubGraph(project)
+                    .all(::canMigrateInternal)
+            }
         }
     }
 }
