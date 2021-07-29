@@ -20,6 +20,7 @@ import com.grab.grazel.bazel.rules.KotlinProjectType
 import com.grab.grazel.bazel.rules.Visibility
 import com.grab.grazel.bazel.starlark.BazelDependency
 import com.grab.grazel.extension.KotlinExtension
+import com.grab.grazel.extension.TestExtension
 import com.grab.grazel.gradle.isAndroid
 import com.grab.grazel.gradle.isAndroidApplication
 import com.grab.grazel.gradle.isKotlin
@@ -29,13 +30,16 @@ import com.grab.grazel.migrate.android.AndroidLibraryData
 import com.grab.grazel.migrate.android.AndroidLibraryDataExtractor
 import com.grab.grazel.migrate.android.AndroidLibraryTarget
 import com.grab.grazel.migrate.android.AndroidManifestParser
+import com.grab.grazel.migrate.android.AndroidUnitTestDataExtractor
 import com.grab.grazel.migrate.android.BuildConfigTarget
 import com.grab.grazel.migrate.android.DefaultAndroidLibraryDataExtractor
 import com.grab.grazel.migrate.android.DefaultAndroidManifestParser
+import com.grab.grazel.migrate.android.DefaultAndroidUnitTestDataExtractor
 import com.grab.grazel.migrate.android.ResValueTarget
 import com.grab.grazel.migrate.android.SourceSetType
 import com.grab.grazel.migrate.kotlin.KtLibraryTarget
 import com.grab.grazel.migrate.toBazelDependency
+import com.grab.grazel.migrate.android.toUnitTestTarget
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoSet
@@ -53,6 +57,10 @@ internal interface KtAndroidLibTargetBuilderModule {
     fun DefaultAndroidLibraryDataExtractor.bindAndroidLibraryDataExtractor(): AndroidLibraryDataExtractor
 
     @Binds
+    fun DefaultAndroidUnitTestDataExtractor.bindAndroidUnitTestDataExtractor(): AndroidUnitTestDataExtractor
+
+
+    @Binds
     @IntoSet
     fun KtAndroidLibTargetBuilder.bindKtLibTargetBuilder(): TargetBuilder
 }
@@ -61,7 +69,9 @@ internal interface KtAndroidLibTargetBuilderModule {
 @Singleton
 internal class KtAndroidLibTargetBuilder @Inject constructor(
     private val projectDataExtractor: AndroidLibraryDataExtractor,
-    private val kotlinExtension: KotlinExtension
+    private val unitTestDataExtractor: AndroidUnitTestDataExtractor,
+    private val kotlinExtension: KotlinExtension,
+    private val testExtension: TestExtension
 ) : TargetBuilder {
 
     override fun build(project: Project): List<BazelTarget> {
@@ -85,6 +95,9 @@ internal class KtAndroidLibTargetBuilder @Inject constructor(
                 .copy(deps = deps)
                 .toKtLibraryTarget(kotlinExtension.enabledTransitiveReduction)
                 ?.also { add(it) }
+
+            if (testExtension.enableTestMigration)
+                add(unitTestDataExtractor.extract(project).toUnitTestTarget(testExtension))
         }
     }
 

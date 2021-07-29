@@ -14,30 +14,29 @@
  * limitations under the License.
  */
 
-package com.grab.grazel.gradle
+package com.grab.grazel.gradle.dependencies
 
 import com.google.common.graph.ImmutableValueGraph
 import com.google.common.graph.MutableValueGraph
 import com.google.common.graph.ValueGraphBuilder
 import com.grab.grazel.di.qualifiers.RootProject
-import com.grab.grazel.gradle.dependencies.DependenciesDataSource
+import com.grab.grazel.gradle.ConfigurationScope
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import javax.inject.Inject
 
-internal class ProjectDependencyGraphBuilder @Inject constructor(
+internal class DependenciesGraphsBuilder @Inject constructor(
     @param:RootProject private val rootProject: Project,
     private val dependenciesDataSource: DependenciesDataSource
 ) {
-    fun build(): ImmutableValueGraph<Project, Configuration> {
-
-        data class EdgeData(
-            val source: Project,
-            val dependency: Project,
-            val configuration: Configuration
-        )
-
-        val projectDependencyGraph: MutableValueGraph<Project, Configuration> =
+    fun build(): DependencyGraphs {
+        val buildGraph: MutableValueGraph<Project, Configuration> =
+            ValueGraphBuilder
+                .directed()
+                .allowsSelfLoops(false)
+                .expectedNodeCount(rootProject.subprojects.size)
+                .build()
+        val testGraph: MutableValueGraph<Project, Configuration> =
             ValueGraphBuilder
                 .directed()
                 .allowsSelfLoops(false)
@@ -45,24 +44,30 @@ internal class ProjectDependencyGraphBuilder @Inject constructor(
                 .build()
 
         rootProject.subprojects
-            .asSequence()
-            .onEach { projectDependencyGraph.addNode(it) }
-            .flatMap { sourceProject ->
-                dependenciesDataSource.projectDependencies(sourceProject)
-                    .map { (configuration, projectDependency) ->
-                        EdgeData(
+            .forEach { sourceProject ->
+                buildGraph.addNode(sourceProject)
+                testGraph.addNode(sourceProject)
+                dependenciesDataSource.projectDependencies(sourceProject, ConfigurationScope.BUILD)
+                    .forEach { (configuration, projectDependency) ->
+                        buildGraph.putEdgeValue(
                             sourceProject,
                             projectDependency.dependencyProject,
                             configuration
                         )
                     }
-            }.forEach { (source, dependency, configuration) ->
-                projectDependencyGraph.putEdgeValue(
-                    source,
-                    dependency,
-                    configuration
-                )
+
+                dependenciesDataSource.projectDependencies(sourceProject, ConfigurationScope.TEST)
+                    .forEach { (configuration, projectDependency) ->
+                        testGraph.putEdgeValue(
+                            sourceProject,
+                            projectDependency.dependencyProject,
+                            configuration
+                        )
+                    }
             }
-        return ImmutableValueGraph.copyOf(projectDependencyGraph)
+        return DefaultDependencyGraphs(
+            buildGraph = ImmutableValueGraph.copyOf(buildGraph),
+            testGraph = ImmutableValueGraph.copyOf(testGraph)
+        )
     }
 }

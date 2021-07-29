@@ -218,6 +218,7 @@ internal val DATABINDING_ARTIFACTS by lazy {
     )
 }
 
+
 fun StatementsBuilder.androidToolsRepository(commit: String? = null, remote : String) {
     load("@grab_bazel_common//:workspace_defs.bzl", "android_tools")
     function("android_tools") {
@@ -241,3 +242,40 @@ fun customRes(
         "resource_files" eq resourceFiles
     }
 }.toAssignee()
+
+
+fun StatementsBuilder.grabAndroidLocalTest(
+    name: String,
+    size: TestSize,
+    customPackage : String,
+    srcs: List<String> = emptyList(),
+    srcsGlob: List<String> = emptyList(),
+    visibility: Visibility = Visibility.Public,
+    deps: List<BazelDependency> = emptyList(),
+    plugins: List<BazelDependency> = emptyList(),
+    tags: List<String> = emptyList()
+) {
+    load("@grab_bazel_common//tools/test:test.bzl", "grab_android_local_test")
+
+    rule("grab_android_local_test") {
+        "name" eq name.quote()
+        "size" eq size.value.quote()
+        "custom_package" eq customPackage.quote()
+        srcs.notEmpty {
+            "srcs" eq srcs.map(String::quote)
+        }
+        srcsGlob.notEmpty {
+            "srcs" eq glob(srcsGlob.map(String::quote))
+        }
+        "visibility" eq array(visibility.rule.quote())
+        deps.notEmpty {
+            "deps" eq array(deps.map(BazelDependency::toString).map(String::quote))
+        }
+        plugins.notEmpty {
+            "plugins" eq array(plugins.map(BazelDependency::toString).map(String::quote))
+        }
+        tags.notEmpty {
+            "tags" eq array(tags.map(String::quote))
+        }
+    }
+}

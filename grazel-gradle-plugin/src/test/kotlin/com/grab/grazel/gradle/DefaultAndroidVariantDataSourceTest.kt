@@ -21,17 +21,24 @@ import com.android.builder.model.ProductFlavor
 import com.grab.grazel.GrazelExtension
 import com.grab.grazel.GrazelPluginTest
 import com.grab.grazel.buildProject
-import com.grab.grazel.util.*
+import com.grab.grazel.fake.DEBUG_FLAVOR1
+import com.grab.grazel.fake.DEBUG_FLAVOR2
+import com.grab.grazel.fake.FLAVOR1
+import com.grab.grazel.fake.FLAVOR2
+import com.grab.grazel.fake.FakeProductFlavor
+import com.grab.grazel.fake.FakeVariant
+import com.grab.grazel.fake.RELEASE_FLAVOR1
+import com.grab.grazel.fake.RELEASE_FLAVOR2
 import org.gradle.api.Project
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-class DefaultAndroidBuildVariantDataSourceTest : GrazelPluginTest() {
+class DefaultAndroidVariantDataSourceTest : GrazelPluginTest() {
     private val project = buildProject("App")
     private val extension = GrazelExtension(project)
     private val fakeVariantsExtractor = FakeAndroidVariantsExtractor()
-    private val buildVariantDataSource = DefaultAndroidBuildVariantDataSource(fakeVariantsExtractor)
+    private val buildVariantDataSource = DefaultAndroidVariantDataSource(fakeVariantsExtractor)
 
     @Test
     fun `when config to ignore variant, assert the related flavors also be ignored`() {
@@ -39,7 +46,7 @@ class DefaultAndroidBuildVariantDataSourceTest : GrazelPluginTest() {
         extension.android.variantFilter {
             if (name in ignoreVariants) setIgnore(true)
         }
-        val ignoreFlavors = DefaultAndroidBuildVariantDataSource(
+        val ignoreFlavors = DefaultAndroidVariantDataSource(
             fakeVariantsExtractor,
             extension.android.variantFilter
         ).getIgnoredFlavors(project)
@@ -66,7 +73,7 @@ class DefaultAndroidBuildVariantDataSourceTest : GrazelPluginTest() {
         extension.android.variantFilter {
             if (name in ignoreVariants) setIgnore(true)
         }
-        DefaultAndroidBuildVariantDataSource(
+        DefaultAndroidVariantDataSource(
             fakeVariantsExtractor,
             extension.android.variantFilter
         ).getIgnoredVariants(project).forEach {
@@ -76,18 +83,19 @@ class DefaultAndroidBuildVariantDataSourceTest : GrazelPluginTest() {
 }
 
 private class FakeAndroidVariantsExtractor : AndroidVariantsExtractor {
-    override fun getVariants(project: Project): Set<BaseVariant> {
-        return setOf(
-            FakeVariant(DEBUG_FLAVOR1, FLAVOR1),
-            FakeVariant(DEBUG_FLAVOR2, FLAVOR2),
-            FakeVariant(RELEASE_FLAVOR1, FLAVOR1),
-            FakeVariant(RELEASE_FLAVOR2, FLAVOR2)
-        )
-    }
+    override fun getVariants(project: Project): Set<BaseVariant> = setOf(
+        FakeVariant(DEBUG_FLAVOR1, FLAVOR1),
+        FakeVariant(DEBUG_FLAVOR2, FLAVOR2),
+        FakeVariant(RELEASE_FLAVOR1, FLAVOR1),
+        FakeVariant(RELEASE_FLAVOR2, FLAVOR2)
+    )
 
-    override fun getFlavors(project: Project): Set<ProductFlavor> {
-        return listOf(FLAVOR1, FLAVOR2).map { FakeProductFlavor(it) }.toSet()
-    }
+    override fun getFlavors(project: Project): Set<ProductFlavor> =
+        listOf(FLAVOR1, FLAVOR2).map { FakeProductFlavor(it) }.toSet()
+
+    override fun getUnitTestVariants(project: Project): Set<BaseVariant> = emptySet()
+
+    override fun getTestVariants(project: Project): Set<BaseVariant> = emptySet()
 }
 
 

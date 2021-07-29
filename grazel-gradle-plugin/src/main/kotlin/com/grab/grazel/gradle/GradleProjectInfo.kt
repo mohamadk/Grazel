@@ -16,15 +16,13 @@
 
 package com.grab.grazel.gradle
 
-import com.google.common.graph.ImmutableGraph
-import com.google.common.graph.ImmutableValueGraph
 import com.grab.grazel.GrazelExtension
 import com.grab.grazel.bazel.rules.DAGGER_GROUP
 import com.grab.grazel.di.qualifiers.RootProject
 import com.grab.grazel.gradle.dependencies.DependenciesDataSource
+import com.grab.grazel.gradle.dependencies.DependencyGraphs
 import dagger.Lazy
 import org.gradle.api.Project
-import org.gradle.api.artifacts.Configuration
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -34,7 +32,6 @@ import javax.inject.Singleton
 interface GradleProjectInfo {
     val rootProject: Project
     val grazelExtension: GrazelExtension
-    val projectGraph: ImmutableGraph<Project>
     val hasDagger: Boolean
     val hasDatabinding: Boolean
     val hasAndroidExtension: Boolean
@@ -47,11 +44,11 @@ internal class DefaultGradleProjectInfo @Inject constructor(
     @param:RootProject
     override val rootProject: Project,
     override val grazelExtension: GrazelExtension,
-    projectGraphProvider: Lazy<ImmutableValueGraph<Project, Configuration>>,
+    private val dependencyGraphsProvider: Lazy<DependencyGraphs>,
     internal val dependenciesDataSource: DependenciesDataSource
 ) : GradleProjectInfo {
 
-    override val projectGraph: ImmutableGraph<Project> = projectGraphProvider.get().asGraph()
+    private val projectGraph: DependencyGraphs get() = dependencyGraphsProvider.get()
 
     override val hasDagger: Boolean by lazy {
         projectGraph.nodes().any { project ->

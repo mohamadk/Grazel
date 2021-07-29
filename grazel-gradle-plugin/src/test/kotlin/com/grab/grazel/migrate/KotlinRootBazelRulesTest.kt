@@ -42,7 +42,8 @@ class KotlinRootBazelRulesTest {
         rootProject.extensions.add(GrazelExtension.GRAZEL_EXTENSION, GrazelExtension(rootProject))
         rootBazelFileBuilder = DaggerGrazelComponent
             .factory()
-            .create(rootProject).rootBazelFileBuilder()
+            .create(rootProject)
+            .rootBazelFileBuilder()
 
         subProject = buildProject("subproject", rootProject)
         subProject.run {
@@ -67,7 +68,8 @@ class KotlinRootBazelRulesTest {
             // Default setup
         }
         val rootBazelFileContents = rootBazelFileBuilder.build().asString()
-        Truth.assertThat(rootBazelFileContents).isEmpty()
+        Truth.assertThat(rootBazelFileContents).doesNotContain("define_kt_toolchain")
+        Truth.assertThat(rootBazelFileContents).doesNotContain("kt_kotlinc_options")
     }
 
     @Test

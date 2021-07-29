@@ -17,14 +17,18 @@
 package com.grab.grazel.migrate.builder
 
 import com.grab.grazel.extension.KotlinExtension
+import com.grab.grazel.extension.TestExtension
 import com.grab.grazel.gradle.isAndroid
 import com.grab.grazel.gradle.isKotlin
 import com.grab.grazel.migrate.BazelTarget
 import com.grab.grazel.migrate.TargetBuilder
 import com.grab.grazel.migrate.kotlin.DefaultKotlinProjectDataExtractor
+import com.grab.grazel.migrate.kotlin.DefaultKotlinUnitTestDataExtractor
 import com.grab.grazel.migrate.kotlin.KotlinProjectData
 import com.grab.grazel.migrate.kotlin.KotlinProjectDataExtractor
+import com.grab.grazel.migrate.kotlin.KotlinUnitTestDataExtractor
 import com.grab.grazel.migrate.kotlin.KtLibraryTarget
+import com.grab.grazel.migrate.kotlin.toUnitTestTarget
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoSet
@@ -38,6 +42,10 @@ internal interface KtLibTargetBuilderModule {
     fun DefaultKotlinProjectDataExtractor.bindKotlinProjectDataExtractor(): KotlinProjectDataExtractor
 
     @Binds
+    fun DefaultKotlinUnitTestDataExtractor.bindKotlinUnitTestDataExtractor(): KotlinUnitTestDataExtractor
+
+
+    @Binds
     @IntoSet
     fun KtLibTargetBuilder.bindKtLibTargetBuilder(): TargetBuilder
 
@@ -47,12 +55,22 @@ internal interface KtLibTargetBuilderModule {
 @Singleton
 internal class KtLibTargetBuilder @Inject constructor(
     private val projectDataExtractor: KotlinProjectDataExtractor,
-    private val kotlinExtension: KotlinExtension
+    private val kotlinUnitTestDataExtractor: KotlinUnitTestDataExtractor,
+    private val kotlinExtension: KotlinExtension,
+    private val testExtension: TestExtension
 ) : TargetBuilder {
     override fun build(project: Project): List<BazelTarget> {
         val projectData = projectDataExtractor.extract(project)
-        if (projectData.srcs.isEmpty()) return emptyList()
-        return listOf(projectData.toKtLibraryTarget(kotlinExtension.enabledTransitiveReduction))
+        val unitTestData = kotlinUnitTestDataExtractor.extract(project)
+
+        return if(testExtension.enableTestMigration){
+            listOf(
+                projectData.toKtLibraryTarget(kotlinExtension.enabledTransitiveReduction),
+                unitTestData.toUnitTestTarget(testExtension)
+            )
+        }else{
+            listOf(projectData.toKtLibraryTarget(kotlinExtension.enabledTransitiveReduction))
+        }
     }
 
     override fun canHandle(project: Project): Boolean = with(project) {
