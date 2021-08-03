@@ -21,6 +21,7 @@ import com.grab.grazel.di.qualifiers.RootProject
 import com.grab.grazel.gradle.ConfigurationDataSource
 import com.grab.grazel.gradle.ConfigurationScope
 import com.grab.grazel.gradle.RepositoryDataSource
+import com.grab.grazel.gradle.configurationScopes
 import com.grab.grazel.util.GradleProvider
 import dagger.Binds
 import dagger.Module
@@ -109,12 +110,6 @@ internal interface DependenciesDataSource {
         vararg scopes: ConfigurationScope
     ): Sequence<Pair<Configuration, ProjectDependency>>
 
-    /**
-     * Resolves all the external dependencies for the given project. By resolving all the dependencies, we get accurate
-     * dependency information that respects resolution strategy, substitution and any other modification by gradle apart
-     * from `build.gradle` definition aka first level module dependencies.
-     */
-    fun Project.externalResolvedDependencies(): List<ResolvedComponentResultInternal>
 
     /**
      * Returns the resolved artifacts dependencies for the given projects in the fully qualified Maven format.
@@ -147,11 +142,14 @@ internal interface DependenciesDataSource {
 @Singleton
 internal class DefaultDependenciesDataSource @Inject constructor(
     @param:RootProject private val rootProject: Project,
+    private val grazelExtension: GrazelExtension,
     private val configurationDataSource: ConfigurationDataSource,
     private val artifactsConfig: ArtifactsConfig,
     private val repositoryDataSource: RepositoryDataSource,
     private val dependencyResolutionService: GradleProvider<DefaultDependencyResolutionService>
 ) : DependenciesDataSource {
+
+    private val configurationScopes by lazy { grazelExtension.configurationScopes() }
 
     private val resolvedVersions: Map<String, String> by lazy {
         rootProject
@@ -179,7 +177,7 @@ internal class DefaultDependenciesDataSource @Inject constructor(
     }
 
     private fun Project.resolvableConfigurations(): Sequence<Configuration> =
-        configurationDataSource.resolvedConfigurations(this)
+        configurationDataSource.resolvedConfigurations(this, *configurationScopes)
 
     /**
      * Given a group, name and version will update version with following property
@@ -219,7 +217,7 @@ internal class DefaultDependenciesDataSource @Inject constructor(
         // Filter out configurations we are interested in.
         val configurations = projects
             .asSequence()
-            .flatMap { configurationDataSource.configurations(it) }
+            .flatMap { configurationDataSource.configurations(it, *configurationScopes) }
             .toList()
 
         // Calculate all the external artifacts
@@ -235,7 +233,7 @@ internal class DefaultDependenciesDataSource @Inject constructor(
         // (Perf fix) - collecting all projects' forced modules is costly, hence take the first sub project
         // TODO Provide option to consider all forced versions backed by a flag.
         val forcedVersions = sequenceOf(rootProject.subprojects.first())
-            .flatMap { configurationDataSource.configurations(it) }
+            .flatMap { configurationDataSource.configurations(it, *configurationScopes) }
             .let(::collectForcedVersions)
 
         return (DEFAULT_MAVEN_ARTIFACTS + externalArtifacts + forcedVersions)
@@ -293,7 +291,12 @@ internal class DefaultDependenciesDataSource @Inject constructor(
         .filter { it.second is ProjectDependency }
         .map { it.first to it.second as ProjectDependency }
 
-    override fun Project.externalResolvedDependencies() = dependencyResolutionService.get()
+    /**
+     * Resolves all the external dependencies for the given project. By resolving all the dependencies, we get accurate
+     * dependency information that respects resolution strategy, substitution and any other modification by gradle apart
+     * from `build.gradle` definition aka first level module dependencies.
+     */
+    private fun Project.externalResolvedDependencies() = dependencyResolutionService.get()
         .resolve(
             project = this,
             configurations = resolvableConfigurations()

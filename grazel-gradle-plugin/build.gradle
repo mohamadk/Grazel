@@ -116,3 +116,4 @@ afterEvaluate {
         dependsOn(tasks.named("publishReleasePublicationToSonatypeRepository"))
     }
 }
+

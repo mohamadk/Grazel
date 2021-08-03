@@ -84,7 +84,7 @@ grazel {
         dexShards = 5
         multiDexEnabled = true
         variantFilter { variant ->
-            if (variant.name != "flavor1Debug") {
+            if (variant.name != "flavor1Debug" && variant.name != "debug" && variant.name != "debugUnitTest") {
                 variant.setIgnore(true)
             }
         }
@@ -96,9 +96,17 @@ grazel {
         overrideArtifactVersions.add("androidx.constraintlayout:constraintlayout:1.1.2")
     }
     rules {
+        test {
+            enableTestMigration = true
+            androidTest {
+                robolectric {
+                    version = "4.4"
+                }
+            }
+        }
         bazelCommon {
             gitRepository {
-                commit = "f74ef90479383a38cef1af33d28a3253031e00c1"
+                commit = "4904bd9f41e12813ff68f5e4a1c7592f76869a62"
                 remote = "https://github.com/grab/grab-bazel-common.git"
             }
         }

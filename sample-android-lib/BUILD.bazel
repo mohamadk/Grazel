@@ -1,0 +1,43 @@
+load("@grab_bazel_common//tools/build_config:build_config.bzl", "build_config")
+
+build_config(
+    name = "sample-android-lib-build-config",
+    package_name = "com.grab.grazel.android.sample.lib",
+)
+
+load("@grab_bazel_common//tools/kotlin:android.bzl", "kt_android_library")
+
+kt_android_library(
+    name = "sample-android-lib",
+    srcs = glob([
+        "src/main/java/com/grab/grazel/android/sample/SampleViewModel.kt",
+    ]),
+    custom_package = "com.grab.grazel.android.sample.lib",
+    manifest = "src/main/AndroidManifest.xml",
+    visibility = [
+        "//visibility:public",
+    ],
+    deps = [
+        ":sample-android-lib-build-config",
+        "//:parcelize",
+    ],
+)
+
+load("@grab_bazel_common//tools/test:test.bzl", "grab_android_local_test")
+
+grab_android_local_test(
+    name = "sample-android-lib-test",
+    size = "medium",
+    srcs = glob([
+        "src/test/java/com/grab/grazel/android/sample/SampleViewModelTest.kt",
+    ]),
+    custom_package = "com.grab.grazel.android.sample.lib",
+    visibility = [
+        "//visibility:public",
+    ],
+    deps = [
+        "//:parcelize",
+        "//sample-android-lib",
+        "@maven//:junit_junit",
+    ],
+)

@@ -16,6 +16,7 @@
 
 package com.grab.grazel.gradle
 
+import com.grab.grazel.GrazelExtension
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import javax.inject.Inject
@@ -25,13 +26,18 @@ internal enum class ConfigurationScope {
     BUILD, TEST, ANDROID_TEST;
 }
 
+internal fun GrazelExtension.configurationScopes(): Array<ConfigurationScope> {
+    return if (rules.test.enableTestMigration) arrayOf(ConfigurationScope.TEST, ConfigurationScope.BUILD)
+    else arrayOf(ConfigurationScope.BUILD)
+}
+
 
 internal interface ConfigurationDataSource {
     /**
      * Return a sequence of the configurations which are filtered out by the ignore flavors & build variants
      * these configuration can be queried or resolved.
      */
-    fun resolvedConfigurations(project: Project): Sequence<Configuration>
+    fun resolvedConfigurations(project: Project, vararg scopes: ConfigurationScope): Sequence<Configuration>
 
     /**
      * Return a sequence of the configurations filtered out by the ignore flavors, build variants and the configuration scopes
@@ -78,8 +84,8 @@ internal class DefaultConfigurationDataSource @Inject constructor(
 
     }
 
-    override fun resolvedConfigurations(project: Project): Sequence<Configuration> {
-        return configurations(project).filter { it.isCanBeResolved }
+    override fun resolvedConfigurations(project: Project, vararg scopes: ConfigurationScope): Sequence<Configuration> {
+        return configurations(project, *scopes).filter { it.isCanBeResolved }
     }
 }
 

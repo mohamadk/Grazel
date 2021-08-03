@@ -53,7 +53,7 @@ internal class DefaultKotlinUnitTestDataExtractor @Inject constructor(
         val srcs = project.kotlinTestSources(sourceSets).toList()
 
         val deps = projectDependencyGraphs.directProjectDependencies(project, ConfigurationScope.TEST) +
-                dependenciesDataSource.collectMavenDeps(project) +
+                dependenciesDataSource.collectMavenDeps(project, ConfigurationScope.TEST) +
                 project.androidJarDeps() +
                 project.kotlinParcelizeDeps() +
                 BazelDependency.ProjectDependency(project)

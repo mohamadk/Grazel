@@ -10,8 +10,15 @@ import org.gradle.api.artifacts.Configuration
 
 internal interface DependencyGraphs {
     fun nodes(vararg scopes: ConfigurationScope): Set<Project>
-    fun dependenciesSubGraph(project: Project, vararg scopes: ConfigurationScope): Set<Project>
-    fun directDependencies(project: Project, vararg scopes: ConfigurationScope): Set<Project>
+    fun dependenciesSubGraph(
+        project: Project,
+        scopes: Array<ConfigurationScope> = ConfigurationScope.values()
+    ): Set<Project>
+
+    fun directDependencies(
+        project: Project,
+        scopes: Array<ConfigurationScope> = ConfigurationScope.values()
+    ): Set<Project>
 }
 
 internal fun DependencyGraphs.directProjectDependencies(project: Project, vararg scopes: ConfigurationScope) =
@@ -36,37 +43,29 @@ internal class DefaultDependencyGraphs(
         }
     }
 
-    override fun dependenciesSubGraph(project: Project, vararg scopes: ConfigurationScope): Set<Project> {
-        return when {
-            scopes.isEmpty() -> {
-                Graphs.reachableNodes(buildGraph.asGraph(), project) +
-                        Graphs.reachableNodes(testGraph.asGraph(), project)
+    override fun dependenciesSubGraph(project: Project, scopes: Array<ConfigurationScope>): Set<Project> =
+        scopes.flatMap {
+            when (it) {
+                ConfigurationScope.BUILD -> Graphs.reachableNodes(buildGraph.asGraph(), project)
+                ConfigurationScope.TEST -> Graphs.reachableNodes(testGraph.asGraph(), project)
+                else -> emptySet<Project>()
             }
-            else -> {
-                scopes.flatMap {
-                    when (it) {
-                        ConfigurationScope.BUILD -> Graphs.reachableNodes(buildGraph.asGraph(), project)
-                        ConfigurationScope.TEST -> Graphs.reachableNodes(testGraph.asGraph(), project)
-                        else -> emptySet<Project>()
-                    }
-                }.toSet()
-            }
-        }
+        }.toSet()
 
-    }
-
-    override fun directDependencies(project: Project, vararg scopes: ConfigurationScope): Set<Project> {
-        return when {
-            scopes.isEmpty() -> buildGraph.successors(project) + testGraph.successors(project)
-            else -> {
-                scopes.flatMap {
-                    when (it) {
-                        ConfigurationScope.BUILD -> buildGraph.successors(project)
-                        ConfigurationScope.TEST -> testGraph.successors(project)
-                        else -> emptySet<Project>()
-                    }
-                }.toSet()
+    override fun directDependencies(project: Project, scopes: Array<ConfigurationScope>): Set<Project> =
+        scopes.flatMap {
+            when (it) {
+                ConfigurationScope.BUILD -> buildGraph.successors(project)
+                ConfigurationScope.TEST -> testGraph.successors(project)
+                else -> emptySet<Project>()
             }
-        }
-    }
+        }.toSet()
+}
+
+internal fun DependencyGraphs.dependenciesSubGraph(project: Project, vararg scopes: ConfigurationScope): Set<Project> {
+    return dependenciesSubGraph(project, arrayOf(*scopes))
+}
+
+internal fun DependencyGraphs.directDependencies(project: Project, vararg scopes: ConfigurationScope): Set<Project> {
+    return directDependencies(project, arrayOf(*scopes))
 }
