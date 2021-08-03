@@ -18,6 +18,7 @@ package com.grab.grazel.gradle
 
 import com.android.build.gradle.LibraryExtension
 import com.google.common.truth.Truth
+import com.grab.grazel.GrazelExtension
 import com.grab.grazel.GrazelPluginTest
 import com.grab.grazel.buildProject
 import com.grab.grazel.gradle.dependencies.*
@@ -83,7 +84,8 @@ class DefaultDependenciesDataSourceTest : GrazelPluginTest() {
             configurationDataSource = configurationDataSource,
             artifactsConfig = ArtifactsConfig(ignoredList = listOf(KOTLIN_STDLIB)),
             repositoryDataSource = repositoryDataSource,
-            dependencyResolutionService = DefaultDependencyResolutionService.register(rootProject)
+            dependencyResolutionService = DefaultDependencyResolutionService.register(rootProject),
+            grazelExtension = GrazelExtension(rootProject)
         )
     }
 
@@ -210,7 +212,8 @@ class DefaultDependenciesDataSourceTest : GrazelPluginTest() {
             configurationDataSource = configurationDataSource,
             artifactsConfig = ArtifactsConfig(ignoredList = listOf(DAGGER.split(":%s").first())),
             repositoryDataSource = repositoryDataSource,
-            dependencyResolutionService = DefaultDependencyResolutionService.register(rootProject)
+            dependencyResolutionService = DefaultDependencyResolutionService.register(rootProject),
+            grazelExtension = GrazelExtension(rootProject)
         )
         assertTrue(
             "hasIgnoredArtifacts returns true when project contains any ignored artifacts",
@@ -238,7 +241,8 @@ class DefaultDependenciesDataSourceTest : GrazelPluginTest() {
             configurationDataSource = configurationDataSource,
             artifactsConfig = ArtifactsConfig(excludedList = listOf(excludedDagger)),
             repositoryDataSource = repositoryDataSource,
-            dependencyResolutionService = DefaultDependencyResolutionService.register(rootProject)
+            dependencyResolutionService = DefaultDependencyResolutionService.register(rootProject),
+            grazelExtension = GrazelExtension(rootProject)
         )
         val resolvedArtifacts = dependenciesDataSource.resolvedArtifactsFor(
             listOf(rootProject, subProject)
