@@ -21,6 +21,7 @@ import com.android.build.gradle.internal.dsl.DefaultConfig
 import com.grab.grazel.gradle.AndroidVariantDataSource
 import com.grab.grazel.gradle.ConfigurationScope
 import com.grab.grazel.gradle.dependencies.DependencyGraphs
+import com.grab.grazel.gradle.dependencies.dependenciesSubGraph
 import com.grab.grazel.gradle.getMigratableBuildVariants
 import com.grab.grazel.gradle.isAndroid
 import dagger.Lazy

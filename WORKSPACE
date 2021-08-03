@@ -4,14 +4,14 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
 git_repository(
     name = "grab_bazel_common",
-    commit = "f74ef90479383a38cef1af33d28a3253031e00c1",
+    commit = "4904bd9f41e12813ff68f5e4a1c7592f76869a62",
     remote = "https://github.com/grab/grab-bazel-common.git",
 )
 
 load("@grab_bazel_common//:workspace_defs.bzl", "android_tools")
 
 android_tools(
-    commit = "f74ef90479383a38cef1af33d28a3253031e00c1",
+    commit = "4904bd9f41e12813ff68f5e4a1c7592f76869a62",
     remote = "https://github.com/grab/grab-bazel-common.git",
 )
 
@@ -56,9 +56,11 @@ maven_install(
         "androidx.databinding:databinding-common:3.4.2",
         "androidx.databinding:databinding-compiler:3.4.2",
         "androidx.databinding:databinding-runtime:3.4.2",
+        "junit:junit:4.13",
         "org.jetbrains.kotlin:kotlin-annotation-processing-gradle:1.4.31",
         "org.jetbrains.kotlin:kotlin-parcelize-runtime:1.4.31",
         "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.3.72",
+        "org.robolectric:robolectric:4.4",
     ],
     excluded_artifacts = ["androidx.test.espresso:espresso-contrib"],
     fail_on_missing_checksum = False,
@@ -71,9 +73,11 @@ maven_install(
         "androidx.databinding:databinding-compiler",
         "androidx.databinding:databinding-runtime",
         "com.android.support:cardview-v7",
+        "junit:junit",
         "org.jetbrains.kotlin:kotlin-annotation-processing-gradle",
         "org.jetbrains.kotlin:kotlin-parcelize-runtime",
         "org.jetbrains.kotlin:kotlin-stdlib-jdk8",
+        "org.robolectric:robolectric",
     ],
     repositories = DAGGER_REPOSITORIES + [
         "https://dl.google.com/dl/android/maven2/",
@@ -137,3 +141,15 @@ http_archive(
 load("@tools_android//tools/googleservices:defs.bzl", "google_services_workspace_dependencies")
 
 google_services_workspace_dependencies()
+
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "robolectric",
+    strip_prefix = "robolectric-bazel-4.4",
+    url = "https://github.com/robolectric/robolectric-bazel/archive/4.4.tar.gz",
+)
+
+load("@robolectric//bazel:robolectric.bzl", "robolectric_repositories")
+
+robolectric_repositories()

@@ -86,8 +86,8 @@ internal interface GrazelComponent {
 )
 internal object GrazelModule {
 
-    @Provides
     @Singleton
+    @Provides
     fun @receiver:RootProject Project.provideGrazelGradlePluginExtension(): GrazelExtension = the()
 
     @Provides

@@ -62,6 +62,7 @@ kt_android_library(
         "//:dagger",
         "//:parcelize",
         "//sample-android-flavor",
+        "//sample-android-lib",
         "//sample-kotlin-lib",
         "@maven//:androidx_appcompat_appcompat",
         "@maven//:androidx_constraintlayout_constraintlayout",
