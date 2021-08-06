@@ -19,4 +19,5 @@ apply plugin: "kotlin"
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
+    testImplementation "junit:junit:4.13"
 }

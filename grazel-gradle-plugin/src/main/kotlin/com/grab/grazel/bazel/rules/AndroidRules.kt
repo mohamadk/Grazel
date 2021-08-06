@@ -219,7 +219,7 @@ internal val DATABINDING_ARTIFACTS by lazy {
 }
 
 
-fun StatementsBuilder.androidToolsRepository(commit: String? = null, remote : String) {
+fun StatementsBuilder.androidToolsRepository(commit: String? = null, remote: String) {
     load("@grab_bazel_common//:workspace_defs.bzl", "android_tools")
     function("android_tools") {
         commit?.let { "commit" eq commit.quote() }
@@ -247,11 +247,12 @@ fun customRes(
 fun StatementsBuilder.grabAndroidLocalTest(
     name: String,
     size: TestSize,
-    customPackage : String,
+    customPackage: String,
     srcs: List<String> = emptyList(),
     srcsGlob: List<String> = emptyList(),
     visibility: Visibility = Visibility.Public,
     deps: List<BazelDependency> = emptyList(),
+    associates: List<BazelDependency> = emptyList(),
     plugins: List<BazelDependency> = emptyList(),
     tags: List<String> = emptyList()
 ) {
@@ -268,6 +269,9 @@ fun StatementsBuilder.grabAndroidLocalTest(
             "srcs" eq glob(srcsGlob.map(String::quote))
         }
         "visibility" eq array(visibility.rule.quote())
+        associates.notEmpty {
+            "associates" eq array(associates.map(BazelDependency::toString).map(String::quote))
+        }
         deps.notEmpty {
             "deps" eq array(deps.map(BazelDependency::toString).map(String::quote))
         }
