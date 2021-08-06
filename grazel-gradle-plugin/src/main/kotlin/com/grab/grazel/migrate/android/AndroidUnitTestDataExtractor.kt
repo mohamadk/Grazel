@@ -16,7 +16,6 @@
 package com.grab.grazel.migrate.android
 
 import com.android.build.gradle.api.AndroidSourceSet
-import com.google.common.graph.ImmutableValueGraph
 import com.grab.grazel.bazel.starlark.BazelDependency
 import com.grab.grazel.gradle.AndroidVariantDataSource
 import com.grab.grazel.gradle.ConfigurationScope
@@ -25,10 +24,10 @@ import com.grab.grazel.gradle.dependencies.DependencyGraphs
 import com.grab.grazel.gradle.dependencies.directProjectDependencies
 import com.grab.grazel.gradle.getMigratableBuildVariants
 import com.grab.grazel.gradle.getMigratableUnitTestVariants
+import com.grab.grazel.migrate.common.calculateTestAssociate
 import com.grab.grazel.migrate.kotlin.kotlinParcelizeDeps
 import dagger.Lazy
 import org.gradle.api.Project
-import org.gradle.api.artifacts.Configuration
 import org.gradle.kotlin.dsl.getByType
 import java.io.File
 import javax.inject.Inject
@@ -58,6 +57,8 @@ internal class DefaultAndroidUnitTestDataExtractor @Inject constructor(
 
         val srcs = project.unitTestSources(migratableSourceSets).toList()
 
+        val associate = calculateTestAssociate(project)
+
         val deps = projectDependencyGraphs.directProjectDependencies(project, ConfigurationScope.TEST) +
                 dependenciesDataSource.collectMavenDeps(project, ConfigurationScope.TEST) +
                 project.kotlinParcelizeDeps() +
@@ -67,7 +68,8 @@ internal class DefaultAndroidUnitTestDataExtractor @Inject constructor(
             name = FORMAT_UNIT_TEST_NAME.format(project.name),
             srcs = srcs,
             deps = deps,
-            customPackage = extractPackageName(project)
+            customPackage = extractPackageName(project),
+            associates = buildList { associate?.let(::add) }
         )
     }
 

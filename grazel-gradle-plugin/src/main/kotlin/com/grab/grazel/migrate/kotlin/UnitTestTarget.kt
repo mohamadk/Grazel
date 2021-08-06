@@ -28,6 +28,7 @@ internal data class UnitTestTarget(
     override val deps: List<BazelDependency>,
     override val srcs: List<String> = emptyList(),
     override val visibility: Visibility = Visibility.Public,
+    val associates: List<BazelDependency> = emptyList(),
     val size: TestSize,
     val tags: List<String> = emptyList()
 ) : BazelBuildTarget {
@@ -35,9 +36,10 @@ internal data class UnitTestTarget(
         if (srcs.isEmpty()) return@statements
         grabKtJvmTest(
             name = name,
+            srcsGlob = srcs,
             deps = deps,
             visibility = visibility,
-            srcsGlob = srcs,
+            associates = associates,
             tags = tags,
             size = size
         )
