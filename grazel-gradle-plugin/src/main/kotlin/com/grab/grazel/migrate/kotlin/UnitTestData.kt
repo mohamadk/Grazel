@@ -7,7 +7,8 @@ import com.grab.grazel.extension.TestExtension
 data class UnitTestData(
     val name: String,
     val srcs: List<String>,
-    val deps: List<BazelDependency>
+    val deps: List<BazelDependency>,
+    val associates: List<BazelDependency>
 )
 
 internal fun UnitTestData.toUnitTestTarget(config: TestExtension): UnitTestTarget {
@@ -15,6 +16,7 @@ internal fun UnitTestData.toUnitTestTarget(config: TestExtension): UnitTestTarge
         name = name,
         srcs = srcs,
         deps = deps,
-        size = TestSize.valueOf(config.defaultTestSize.toUpperCase())
+        size = TestSize.SMALL,
+        associates = associates
     )
 }

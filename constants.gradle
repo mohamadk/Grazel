@@ -19,7 +19,7 @@ ext {
     versionName = "0.1.0"
 
     kotlinVersion = "1.4.31"
-    agpVersion = "4.1.0"
+    agpVersion = "4.0.1"
 
     jUnitVersion = "4.13"
     truthVersion = "1.0"
