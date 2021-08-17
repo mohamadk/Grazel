@@ -28,6 +28,7 @@ internal data class AndroidUnitTestTarget(
     override val deps: List<BazelDependency>,
     override val srcs: List<String> = emptyList(),
     override val visibility: Visibility = Visibility.Public,
+    val associates: List<BazelDependency> = emptyList(),
     val customPackage: String,
     val size: TestSize,
     val tags: List<String> = emptyList()
@@ -39,6 +40,7 @@ internal data class AndroidUnitTestTarget(
             deps = deps,
             visibility = visibility,
             srcsGlob = srcs,
+            associates = associates,
             tags = tags,
             customPackage = customPackage,
             size = size

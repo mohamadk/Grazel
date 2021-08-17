@@ -31,6 +31,9 @@ grab_android_local_test(
     srcs = glob([
         "src/test/java/com/grab/grazel/android/sample/SampleViewModelTest.kt",
     ]),
+    associates = [
+        "//sample-android-lib:sample-android-lib_kt",
+    ],
     custom_package = "com.grab.grazel.android.sample.lib",
     visibility = [
         "//visibility:public",

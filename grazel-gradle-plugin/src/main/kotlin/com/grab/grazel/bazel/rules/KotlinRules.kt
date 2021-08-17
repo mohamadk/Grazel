@@ -224,6 +224,7 @@ fun StatementsBuilder.grabKtJvmTest(
     srcs: List<String> = emptyList(),
     srcsGlob: List<String> = emptyList(),
     visibility: Visibility = Public,
+    associates: List<BazelDependency> = emptyList(),
     deps: List<BazelDependency> = emptyList(),
     plugins: List<BazelDependency> = emptyList(),
     tags: List<String> = emptyList()
@@ -242,6 +243,9 @@ fun StatementsBuilder.grabKtJvmTest(
         "visibility" eq array(visibility.rule.quote())
         deps.notEmpty {
             "deps" eq array(deps.map(BazelDependency::toString).map(String::quote))
+        }
+        associates.notEmpty {
+            "associates" eq array(associates.map(BazelDependency::toString).map(String::quote))
         }
         plugins.notEmpty {
             "plugins" eq array(plugins.map(BazelDependency::toString).map(String::quote))

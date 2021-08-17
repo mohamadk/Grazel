@@ -8,7 +8,8 @@ data class AndroidUnitTestData(
     val name: String,
     val srcs: List<String>,
     val deps: List<BazelDependency>,
-    val customPackage: String
+    val customPackage: String,
+    val associates: List<BazelDependency>
 )
 
 internal fun AndroidUnitTestData.toUnitTestTarget(config: TestExtension): AndroidUnitTestTarget {
@@ -16,6 +17,7 @@ internal fun AndroidUnitTestData.toUnitTestTarget(config: TestExtension): Androi
         name = name,
         srcs = srcs,
         deps = deps,
+        associates = associates,
         size = TestSize.valueOf(config.defaultTestSize.toUpperCase()),
         customPackage = customPackage
     )

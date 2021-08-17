@@ -63,12 +63,12 @@ internal class KtLibTargetBuilder @Inject constructor(
         val projectData = projectDataExtractor.extract(project)
         val unitTestData = kotlinUnitTestDataExtractor.extract(project)
 
-        return if(testExtension.enableTestMigration){
+        return if (testExtension.enableTestMigration) {
             listOf(
                 projectData.toKtLibraryTarget(kotlinExtension.enabledTransitiveReduction),
                 unitTestData.toUnitTestTarget(testExtension)
             )
-        }else{
+        } else {
             listOf(projectData.toKtLibraryTarget(kotlinExtension.enabledTransitiveReduction))
         }
     }

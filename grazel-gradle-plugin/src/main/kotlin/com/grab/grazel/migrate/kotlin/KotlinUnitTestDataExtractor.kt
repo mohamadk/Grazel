@@ -25,6 +25,7 @@ import com.grab.grazel.migrate.android.FORMAT_UNIT_TEST_NAME
 import com.grab.grazel.migrate.android.SourceSetType
 import com.grab.grazel.migrate.android.collectMavenDeps
 import com.grab.grazel.migrate.android.filterValidPaths
+import com.grab.grazel.migrate.common.calculateTestAssociate
 import dagger.Lazy
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
@@ -52,16 +53,23 @@ internal class DefaultKotlinUnitTestDataExtractor @Inject constructor(
 
         val srcs = project.kotlinTestSources(sourceSets).toList()
 
-        val deps = projectDependencyGraphs.directProjectDependencies(project, ConfigurationScope.TEST) +
-                dependenciesDataSource.collectMavenDeps(project, ConfigurationScope.TEST) +
-                project.androidJarDeps() +
-                project.kotlinParcelizeDeps() +
-                BazelDependency.ProjectDependency(project)
+        val projectDependency = BazelDependency.ProjectDependency(project)
+        val associate = calculateTestAssociate(project)
 
+        val deps: List<BazelDependency> = buildList {
+            addAll(projectDependencyGraphs.directProjectDependencies(project, ConfigurationScope.TEST))
+            addAll(dependenciesDataSource.collectMavenDeps(project, ConfigurationScope.TEST))
+            addAll(project.androidJarDeps())
+            addAll(project.kotlinParcelizeDeps())
+            if (projectDependency.toString() != associate.toString()) {
+                add(projectDependency)
+            }
+        }
         return UnitTestData(
             name = FORMAT_UNIT_TEST_NAME.format(project.name),
             srcs = srcs,
-            deps = deps
+            deps = deps,
+            associates = buildList { associate?.let(::add) }
         )
     }
 
