@@ -61,15 +61,13 @@ internal class DefaultConfigurationDataSource @Inject constructor(
             .filter { !it.name.contains("_internal_aapt2_binary") }
             .filter { !it.name.contains("archives") }
             .filter {
-                when{
+                when {
                     scopes.isEmpty() -> it.isNotTest() // If the scopes is empty, the build scope will be used by default.
-                    else -> {
-                        scopes.any { scope ->
-                            when (scope) {
-                                ConfigurationScope.TEST -> !it.isAndroidTest()
-                                ConfigurationScope.ANDROID_TEST -> !it.isUnitTest()
-                                ConfigurationScope.BUILD -> it.isNotTest()
-                            }
+                    else -> scopes.any { scope ->
+                        when (scope) {
+                            ConfigurationScope.TEST -> !it.isAndroidTest() && it.isUnitTest()
+                            ConfigurationScope.ANDROID_TEST -> !it.isUnitTest()
+                            ConfigurationScope.BUILD -> it.isNotTest()
                         }
                     }
                 }
