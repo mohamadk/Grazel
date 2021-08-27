@@ -19,6 +19,5 @@ apply plugin: "kotlin"
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
-    testImplementation "junit:junit:4.13"
+    testImplementation "junit:junit:$jUnitVersion"
 }
