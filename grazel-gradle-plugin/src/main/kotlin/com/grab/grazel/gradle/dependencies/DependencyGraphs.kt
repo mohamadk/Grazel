@@ -21,8 +21,10 @@ internal interface DependencyGraphs {
     ): Set<Project>
 }
 
-internal fun DependencyGraphs.directProjectDependencies(project: Project, vararg scopes: ConfigurationScope) =
-    directDependencies(project, *scopes).map { BazelDependency.ProjectDependency(it) }
+internal fun DependencyGraphs.directProjectDependencies(
+    project: Project,
+    vararg scopes: ConfigurationScope
+) = directDependencies(project, *scopes).map { BazelDependency.ProjectDependency(it) }
 
 internal class DefaultDependencyGraphs(
     private val buildGraph: ImmutableValueGraph<Project, Configuration>,
