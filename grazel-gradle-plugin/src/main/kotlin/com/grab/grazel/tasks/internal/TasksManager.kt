@@ -16,7 +16,6 @@
 
 package com.grab.grazel.tasks.internal
 
-import com.android.build.gradle.internal.tasks.factory.dependsOn
 import com.grab.grazel.di.GrazelComponent
 import com.grab.grazel.di.qualifiers.RootProject
 import com.grab.grazel.hybrid.bazelCommand
@@ -24,6 +23,7 @@ import com.grab.grazel.util.BAZEL_BUILD_ALL_TASK_NAME
 import com.grab.grazel.util.BAZEL_CLEAN_TASK_NAME
 import com.grab.grazel.util.BUILD_BAZEL
 import com.grab.grazel.util.WORKSPACE
+import com.grab.grazel.util.dependsOn
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.tasks.TaskProvider
