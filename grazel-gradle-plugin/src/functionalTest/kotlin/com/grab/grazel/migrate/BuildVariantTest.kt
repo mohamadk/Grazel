@@ -57,35 +57,43 @@ class BuildVariantTest : BaseGrazelPluginTest() {
 
     private fun moduleDepsShouldOnlyContainEnabledFlavor(buildFileContent: String) {
         Assert.assertTrue(
+            "Contains Kotlin library flavor2",
             buildFileContent.contains(""""//kotlin-library-flavor2"""")
         )
         Assert.assertFalse(
+            "Does not contain Kotlin library flavor1",
             buildFileContent.contains(""""//kotlin-library-flavor1"""")
         )
     }
 
     private fun sourceShouldOnlyContainEnabledFlavorAndVariant(buildFileContent: String) {
         Assert.assertTrue(
+            "Contains Kotlin library flavor2 sources",
             buildFileContent.contains("""src/flavor2/java/com/grab/grazel/android/flavor""")
         )
 
         Assert.assertFalse(
+            "Does not Kotlin library flavor1 sources",
             buildFileContent.contains("""src/flavor1/java/com/grab/grazel/android/flavor""")
         )
 
         Assert.assertTrue(
+            "Contains Kotlin library main sources",
             buildFileContent.contains("""src/main/java/com/grab/grazel/android/flavor""")
         )
     }
 
     private fun resourceShouldOnlyContainEnabledFlavorAndVariant(buildFileContent: String) {
         Assert.assertTrue(
+            "Contains flavor2 resources",
             buildFileContent.contains("""src/flavor2/res/""")
         )
         Assert.assertFalse(
+            "Does not contain flavor1 resources",
             buildFileContent.contains("""src/flavor1/res/""")
         )
         Assert.assertTrue(
+            "Contains main resources",
             buildFileContent.contains("""src/main/res/""")
         )
     }

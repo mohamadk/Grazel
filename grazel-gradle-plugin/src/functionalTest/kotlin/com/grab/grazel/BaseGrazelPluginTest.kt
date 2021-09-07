@@ -55,7 +55,7 @@ abstract class BaseGrazelPluginTest {
         assertions: BuildResult.() -> Unit = {}
     ): BuildResult = gradleRunner
         .withProjectDir(fixtureRoot)
-        .withArguments(arguments.toList())
+        .withArguments((arguments + "--stacktrace").toSet().toList())
         .forwardOutput()
         .build()
         .also(assertions)

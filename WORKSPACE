@@ -4,14 +4,14 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
 git_repository(
     name = "grab_bazel_common",
-    commit = "2dc3a57d24132ea542efb881d13f3beb707b27f5",
+    commit = "bdc80483256fca3e652413dd7096eb4307ae27cc",
     remote = "https://github.com/grab/grab-bazel-common.git",
 )
 
 load("@grab_bazel_common//:workspace_defs.bzl", "android_tools")
 
 android_tools(
-    commit = "2dc3a57d24132ea542efb881d13f3beb707b27f5",
+    commit = "bdc80483256fca3e652413dd7096eb4307ae27cc",
     remote = "https://github.com/grab/grab-bazel-common.git",
 )
 
@@ -60,6 +60,7 @@ maven_install(
         "org.jetbrains.kotlin:kotlin-annotation-processing-gradle:1.4.31",
         "org.jetbrains.kotlin:kotlin-parcelize-runtime:1.4.31",
         "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.3.72",
+        "org.jetbrains.kotlin:kotlin-stdlib:1.3.72",
         "org.robolectric:robolectric:4.4",
     ],
     excluded_artifacts = ["androidx.test.espresso:espresso-contrib"],
@@ -76,6 +77,7 @@ maven_install(
         "junit:junit",
         "org.jetbrains.kotlin:kotlin-annotation-processing-gradle",
         "org.jetbrains.kotlin:kotlin-parcelize-runtime",
+        "org.jetbrains.kotlin:kotlin-stdlib",
         "org.jetbrains.kotlin:kotlin-stdlib-jdk8",
         "org.robolectric:robolectric",
     ],

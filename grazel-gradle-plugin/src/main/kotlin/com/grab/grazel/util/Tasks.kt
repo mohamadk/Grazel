@@ -14,9 +14,21 @@
  * limitations under the License.
  */
 
-apply plugin: "java-library"
-apply plugin: "kotlin"
+package com.grab.grazel.util
 
-dependencies {
-    testImplementation "junit:junit:$jUnitVersion"
+import org.gradle.api.Task
+import org.gradle.api.tasks.TaskProvider
+
+fun <T : Task> TaskProvider<out T>.dependsOn(tasks: Collection<TaskProvider<out Task>>): TaskProvider<out T> {
+    if (tasks.isEmpty().not()) {
+        configure { dependsOn(tasks) }
+    }
+    return this
+}
+
+fun <T : Task> TaskProvider<out T>.dependsOn(vararg tasks: TaskProvider<out Task>): TaskProvider<out T> {
+    if (tasks.isEmpty().not()) {
+        configure { dependsOn(*tasks) }
+    }
+    return this
 }
