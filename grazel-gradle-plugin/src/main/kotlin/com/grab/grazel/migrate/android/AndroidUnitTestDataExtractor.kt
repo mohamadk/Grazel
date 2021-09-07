@@ -79,7 +79,7 @@ internal class DefaultAndroidUnitTestDataExtractor @Inject constructor(
     ): Sequence<String> {
         val dirs = sourceSets.flatMap { it.java.srcDirs.asSequence() }
         val dirsKotlin = dirs.map { File(it.path.replace("/java", "/kotlin")) }
-        return filterValidPaths(dirs + dirsKotlin, sourceSetType.patterns)
+        return filterSourceSetPaths(dirs + dirsKotlin, sourceSetType.patterns)
     }
 
     private fun extractPackageName(project: Project): String {

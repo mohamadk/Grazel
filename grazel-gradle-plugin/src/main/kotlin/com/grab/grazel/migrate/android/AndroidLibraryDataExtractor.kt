@@ -32,7 +32,6 @@ import com.grab.grazel.gradle.getMigratableBuildVariants
 import com.grab.grazel.gradle.hasDatabinding
 import com.grab.grazel.gradle.isAndroid
 import com.grab.grazel.migrate.kotlin.kotlinParcelizeDeps
-import com.grab.grazel.util.commonPath
 import dagger.Lazy
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.getByType
@@ -171,7 +170,7 @@ internal class DefaultAndroidLibraryDataExtractor @Inject constructor(
         val dirs = sourceSets.asSequence().flatMap(sourceSetChoosers)
         val dirsKotlin = dirs
             .map { File(it.path.replace("/java", "/kotlin")) } //TODO(arun) Remove hardcoding
-        return filterValidPaths(dirs + dirsKotlin, sourceSetType.patterns)
+        return filterSourceSetPaths(dirs + dirsKotlin, sourceSetType.patterns)
     }
 
 
@@ -187,34 +186,6 @@ internal class DefaultAndroidLibraryDataExtractor @Inject constructor(
         } else null
     }
 }
-
-/**
- * Given a list of directories specified by `dirs` and list of file patterns specified by `patterns` will return
- * list of `dir/pattern` where `dir` has at least one file matching the pattern.
- */
-internal fun Project.filterValidPaths(
-    dirs: Sequence<File>,
-    patterns: Sequence<String>
-): Sequence<String> = dirs.filter(File::exists)
-    .map(::relativePath)
-    .flatMap { dir ->
-        patterns.flatMap { pattern ->
-            val matchedFiles = fileTree(dir).matching { include(pattern) }.files
-            when {
-                matchedFiles.isEmpty() -> sequenceOf()
-                else -> {
-                    val commonPath = commonPath(*matchedFiles.map { it.path }.toTypedArray())
-                    val relativePath = relativePath(commonPath)
-                    if (matchedFiles.size == 1) {
-                        sequenceOf(relativePath)
-                    } else {
-                        sequenceOf("$relativePath/$pattern")
-                    }
-                }
-            }
-        }
-    }.distinct()
-
 
 internal fun DependenciesDataSource.collectMavenDeps(
     project: Project, vararg scopes: ConfigurationScope
