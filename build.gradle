@@ -21,7 +21,8 @@ buildscript {
     apply from: "constants.gradle"
     repositories {
         google()
-        jcenter()
+        mavenCentral()
+        gradlePluginPortal()
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
@@ -36,13 +37,12 @@ plugins {
     id "idea"
 }
 
-apply plugin: "java-library"
 apply plugin: "com.grab.grazel"
 
 allprojects {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
     group groupId
     version versionName
