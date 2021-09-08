@@ -83,7 +83,7 @@ maven_install(
     ],
     repositories = DAGGER_REPOSITORIES + [
         "https://dl.google.com/dl/android/maven2/",
-        "https://jcenter.bintray.com/",
+        "https://repo.maven.apache.org/maven2/",
         "https://maven.google.com",
         "https://repo1.maven.org/maven2",
     ],
