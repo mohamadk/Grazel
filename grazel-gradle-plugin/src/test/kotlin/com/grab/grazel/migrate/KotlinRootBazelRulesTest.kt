@@ -54,7 +54,6 @@ class KotlinRootBazelRulesTest {
             repositories {
                 mavenCentral()
                 google()
-                jcenter()
             }
             dependencies {
                 add("implementation", "com.google.dagger:dagger:2.33")

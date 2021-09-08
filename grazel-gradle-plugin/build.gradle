@@ -40,7 +40,7 @@ description = "A Gradle plugin to automate Bazel migration for Android projects"
 
 repositories {
     google()
-    jcenter()
+    mavenCentral()
 }
 
 idea {
