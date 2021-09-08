@@ -278,7 +278,6 @@ class DefaultDependenciesDataSourceTest : GrazelPluginTest() {
             repositories {
                 mavenCentral()
                 google()
-                jcenter()
             }
             dependencies {
                 add("$FLAVOR1${IMPLEMENTATION.capitalize()}", project(":$FLAVOR1_PROJECT_NAME"))
@@ -303,7 +302,7 @@ class DefaultDependenciesDataSourceTest : GrazelPluginTest() {
             }
             repositories {
                 google()
-                jcenter()
+                mavenCentral()
             }
             configurations.configureEach {
                 resolutionStrategy {
