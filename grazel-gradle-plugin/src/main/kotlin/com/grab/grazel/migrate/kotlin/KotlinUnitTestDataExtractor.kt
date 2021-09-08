@@ -24,7 +24,7 @@ import com.grab.grazel.gradle.dependencies.directProjectDependencies
 import com.grab.grazel.migrate.android.FORMAT_UNIT_TEST_NAME
 import com.grab.grazel.migrate.android.SourceSetType
 import com.grab.grazel.migrate.android.collectMavenDeps
-import com.grab.grazel.migrate.android.filterValidPaths
+import com.grab.grazel.migrate.android.filterSourceSetPaths
 import com.grab.grazel.migrate.common.calculateTestAssociate
 import dagger.Lazy
 import org.gradle.api.NamedDomainObjectContainer
@@ -80,7 +80,7 @@ internal class DefaultKotlinUnitTestDataExtractor @Inject constructor(
             .asSequence()
             .filter { it.name.toLowerCase().contains("test") }
             .flatMap { it.kotlin.srcDirs.asSequence() }
-        return filterValidPaths(dirs, SourceSetType.JAVA_KOTLIN.patterns)
+        return filterSourceSetPaths(dirs, SourceSetType.JAVA_KOTLIN.patterns)
     }
 }
 
