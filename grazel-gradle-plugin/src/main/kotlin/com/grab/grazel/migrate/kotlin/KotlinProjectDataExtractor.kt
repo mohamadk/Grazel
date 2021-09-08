@@ -25,7 +25,7 @@ import com.grab.grazel.gradle.dependencies.directProjectDependencies
 import com.grab.grazel.gradle.hasKotlinAndroidExtensions
 import com.grab.grazel.migrate.android.SourceSetType
 import com.grab.grazel.migrate.android.collectMavenDeps
-import com.grab.grazel.migrate.android.filterValidPaths
+import com.grab.grazel.migrate.android.filterSourceSetPaths
 import dagger.Lazy
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
@@ -86,7 +86,7 @@ internal class DefaultKotlinProjectDataExtractor @Inject constructor(
             .asSequence()
             .filter { !it.name.toLowerCase().contains("test") } // TODO Consider enabling later.
             .flatMap(sourceSetChoosers)
-        return filterValidPaths(dirs, sourceSetType.patterns)
+        return filterSourceSetPaths(dirs, sourceSetType.patterns)
     }
 }
 

@@ -16,6 +16,10 @@
 
 package com.grab.grazel.migrate.android
 
+import com.grab.grazel.util.commonPath
+import org.gradle.api.Project
+import java.io.File
+
 private const val JAVA_PATTERN = "**/*.java"
 private const val KOTLIN_PATTERN = "**/*.kt"
 private const val ALL_PATTERN = "**"
@@ -28,3 +32,30 @@ enum class SourceSetType(val patterns: Sequence<String>) {
     RESOURCES_CUSTOM(patterns = sequenceOf(ALL_PATTERN)),
     ASSETS(patterns = sequenceOf(ALL_PATTERN))
 }
+
+/**
+ * Given a list of directories specified by `dirs` and list of file patterns specified by `patterns` will return
+ * list of `dir/pattern` where `dir`s has at least one file matching the pattern.
+ */
+internal fun Project.filterSourceSetPaths(
+    dirs: Sequence<File>,
+    patterns: Sequence<String>
+): Sequence<String> = dirs.filter(File::exists)
+    .map(::relativePath)
+    .flatMap { dir ->
+        patterns.flatMap { pattern ->
+            val matchedFiles = fileTree(dir).matching { include(pattern) }.files
+            when {
+                matchedFiles.isEmpty() -> sequenceOf()
+                else -> {
+                    val commonPath = commonPath(*matchedFiles.map { it.path }.toTypedArray())
+                    val relativePath = relativePath(commonPath)
+                    if (matchedFiles.size == 1) {
+                        sequenceOf(relativePath)
+                    } else {
+                        sequenceOf("$relativePath/$pattern")
+                    }
+                }
+            }
+        }
+    }.distinct()
