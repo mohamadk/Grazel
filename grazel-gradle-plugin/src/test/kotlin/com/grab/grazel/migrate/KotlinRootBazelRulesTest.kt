@@ -43,7 +43,7 @@ class KotlinRootBazelRulesTest {
         rootBazelFileBuilder = DaggerGrazelComponent
             .factory()
             .create(rootProject)
-            .rootBazelFileBuilder()
+            .rootBazelFileBuilder().get()
 
         subProject = buildProject("subproject", rootProject)
         subProject.run {

@@ -43,7 +43,7 @@ class KotlinWorkspaceRulesTest {
         rootProject = buildProject("root")
         rootProject.extensions.add(GrazelExtension.GRAZEL_EXTENSION, GrazelExtension(rootProject))
         val grazelComponent = DaggerGrazelComponent.factory().create(rootProject)
-        workspaceFactory = grazelComponent.workspaceBuilderFactory()
+        workspaceFactory = grazelComponent.workspaceBuilderFactory().get()
 
         subProject = buildProject("subproject", rootProject)
         subProject.run {

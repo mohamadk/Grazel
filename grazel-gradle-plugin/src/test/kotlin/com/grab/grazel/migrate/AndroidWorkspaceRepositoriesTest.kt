@@ -39,6 +39,7 @@ class AndroidWorkspaceRepositoriesTest : GrazelPluginTest() {
         val workspaceBuilder = buildRootProject
             .createGrazelComponent()
             .workspaceBuilderFactory()
+            .get()
             .create(listOf(buildRootProject))
 
         val generatedCode = statements {
@@ -58,6 +59,7 @@ class AndroidWorkspaceRepositoriesTest : GrazelPluginTest() {
         val workspaceBuilder = buildRootProject
             .createGrazelComponent()
             .workspaceBuilderFactory()
+            .get()
             .create(listOf(buildRootProject))
         val generatedCode = statements {
             workspaceBuilder.addAndroidSdkRepositories(this)
