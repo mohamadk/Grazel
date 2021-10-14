@@ -43,6 +43,7 @@ import com.grab.grazel.migrate.internal.WorkspaceBuilder
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
+import dagger.Lazy
 import dagger.Module
 import dagger.Provides
 import org.gradle.api.Project
@@ -69,12 +70,12 @@ internal interface GrazelComponent {
         fun create(@BindsInstance @RootProject rootProject: Project): GrazelComponent
     }
 
-    fun migrationChecker(): MigrationChecker
-    fun progressLogger(): ProgressLogger
     fun gradleProjectInfo(): GradleProjectInfo
-    fun projectBazelFileBuilderFactory(): ProjectBazelFileBuilder.Factory
-    fun workspaceBuilderFactory(): WorkspaceBuilder.Factory
-    fun rootBazelFileBuilder(): RootBazelFileBuilder
+    fun migrationChecker(): Lazy<MigrationChecker>
+    fun progressLogger(): Lazy<ProgressLogger>
+    fun projectBazelFileBuilderFactory(): Lazy<ProjectBazelFileBuilder.Factory>
+    fun workspaceBuilderFactory(): Lazy<WorkspaceBuilder.Factory>
+    fun rootBazelFileBuilder(): Lazy<RootBazelFileBuilder>
 }
 
 @Module(
