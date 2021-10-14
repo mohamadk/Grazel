@@ -38,13 +38,13 @@ import javax.inject.Inject
 
 open class GenerateBazelScriptsTask @Inject constructor(objects: ObjectFactory) : DefaultTask() {
 
-    @Input
+    @get:Input
     internal val migrationChecker = objects.property<MigrationChecker>()
 
-    @Input
+    @get:Input
     internal val bazelFileBuilder = objects.property<ProjectBazelFileBuilder.Factory>()
 
-    @Input
+    @get:Input
     internal val progressLogger = objects.property<ProgressLogger>()
 
     private val rootProject get() = project.rootProject
