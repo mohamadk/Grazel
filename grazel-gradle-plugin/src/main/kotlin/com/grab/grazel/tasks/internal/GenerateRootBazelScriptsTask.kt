@@ -20,32 +20,32 @@ import com.grab.grazel.bazel.starlark.writeToFile
 import com.grab.grazel.di.GrazelComponent
 import com.grab.grazel.di.qualifiers.RootProject
 import com.grab.grazel.gradle.MigrationChecker
+import com.grab.grazel.migrate.internal.ProjectBazelFileBuilder
 import com.grab.grazel.migrate.internal.RootBazelFileBuilder
 import com.grab.grazel.migrate.internal.WorkspaceBuilder
 import com.grab.grazel.util.BUILD_BAZEL
 import com.grab.grazel.util.WORKSPACE
 import com.grab.grazel.util.ansiGreen
 import com.grab.grazel.util.setFinal
+import dagger.Lazy
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.TaskProvider
+import org.gradle.internal.logging.progress.ProgressLogger
 import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.register
 import javax.inject.Inject
 
-internal open class GenerateRootBazelScriptsTask @Inject constructor(
-    objectFactory: ObjectFactory
+internal open class GenerateRootBazelScriptsTask
+@Inject
+constructor(
+    private val migrationChecker: Lazy<MigrationChecker>,
+    private val workspaceBuilderFactory: Lazy<WorkspaceBuilder.Factory>,
+    private val rootBazelBuilder: Lazy<RootBazelFileBuilder>
 ) : DefaultTask() {
-    @Input
-    internal val migrationChecker = objectFactory.property<MigrationChecker>()
-
-    @Input
-    internal val workspaceBuilderFactory = objectFactory.property<WorkspaceBuilder.Factory>()
-
-    @Input
-    internal val rootBazelBuilder = objectFactory.property<RootBazelFileBuilder>()
 
     @TaskAction
     fun action() {
@@ -69,13 +69,20 @@ internal open class GenerateRootBazelScriptsTask @Inject constructor(
 
     companion object {
         private const val TASK_NAME = "generateRootBazelScripts"
+
         fun register(
             @RootProject rootProject: Project,
             grazelComponent: GrazelComponent
-        ) = rootProject.tasks.register<GenerateRootBazelScriptsTask>(TASK_NAME) {
-            migrationChecker.setFinal(grazelComponent.migrationChecker())
-            workspaceBuilderFactory.setFinal(grazelComponent.workspaceBuilderFactory())
-            rootBazelBuilder.setFinal(grazelComponent.rootBazelFileBuilder())
+        ) = rootProject.tasks.register<GenerateRootBazelScriptsTask>(
+            TASK_NAME,
+            grazelComponent.migrationChecker(),
+            grazelComponent.workspaceBuilderFactory(),
+            grazelComponent.rootBazelFileBuilder()
+        ).apply {
+            configure {
+                group = GRAZEL_TASK_GROUP
+                description = "Generate $BUILD_BAZEL for root project"
+            }
         }
     }
 }
