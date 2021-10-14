@@ -25,27 +25,22 @@ import com.grab.grazel.util.BUILD_BAZEL
 import com.grab.grazel.util.BUILD_BAZEL_IGNORE
 import com.grab.grazel.util.ansiGreen
 import com.grab.grazel.util.ansiYellow
-import com.grab.grazel.util.setFinal
+import dagger.Lazy
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
-import org.gradle.api.model.ObjectFactory
-import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.TaskProvider
 import org.gradle.internal.logging.progress.ProgressLogger
-import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.register
 import javax.inject.Inject
 
-open class GenerateBazelScriptsTask @Inject constructor(objects: ObjectFactory) : DefaultTask() {
-
-    @get:Input
-    internal val migrationChecker = objects.property<MigrationChecker>()
-
-    @get:Input
-    internal val bazelFileBuilder = objects.property<ProjectBazelFileBuilder.Factory>()
-
-    @get:Input
-    internal val progressLogger = objects.property<ProgressLogger>()
+internal open class GenerateBazelScriptsTask
+@Inject
+constructor(
+    private val migrationChecker: Lazy<MigrationChecker>,
+    private val bazelFileBuilder: Lazy<ProjectBazelFileBuilder.Factory>,
+    private val progressLogger: Lazy<ProgressLogger>
+) : DefaultTask() {
 
     private val rootProject get() = project.rootProject
 
@@ -94,15 +89,20 @@ open class GenerateBazelScriptsTask @Inject constructor(objects: ObjectFactory) 
             project: Project,
             grazelComponent: GrazelComponent,
             configureAction: GenerateBazelScriptsTask.() -> Unit = {}
-        ) = project.tasks.register<GenerateBazelScriptsTask>(TASK_NAME) {
-            group = GRAZEL_TASK_GROUP
-            description = "Generate $BUILD_BAZEL for this project"
-
-            migrationChecker.setFinal(grazelComponent.migrationChecker())
-            bazelFileBuilder.setFinal(grazelComponent.projectBazelFileBuilderFactory())
-            progressLogger.setFinal(grazelComponent.progressLogger())
-
-            configureAction(this)
+        ): TaskProvider<GenerateBazelScriptsTask> {
+            val genTask = project.tasks.register<GenerateBazelScriptsTask>(
+                TASK_NAME,
+                grazelComponent.migrationChecker(),
+                grazelComponent.projectBazelFileBuilderFactory(),
+                grazelComponent.progressLogger()
+            ).apply {
+                configure {
+                    group = GRAZEL_TASK_GROUP
+                    description = "Generate $BUILD_BAZEL for this project"
+                    configureAction(this)
+                }
+            }
+            return genTask
         }
     }
 }

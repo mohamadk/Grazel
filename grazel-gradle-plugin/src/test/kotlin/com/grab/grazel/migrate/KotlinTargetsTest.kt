@@ -64,6 +64,7 @@ class KotlinTargetsTest {
         projectBazelFileBuilder = rootProject
             .createGrazelComponent()
             .projectBazelFileBuilderFactory()
+            .get()
             .create(androidLibrary)
     }
 
