@@ -82,9 +82,9 @@ private void configurePom(MavenPublication publication) {
                 email = "minhnguyen.gtvt@gmail.com"
             }
             developer {
-                id = "MarinaShaposhnikova"
-                name = "Maryna Shaposhnikova"
-                email = "marina95meier@gmail.com"
+                id = "minkuan88"
+                name = "Min Kuan Lim"
+                email = "minkuan88@hotmail.com"
             }
         }
         scm {
