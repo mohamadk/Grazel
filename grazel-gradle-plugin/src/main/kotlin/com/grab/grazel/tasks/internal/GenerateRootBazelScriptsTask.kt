@@ -20,22 +20,15 @@ import com.grab.grazel.bazel.starlark.writeToFile
 import com.grab.grazel.di.GrazelComponent
 import com.grab.grazel.di.qualifiers.RootProject
 import com.grab.grazel.gradle.MigrationChecker
-import com.grab.grazel.migrate.internal.ProjectBazelFileBuilder
 import com.grab.grazel.migrate.internal.RootBazelFileBuilder
 import com.grab.grazel.migrate.internal.WorkspaceBuilder
 import com.grab.grazel.util.BUILD_BAZEL
 import com.grab.grazel.util.WORKSPACE
 import com.grab.grazel.util.ansiGreen
-import com.grab.grazel.util.setFinal
 import dagger.Lazy
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
-import org.gradle.api.model.ObjectFactory
-import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.TaskProvider
-import org.gradle.internal.logging.progress.ProgressLogger
-import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.register
 import javax.inject.Inject
 
@@ -46,6 +39,10 @@ constructor(
     private val workspaceBuilderFactory: Lazy<WorkspaceBuilder.Factory>,
     private val rootBazelBuilder: Lazy<RootBazelFileBuilder>
 ) : DefaultTask() {
+
+    init {
+        outputs.upToDateWhen { false } // This task is supposed to run always until we figure out up-to-date checks
+    }
 
     @TaskAction
     fun action() {

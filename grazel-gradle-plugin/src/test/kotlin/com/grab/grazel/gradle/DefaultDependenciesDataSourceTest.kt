@@ -21,10 +21,10 @@ import com.google.common.truth.Truth
 import com.grab.grazel.GrazelExtension
 import com.grab.grazel.GrazelPluginTest
 import com.grab.grazel.buildProject
-import com.grab.grazel.gradle.dependencies.*
 import com.grab.grazel.fake.FLAVOR1
 import com.grab.grazel.fake.FLAVOR2
 import com.grab.grazel.fake.FakeAndroidVariantDataSource
+import com.grab.grazel.gradle.dependencies.*
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
