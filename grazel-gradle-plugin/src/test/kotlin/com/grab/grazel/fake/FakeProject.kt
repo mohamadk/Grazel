@@ -44,7 +44,7 @@ import java.io.File
 import java.net.URI
 import java.util.concurrent.Callable
 
-class FakeProject(private val name : String) : Project {
+class FakeProject(private val name: String) : Project {
 
     override fun toString(): String = name
 

@@ -18,36 +18,53 @@ package com.grab.grazel.tasks.internal
 
 import com.grab.grazel.util.BUILD_BAZEL
 import com.grab.grazel.util.WORKSPACE
+import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.register
+import org.gradle.kotlin.dsl.support.serviceOf
+import org.gradle.process.ExecOperations
 import java.io.File
 
 private const val FORMAT_BAZEL_FILE_TASK = "formatBazelScripts"
 private const val FORMAT_BUILD_BAZEL_FILE_TASK = "formatBuildBazel"
 private const val FORMAT_WORK_SPACE_FILE_TASK = "formatWorkSpace"
 
-open class FormatBazelFileTask : Exec() {
+abstract class FormatBazelFileTask : DefaultTask() {
+
     @get:OutputFile
     var bazelFile: File = File(project.projectDir, BUILD_BAZEL)
 
-    override fun exec() = if (bazelFile.exists()) {
-        // set command here due to this issue: https://discuss.gradle.org/t/dofirst-does-not-execute-first-but-only-after-task-execution/28129/4
-        setupCommand()
-        super.exec()
-    } else {
-        // project.logger.quiet("The build.bazel file in ${project.name} is not exist")
+    init {
+        outputs.upToDateWhen { false } // This task is supposed to run always until we figure out up-to-date checks
     }
 
-    private fun setupCommand() {
-        commandLine = listOf("buildifier", bazelFile.absolutePath)
+    private val execOperations: ExecOperations = project.serviceOf()
+
+    @TaskAction
+    fun action() {
+        execOperations.exec {
+            commandLine = listOf("buildifier", bazelFile.absolutePath)
+        }
     }
 
     companion object {
         private const val TASK_DESCRIPTION = "Format Bazel build files"
+
+        private fun Project.register(
+            taskName: String,
+            configureAction: FormatBazelFileTask.() -> Unit
+        ): TaskProvider<out Task> {
+            return tasks.register<FormatBazelFileTask>(name = taskName).apply {
+                configure {
+                    group = GRAZEL_TASK_GROUP
+                    configureAction(this)
+                }
+            }
+        }
 
         /**
          * Register formatting task on the given project and provide callbacks to configure it.
@@ -67,33 +84,26 @@ open class FormatBazelFileTask : Exec() {
             val rootProject = project.rootProject
             if (project == rootProject) {
                 // Format work space
-                val formatWorkspace = rootProject.tasks
-                    .register<FormatBazelFileTask>(FORMAT_WORK_SPACE_FILE_TASK) {
-                        bazelFile = File(rootProject.projectDir, WORKSPACE)
-                        group = GRAZEL_TASK_GROUP
-                        description = "Format $WORKSPACE file"
+                val formatWorkspace = rootProject.register(FORMAT_WORK_SPACE_FILE_TASK) {
+                    bazelFile = File(rootProject.projectDir, WORKSPACE)
+                    description = "Format $WORKSPACE file"
 
-                        configureAction(this)
-                    }
+                    configureAction(this)
+                }
                 // Format build.bazel
-                val formatBuildBazel = rootProject.tasks
-                    .register<FormatBazelFileTask>(FORMAT_BUILD_BAZEL_FILE_TASK) {
-                        group = GRAZEL_TASK_GROUP
-                        description = "Format $BUILD_BAZEL file"
+                val formatBuildBazel = rootProject.register(FORMAT_BUILD_BAZEL_FILE_TASK) {
+                    description = "Format $BUILD_BAZEL file"
 
-                        configureAction(this)
-                    }
+                    configureAction(this)
+                }
                 // Aggregating task to depend on above
-                return rootProject.tasks.register(FORMAT_BAZEL_FILE_TASK) {
-                    group = GRAZEL_TASK_GROUP
+                return rootProject.register(FORMAT_BAZEL_FILE_TASK) {
                     description = TASK_DESCRIPTION
                     dependsOn(formatWorkspace, formatBuildBazel)
                 }
             } else {
-                return project.tasks.register<FormatBazelFileTask>(FORMAT_BAZEL_FILE_TASK) {
-                    group = GRAZEL_TASK_GROUP
+                return project.register(FORMAT_BAZEL_FILE_TASK) {
                     description = TASK_DESCRIPTION
-
                     configureAction(this)
                 }
             }

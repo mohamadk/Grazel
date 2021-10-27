@@ -31,7 +31,7 @@ nav:
   - Hybrid Builds: hybrid_builds.md
   - Misc:
       - Databinding: databinding.md
- 
+
 
 plugins:
   - search

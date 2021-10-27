@@ -23,7 +23,6 @@ import com.grab.grazel.bazel.rules.DAGGER_GROUP
 import com.grab.grazel.bazel.rules.DAGGER_REPOSITORIES
 import com.grab.grazel.bazel.rules.DATABINDING_ARTIFACTS
 import com.grab.grazel.bazel.rules.DATABINDING_GROUP
-import com.grab.grazel.bazel.rules.FORMAT_ROBOLECTRIC_ARTIFACT
 import com.grab.grazel.bazel.rules.GRAB_BAZEL_COMMON_ARTIFACTS
 import com.grab.grazel.bazel.rules.MavenRepository
 import com.grab.grazel.bazel.rules.MavenRepository.DefaultMavenRepository
@@ -38,12 +37,10 @@ import com.grab.grazel.bazel.rules.kotlinRepository
 import com.grab.grazel.bazel.rules.loadBazelCommonArtifacts
 import com.grab.grazel.bazel.rules.loadDaggerArtifactsAndRepositories
 import com.grab.grazel.bazel.rules.registerKotlinToolchain
-import com.grab.grazel.bazel.rules.robolectricWorkspaceRules
 import com.grab.grazel.bazel.rules.workspace
 import com.grab.grazel.bazel.starlark.StatementsBuilder
 import com.grab.grazel.bazel.starlark.statements
 import com.grab.grazel.di.qualifiers.RootProject
-import com.grab.grazel.extension.TestExtension
 import com.grab.grazel.gradle.GradleProjectInfo
 import com.grab.grazel.gradle.RepositoryDataSource
 import com.grab.grazel.gradle.dependencies.DependenciesDataSource
@@ -89,8 +86,6 @@ internal class WorkspaceBuilder(
     private val dependenciesConfiguration get() = grazelExtension.dependencies
     private val mavenInstallConfig get() = grazelExtension.rules.mavenInstall
     private val hasDatabinding = gradleProjectInfo.hasDatabinding
-    private val hasAndroidLocalTest get() = grazelExtension.rules.test.enableTestMigration && gradleProjectInfo.hasAndroidExtension
-
 
     override fun build() = statements {
         workspace(name = rootProject.name)
@@ -104,8 +99,6 @@ internal class WorkspaceBuilder(
         addAndroidSdkRepositories(this)
 
         toolsAndroid()
-
-        setupRobolectric()
     }
 
     private val injectedRepositories = listOf<MavenRepository>(
@@ -113,20 +106,11 @@ internal class WorkspaceBuilder(
         DefaultMavenRepository("https://repo1.maven.org/maven2")
     )
 
-    private fun StatementsBuilder.setupRobolectric() {
-        if (hasAndroidLocalTest)
-            robolectricWorkspaceRules(grazelExtension.rules.test.robolectricRepository())
-    }
-
-    private fun TestExtension.robolectricVersion() = androidTest.robolectric.version
-    private fun TestExtension.robolectricRepository() = androidTest.robolectric.repository
-
     private fun StatementsBuilder.buildJvmRules() {
         val hasDagger = gradleProjectInfo.hasDagger
 
         val externalArtifacts = mutableListOf<String>()
         val externalRepositories = mutableListOf<String>()
-
 
         if (hasDagger) {
             daggerWorkspaceRules()
@@ -155,10 +139,6 @@ internal class WorkspaceBuilder(
             DATABINDING_ARTIFACTS.map(MavenArtifact::toString).asSequence()
         }
 
-        val androidLocalTestArtifacts = if (!hasAndroidLocalTest) emptySequence() else {
-            sequenceOf(String.format(FORMAT_ROBOLECTRIC_ARTIFACT, grazelExtension.rules.test.robolectricVersion()))
-        }
-
         val repositories = repositoryDataSource.supportedRepositories
             .map { repo ->
                 val passwordCredentials = try {
@@ -174,7 +154,7 @@ internal class WorkspaceBuilder(
                 )
             }
 
-        val allArtifacts = (mavenArtifacts + databindingArtifacts + androidLocalTestArtifacts)
+        val allArtifacts = (mavenArtifacts + databindingArtifacts)
             .distinct()
             .sorted()
             .toList()

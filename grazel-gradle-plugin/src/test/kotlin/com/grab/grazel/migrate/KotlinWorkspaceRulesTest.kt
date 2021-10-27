@@ -20,8 +20,8 @@ import com.google.common.truth.Truth
 import com.grab.grazel.GrazelExtension
 import com.grab.grazel.bazel.starlark.asString
 import com.grab.grazel.buildProject
-import com.grab.grazel.extension.KotlinCompiler
 import com.grab.grazel.di.DaggerGrazelComponent
+import com.grab.grazel.extension.KotlinCompiler
 import com.grab.grazel.gradle.ANDROID_LIBRARY_PLUGIN
 import com.grab.grazel.gradle.KOTLIN_ANDROID_PLUGIN
 import com.grab.grazel.migrate.internal.WorkspaceBuilder

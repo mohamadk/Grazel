@@ -19,7 +19,6 @@ package com.grab.grazel.extension
 import com.grab.grazel.bazel.rules.BazelRepositoryRule
 import com.grab.grazel.bazel.rules.GitRepositoryRule
 import com.grab.grazel.bazel.rules.HttpArchiveRule
-import com.grab.grazel.bazel.starlark.quote
 import groovy.lang.Closure
 
 internal const val RULE_KOTLIN_NAME = "io_bazel_rules_kotlin"
