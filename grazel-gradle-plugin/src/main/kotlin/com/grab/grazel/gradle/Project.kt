@@ -19,13 +19,9 @@ package com.grab.grazel.gradle
 import com.android.build.api.dsl.ApplicationBuildFeatures
 import com.android.build.api.dsl.LibraryBuildFeatures
 import com.android.build.gradle.BaseExtension
-import com.google.common.graph.Graphs
-import com.google.common.graph.ImmutableValueGraph
-import com.grab.grazel.bazel.starlark.BazelDependency
 import com.grab.grazel.util.BUILD_BAZEL
 import com.grab.grazel.util.WORKSPACE
 import org.gradle.api.Project
-import org.gradle.api.artifacts.Configuration
 import org.gradle.kotlin.dsl.findByType
 
 const val KOTLIN_PLUGIN = "kotlin"

@@ -23,7 +23,6 @@ import com.grab.grazel.bazel.rules.DAGGER_GROUP
 import com.grab.grazel.bazel.rules.DAGGER_REPOSITORIES
 import com.grab.grazel.bazel.rules.DATABINDING_ARTIFACTS
 import com.grab.grazel.bazel.rules.DATABINDING_GROUP
-import com.grab.grazel.bazel.rules.FORMAT_ROBOLECTRIC_ARTIFACT
 import com.grab.grazel.bazel.rules.GRAB_BAZEL_COMMON_ARTIFACTS
 import com.grab.grazel.bazel.rules.MavenRepository
 import com.grab.grazel.bazel.rules.MavenRepository.DefaultMavenRepository
@@ -38,12 +37,10 @@ import com.grab.grazel.bazel.rules.kotlinRepository
 import com.grab.grazel.bazel.rules.loadBazelCommonArtifacts
 import com.grab.grazel.bazel.rules.loadDaggerArtifactsAndRepositories
 import com.grab.grazel.bazel.rules.registerKotlinToolchain
-import com.grab.grazel.bazel.rules.robolectricWorkspaceRules
 import com.grab.grazel.bazel.rules.workspace
 import com.grab.grazel.bazel.starlark.StatementsBuilder
 import com.grab.grazel.bazel.starlark.statements
 import com.grab.grazel.di.qualifiers.RootProject
-import com.grab.grazel.extension.TestExtension
 import com.grab.grazel.gradle.GradleProjectInfo
 import com.grab.grazel.gradle.RepositoryDataSource
 import com.grab.grazel.gradle.dependencies.DependenciesDataSource

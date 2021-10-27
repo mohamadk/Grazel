@@ -19,9 +19,6 @@ package com.grab.grazel.migrate.android
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.LibraryExtension
 import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
-import com.google.common.graph.ImmutableValueGraph
-import com.google.common.graph.MutableValueGraph
-import com.google.common.graph.ValueGraphBuilder
 import com.google.common.truth.Truth
 import com.grab.grazel.GrazelExtension
 import com.grab.grazel.GrazelExtension.Companion.GRAZEL_EXTENSION
@@ -33,7 +30,6 @@ import com.grab.grazel.gradle.ANDROID_LIBRARY_PLUGIN
 import com.grab.grazel.gradle.AndroidVariantDataSource
 import com.grab.grazel.gradle.DefaultAndroidVariantDataSource
 import com.grab.grazel.util.doEvaluate
-import dagger.Lazy
 import org.gradle.api.Project
 import org.gradle.api.artifacts.*
 import org.gradle.kotlin.dsl.configure
