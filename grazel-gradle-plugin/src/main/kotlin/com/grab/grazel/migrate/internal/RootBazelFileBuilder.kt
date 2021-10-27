@@ -30,18 +30,12 @@ import org.gradle.api.Project
 import javax.inject.Inject
 
 internal class RootBazelFileBuilder @Inject constructor(
-    @param:RootProject private val rootProject: Project,
     private val gradleProjectInfo: GradleProjectInfo,
     private val grazelExtension: GrazelExtension
 ) : BazelFileBuilder {
 
     override fun build(): List<Statement> = statements {
-        if (rootProject != rootProject.rootProject) {
-            throw IllegalArgumentException("Wrong project instance passed to ${javaClass.name}")
-        }
-
         setupKotlin()
-
         if (gradleProjectInfo.hasDagger) daggerBuildRules()
         if (gradleProjectInfo.hasAndroidExtension) androidExtensionsRules()
     }
