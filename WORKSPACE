@@ -61,7 +61,6 @@ maven_install(
         "org.jetbrains.kotlin:kotlin-parcelize-runtime:1.4.31",
         "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.3.72",
         "org.jetbrains.kotlin:kotlin-stdlib:1.3.72",
-        "org.robolectric:robolectric:4.4",
     ],
     excluded_artifacts = ["androidx.test.espresso:espresso-contrib"],
     fail_on_missing_checksum = False,
@@ -79,7 +78,6 @@ maven_install(
         "org.jetbrains.kotlin:kotlin-parcelize-runtime",
         "org.jetbrains.kotlin:kotlin-stdlib",
         "org.jetbrains.kotlin:kotlin-stdlib-jdk8",
-        "org.robolectric:robolectric",
     ],
     repositories = DAGGER_REPOSITORIES + [
         "https://dl.google.com/dl/android/maven2/",
@@ -143,15 +141,3 @@ http_archive(
 load("@tools_android//tools/googleservices:defs.bzl", "google_services_workspace_dependencies")
 
 google_services_workspace_dependencies()
-
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-
-http_archive(
-    name = "robolectric",
-    strip_prefix = "robolectric-bazel-4.4",
-    url = "https://github.com/robolectric/robolectric-bazel/archive/4.4.tar.gz",
-)
-
-load("@robolectric//bazel:robolectric.bzl", "robolectric_repositories")
-
-robolectric_repositories()

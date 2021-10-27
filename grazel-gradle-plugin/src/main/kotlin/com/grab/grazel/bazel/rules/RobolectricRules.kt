@@ -21,7 +21,6 @@ import com.grab.grazel.bazel.starlark.load
 
 internal const val FORMAT_ROBOLECTRIC_ARTIFACT = "org.robolectric:robolectric:%s"
 
-
 fun StatementsBuilder.robolectricWorkspaceRules(repository: BazelRepositoryRule) {
     repository.addTo(this)
     load("@robolectric//bazel:robolectric.bzl", "robolectric_repositories")
