@@ -47,6 +47,10 @@ constructor(
     private val rootBazelBuilder: Lazy<RootBazelFileBuilder>
 ) : DefaultTask() {
 
+    init {
+        outputs.upToDateWhen { false } // This task is supposed to run always until we figure out up-to-date checks
+    }
+
     @TaskAction
     fun action() {
         val rootProject = project.rootProject
