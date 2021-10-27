@@ -23,10 +23,8 @@ import com.grab.grazel.bazel.rules.rootKotlinSetup
 import com.grab.grazel.bazel.starlark.Statement
 import com.grab.grazel.bazel.starlark.StatementsBuilder
 import com.grab.grazel.bazel.starlark.statements
-import com.grab.grazel.di.qualifiers.RootProject
 import com.grab.grazel.gradle.GradleProjectInfo
 import com.grab.grazel.migrate.BazelFileBuilder
-import org.gradle.api.Project
 import javax.inject.Inject
 
 internal class RootBazelFileBuilder @Inject constructor(

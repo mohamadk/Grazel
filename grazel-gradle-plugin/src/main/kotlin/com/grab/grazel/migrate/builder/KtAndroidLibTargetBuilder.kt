@@ -37,9 +37,9 @@ import com.grab.grazel.migrate.android.DefaultAndroidManifestParser
 import com.grab.grazel.migrate.android.DefaultAndroidUnitTestDataExtractor
 import com.grab.grazel.migrate.android.ResValueTarget
 import com.grab.grazel.migrate.android.SourceSetType
+import com.grab.grazel.migrate.android.toUnitTestTarget
 import com.grab.grazel.migrate.kotlin.KtLibraryTarget
 import com.grab.grazel.migrate.toBazelDependency
-import com.grab.grazel.migrate.android.toUnitTestTarget
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoSet

@@ -30,12 +30,12 @@ interface BazelDependencyAnalytics {
 
 internal class QueryBazelDependencyAnalytics(
     private val gradleProjectInfo: DefaultGradleProjectInfo,
-    private val dependencyGraphs : DependencyGraphs,
+    private val dependencyGraphs: DependencyGraphs,
     extension: GrazelExtension
 ) : BazelDependencyAnalytics {
     private val mavenDeps = dependencyGraphs.nodes()
         .asSequence()
-        .flatMap{ gradleProjectInfo.dependenciesDataSource.mavenDependencies(it) }
+        .flatMap { gradleProjectInfo.dependenciesDataSource.mavenDependencies(it) }
         .filter { artifact ->
             !(extension.dependencies.ignoreArtifacts.get()
                 .any { ignore -> "${artifact.group}:${artifact.name}" == ignore })

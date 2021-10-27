@@ -1,7 +1,6 @@
 package com.grab.grazel.migrate.kotlin
 
 import com.grab.grazel.bazel.starlark.BazelDependency
-import com.grab.grazel.extension.TestExtension
 
 data class UnitTestData(
     val name: String,
