@@ -44,31 +44,21 @@ data class RobolectricExtension(
 }
 
 
-data class AndroidTestExtension(
-    val robolectric: RobolectricExtension = RobolectricExtension()
-) {
-
-    fun robolectric(block: RobolectricExtension.() -> Unit) {
-        robolectric.block()
-    }
-
-    fun robolectric(closure: Closure<*>) {
-        closure.delegate = robolectric
-        closure.call()
-    }
+class AndroidTestExtension {
+    // TODO
 }
 
 data class TestExtension(
     var enableTestMigration: Boolean = false,
     val androidTest: AndroidTestExtension = AndroidTestExtension()
 ) {
-    fun androidTest(block: AndroidTestExtension.() -> Unit) {
-        androidTest.block()
-    }
-
-    fun androidTest(closure: Closure<*>) {
-        closure.delegate = androidTest
-        closure.call()
-    }
+//    fun androidTest(block: AndroidTestExtension.() -> Unit) {
+//        androidTest.block()
+//    }
+//
+//    fun androidTest(closure: Closure<*>) {
+//        closure.delegate = androidTest
+//        closure.call()
+//    }
 }
 
