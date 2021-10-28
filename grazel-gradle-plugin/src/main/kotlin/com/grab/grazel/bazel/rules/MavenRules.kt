@@ -62,7 +62,7 @@ private fun combineExternalVariablesAndArray(
 fun StatementsBuilder.mavenInstall(
     name: String? = null,
     rulesJvmExternalName: String,
-    artifacts: List<String> = emptyList(),
+    artifacts: Set<MavenInstallArtifact> = emptySet(),
     mavenRepositories: List<MavenRepository> = emptyList(),
     externalArtifacts: List<String> = emptyList(),
     externalRepositories: List<String> = emptyList(),
@@ -80,7 +80,7 @@ fun StatementsBuilder.mavenInstall(
 
         "artifacts" eq combineExternalVariablesAndArray(
             externalArtifacts,
-            artifacts.map(String::quote)
+            artifacts.map { it.asString() }
         )
 
         "repositories" eq combineExternalVariablesAndArray(
@@ -113,9 +113,14 @@ fun StatementsBuilder.mavenInstall(
  * This assumes `load("@rules_jvm_external//:specs.bzl", "maven")` is already loaded
  */
 sealed class MavenInstallArtifact : StarlarkType {
+    // Full maven coordinates
+    abstract val id: String
+
     data class SimpleArtifact(
         val coordinates: String,
     ) : MavenInstallArtifact() {
+        override val id: String get() = coordinates
+
         override fun StatementsBuilder.statements() {
             add(coordinates.quote())
         }
@@ -152,6 +157,7 @@ sealed class MavenInstallArtifact : StarlarkType {
         val version: String,
         val exclusions: List<Exclusion>,
     ) : MavenInstallArtifact() {
+        override val id: String = "$group:$artifact:$version"
         override fun StatementsBuilder.statements() {
             rule("maven.artifact") {
                 "group" eq group.quote()
@@ -166,7 +172,7 @@ sealed class MavenInstallArtifact : StarlarkType {
 fun StatementsBuilder.jvmRules(
     rulesJvmExternalRule: BazelRepositoryRule,
     resolveTimeout: Int = 600,
-    artifacts: List<String> = emptyList(),
+    artifacts: Set<MavenInstallArtifact> = emptySet(),
     mavenRepositories: List<MavenRepository> = emptyList(),
     externalArtifacts: List<String> = emptyList(),
     externalRepositories: List<String> = emptyList(),

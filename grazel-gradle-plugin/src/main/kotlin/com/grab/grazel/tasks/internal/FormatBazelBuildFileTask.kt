@@ -46,8 +46,10 @@ abstract class FormatBazelFileTask : DefaultTask() {
 
     @TaskAction
     fun action() {
-        execOperations.exec {
-            commandLine = listOf("buildifier", bazelFile.absolutePath)
+        if (bazelFile.exists()) {
+            execOperations.exec {
+                commandLine = listOf("buildifier", bazelFile.absolutePath)
+            }
         }
     }
 

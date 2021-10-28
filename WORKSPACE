@@ -45,13 +45,22 @@ load("@rules_jvm_external//:specs.bzl", "maven")
 maven_install(
     artifacts = DAGGER_ARTIFACTS + GRAB_BAZEL_COMMON_ARTIFACTS + [
         "androidx.annotation:annotation:1.1.0",
-        "androidx.appcompat:appcompat:1.1.0",
-        "androidx.constraintlayout:constraintlayout:1.1.2",
+        "androidx.appcompat:appcompat:1.3.1",
+        maven.artifact(
+            group = "androidx.constraintlayout",
+            artifact = "constraintlayout",
+            version = "1.1.2",
+            exclusions = [
+                "androidx.appcompat:appcompat",
+                "androidx.core:core",
+            ],
+        ),
+        "androidx.core:core:1.5.0",
         "androidx.databinding:databinding-adapters:3.4.2",
         "androidx.databinding:databinding-common:3.4.2",
         "androidx.databinding:databinding-compiler:3.4.2",
         "androidx.databinding:databinding-runtime:3.4.2",
-        "junit:junit:4.13",
+        "junit:junit:4.13.2",
         "org.jetbrains.kotlin:kotlin-annotation-processing-gradle:1.4.31",
         "org.jetbrains.kotlin:kotlin-parcelize-runtime:1.4.31",
         "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.3.72",
@@ -63,6 +72,7 @@ maven_install(
     jetify_include_list = [
         "androidx.annotation:annotation",
         "androidx.constraintlayout:constraintlayout",
+        "androidx.core:core",
         "androidx.databinding:databinding-adapters",
         "androidx.databinding:databinding-common",
         "androidx.databinding:databinding-compiler",
