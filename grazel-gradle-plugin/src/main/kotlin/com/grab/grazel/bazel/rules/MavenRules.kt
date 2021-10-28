@@ -25,9 +25,6 @@ import com.grab.grazel.bazel.starlark.assigneeBuilder
 import com.grab.grazel.bazel.starlark.load
 import com.grab.grazel.bazel.starlark.quote
 
-private const val RULES_JVM_EXTERNAL_SHA = "RULES_JVM_EXTERNAL_SHA"
-private const val RULES_JVM_EXTERNAL_TAG = "RULES_JVM_EXTERNAL_TAG"
-
 sealed class MavenRepository : AssigneeBuilder {
 
     data class DefaultMavenRepository(
@@ -62,6 +59,7 @@ private fun combineExternalVariablesAndArray(
 
 fun StatementsBuilder.mavenInstall(
     name: String? = null,
+    rulesJvmExternalName: String,
     artifacts: List<String> = emptyList(),
     mavenRepositories: List<MavenRepository> = emptyList(),
     externalArtifacts: List<String> = emptyList(),
@@ -72,8 +70,8 @@ fun StatementsBuilder.mavenInstall(
     resolveTimeout: Int = 600,
     excludeArtifacts: List<String> = emptyList()
 ) {
-    load("@rules_jvm_external//:defs.bzl", "maven_install")
-    load("@rules_jvm_external//:specs.bzl", "maven")
+    load("@$rulesJvmExternalName//:defs.bzl", "maven_install")
+    load("@$rulesJvmExternalName//:specs.bzl", "maven")
 
     rule("maven_install") {
         name?.let { "name" eq it.quote() }
@@ -108,8 +106,7 @@ fun StatementsBuilder.mavenInstall(
 }
 
 fun StatementsBuilder.jvmRules(
-    rulesJvmTag: String = "3.3",
-    rulesJvmSha: String = "d85951a92c0908c80bd8551002d66cb23c3434409c814179c0ff026b53544dab",
+    rulesJvmExternalRule: BazelRepositoryRule,
     resolveTimeout: Int = 600,
     artifacts: List<String> = emptyList(),
     mavenRepositories: List<MavenRepository> = emptyList(),
@@ -120,21 +117,12 @@ fun StatementsBuilder.jvmRules(
     jetifyIncludeList: List<String> = emptyList(),
     failOnMissingChecksum: Boolean = true
 ) {
-    RULES_JVM_EXTERNAL_TAG eq rulesJvmTag.quote()
-    RULES_JVM_EXTERNAL_SHA eq rulesJvmSha.quote()
-
-    newLine()
-
-    httpArchive(
-        name = "rules_jvm_external",
-        sha256 = RULES_JVM_EXTERNAL_SHA,
-        stripPrefix = """"rules_jvm_external-%s" % $RULES_JVM_EXTERNAL_TAG""",
-        url = """"https://github.com/bazelbuild/rules_jvm_external/archive/%s.zip" % $RULES_JVM_EXTERNAL_TAG"""
-    )
+    rulesJvmExternalRule.addTo(this)
 
     newLine()
 
     mavenInstall(
+        rulesJvmExternalName = rulesJvmExternalRule.name,
         artifacts = artifacts,
         mavenRepositories = mavenRepositories,
         externalArtifacts = externalArtifacts,
