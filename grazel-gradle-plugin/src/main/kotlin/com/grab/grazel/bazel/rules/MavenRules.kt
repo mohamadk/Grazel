@@ -17,8 +17,10 @@
 package com.grab.grazel.bazel.rules
 
 import com.grab.grazel.bazel.starlark.AssigneeBuilder
+import com.grab.grazel.bazel.starlark.StarlarkType
 import com.grab.grazel.bazel.starlark.StatementsBuilder
 import com.grab.grazel.bazel.starlark.StringStatement
+import com.grab.grazel.bazel.starlark.add
 import com.grab.grazel.bazel.starlark.array
 import com.grab.grazel.bazel.starlark.asString
 import com.grab.grazel.bazel.starlark.assigneeBuilder
@@ -105,6 +107,62 @@ fun StatementsBuilder.mavenInstall(
     }
 }
 
+/**
+ * Type representing artifacts in `rules_jvm_external`'s `maven_install` rule.
+ *
+ * This assumes `load("@rules_jvm_external//:specs.bzl", "maven")` is already loaded
+ */
+sealed class MavenInstallArtifact : StarlarkType {
+    data class SimpleArtifact(
+        val coordinates: String,
+    ) : MavenInstallArtifact() {
+        override fun StatementsBuilder.statements() {
+            add(coordinates.quote())
+        }
+    }
+
+    /**
+     * Type representing artifacts in `maven_install`'s `maven.artifact`
+     */
+    sealed class Exclusion : StarlarkType {
+        data class SimpleExclusion(
+            val coordinates: String
+        ) : Exclusion() {
+            override fun StatementsBuilder.statements() {
+                add(coordinates.quote())
+            }
+        }
+
+        data class DetailedExclusion(
+            val group: String,
+            val artifact: String
+        ) : Exclusion() {
+            override fun StatementsBuilder.statements() {
+                rule("maven.exclusion") {
+                    "group" eq group.quote()
+                    "artifact" eq artifact.quote()
+                }
+            }
+        }
+    }
+
+    data class DetailedArtifact(
+        val group: String,
+        val artifact: String,
+        val version: String,
+        val exclusions: List<Exclusion>,
+    ) : MavenInstallArtifact() {
+        override fun StatementsBuilder.statements() {
+            rule("maven.artifact") {
+                "group" eq group.quote()
+                "artifact" eq artifact.quote()
+                "version" eq version.quote()
+                "exclusions" eq exclusions.map { it.asString() }
+            }
+        }
+    }
+}
+
 fun StatementsBuilder.jvmRules(
     rulesJvmExternalRule: BazelRepositoryRule,
     resolveTimeout: Int = 600,
@@ -117,7 +175,7 @@ fun StatementsBuilder.jvmRules(
     jetifyIncludeList: List<String> = emptyList(),
     failOnMissingChecksum: Boolean = true
 ) {
-    rulesJvmExternalRule.addTo(this)
+    add(rulesJvmExternalRule)
 
     newLine()
 

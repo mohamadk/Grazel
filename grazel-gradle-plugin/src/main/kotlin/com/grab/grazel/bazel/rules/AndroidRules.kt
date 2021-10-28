@@ -25,8 +25,6 @@ import com.grab.grazel.bazel.starlark.function
 import com.grab.grazel.bazel.starlark.glob
 import com.grab.grazel.bazel.starlark.load
 import com.grab.grazel.bazel.starlark.quote
-import com.grab.grazel.bazel.starlark.statements
-import com.grab.grazel.bazel.starlark.toAssignee
 import com.grab.grazel.bazel.starlark.toObject
 import com.grab.grazel.gradle.dependencies.MavenArtifact
 
@@ -235,13 +233,13 @@ fun customRes(
     target: String,
     dirName: String,
     resourceFiles: Assignee
-): Assignee = statements {
+): Assignee = Assignee {
     rule("custom_res") {
         "target" eq target.quote()
         "dir_name" eq dirName.quote()
         "resource_files" eq resourceFiles
     }
-}.toAssignee()
+}
 
 
 fun StatementsBuilder.grabAndroidLocalTest(

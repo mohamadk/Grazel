@@ -22,6 +22,7 @@ import com.grab.grazel.bazel.rules.Visibility.Public
 import com.grab.grazel.bazel.starlark.Assignee
 import com.grab.grazel.bazel.starlark.BazelDependency
 import com.grab.grazel.bazel.starlark.StatementsBuilder
+import com.grab.grazel.bazel.starlark.add
 import com.grab.grazel.bazel.starlark.array
 import com.grab.grazel.bazel.starlark.asString
 import com.grab.grazel.bazel.starlark.glob
@@ -36,7 +37,7 @@ import com.grab.grazel.extension.KotlinToolChain
  * `WORKSPACE` rule that registers the given [repositoryRule].
  */
 fun StatementsBuilder.kotlinRepository(repositoryRule: BazelRepositoryRule) {
-    repositoryRule.addTo(this)
+    add(repositoryRule)
     if (repositoryRule is GitRepositoryRule) {
         // If repository is git repository then transitive dependencies of Kotlin repo needs to be manually added
         load("@io_bazel_rules_kotlin//kotlin:dependencies.bzl", "kt_download_local_dev_dependencies")

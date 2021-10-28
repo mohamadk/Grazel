@@ -34,7 +34,7 @@ class ObjectStatement(private val args: List<AssignStatement>) : Assignee {
 }
 
 fun obj(assignmentBuilder: AssignmentBuilder.() -> Unit = {}) = ObjectStatement(
-    assignments(COLON, assignmentBuilder)
+    Assignments(COLON, assignmentBuilder)
 )
 
 @Suppress("unused")
