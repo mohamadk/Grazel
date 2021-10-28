@@ -62,7 +62,7 @@ class KotlinToolChain(
 internal val KOTLIN_REPOSITORY = HttpArchiveRule(
     name = RULE_KOTLIN_NAME,
     sha256 = RULES_KOTLIN_SHA,
-    url = """https://github.com/bazelbuild/rules_kotlin/releases/download/%s/rules_kotlin_release.tgz % ${RULES_KOTLIN_VERSION}"""
+    url = """https://github.com/bazelbuild/rules_kotlin/releases/download/%s/rules_kotlin_release.tgz % $RULES_KOTLIN_VERSION"""
 )
 
 data class KotlinCompiler(
@@ -148,7 +148,7 @@ data class KotlinExtension(
     }
 
     /**
-     * Configure a HTTP Archive for `rules_kotlin`.
+     * Configure an HTTP Archive for `rules_kotlin`.
      *
      * @param closure closure called with default value set to [KOTLIN_REPOSITORY]
      */
@@ -159,7 +159,7 @@ data class KotlinExtension(
     }
 
     /**
-     * Configure a HTTP Archive for `rules_kotlin`.
+     * Configure an HTTP Archive for `rules_kotlin`.
      *
      * @param builder Builder called with default value of [KOTLIN_REPOSITORY]
      */
