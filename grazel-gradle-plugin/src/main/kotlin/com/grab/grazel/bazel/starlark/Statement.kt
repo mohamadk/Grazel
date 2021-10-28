@@ -78,22 +78,22 @@ class StatementsBuilder : AssignmentBuilder {
     }
 
     fun add(statement: String) {
-        add(StringStatement(statement))
+        add(statement.toStatement())
     }
 
     override fun String.eq(value: String) {
         val key = this
-        add(assignments { key eq value })
+        add(Assignments { key eq value })
     }
 
     override fun String.eq(assignee: Assignee) {
         val key = this
-        add(assignments { key eq assignee })
+        add(Assignments { key eq assignee })
     }
 
     override fun String.eq(strings: List<String>) {
         val key = this
-        add(assignments { key eq strings })
+        add(Assignments { key eq strings })
     }
 }
 
@@ -107,6 +107,8 @@ fun List<Statement>.asString(): String {
     forEach { it.write(0, pw) }
     return sw.toString()
 }
+
+fun List<Statement>.asAssignee(): Assignee = asString().toStatement()
 
 fun Statement.asString(): String {
     val sw = StringWriter()
