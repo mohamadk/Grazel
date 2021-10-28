@@ -163,13 +163,16 @@ Grazel uses official [rules_jvm_external](https://github.com/bazelbuild/rules_jv
 ```groovy
 grazel {
     rules {
-        bazelCommon {
-            mavenInstall {
-                resolveTimeout = 1000 // https://github.com/bazelbuild/rules_jvm_external#fetch-and-resolve-timeout
-                excludeArtifacts.add("androidx.test.espresso:espresso-contrib")
-                jetifyIncludeList.add("com.android.support:cardview-v7")
-                jetifyExcludeList.add("androidx.appcompat:appcompat")
+        mavenInstall {
+            httpArchiveRepository {
+                sha256 = "f36441aa876c4f6427bfb2d1f2d723b48e9d930b62662bf723ddfb8fc80f0140"
+                stripPrefix = "rules_jvm_external-4.1"
+                url = "https://github.com/bazelbuild/rules_jvm_external/archive/4.1.zip"
             }
+            resolveTimeout = 1000 // https://github.com/bazelbuild/rules_jvm_external#fetch-and-resolve-timeout
+            excludeArtifacts.add("androidx.test.espresso:espresso-contrib")
+            jetifyIncludeList.add("com.android.support:cardview-v7")
+            jetifyExcludeList.add("androidx.appcompat:appcompat")
         }
     }
 }
@@ -186,6 +189,6 @@ Jetifier is automatically detected by looking for presence of `android.enableJet
 Configure options for `Jetifier`. 
 
 * `jetifyIncludeList` - Configure artifacts that should be included for Jetification.
-* `jetifyIncludeList` - Configure artifacts that should be excluded from Jetification.
+* `jetifyExcludeList` - Configure artifacts that should be excluded from Jetification.
 
-With these options, Grazel generates `jetify_include_list` as specified [here](https://github.com/bazelbuild/rules_jvm_external#jetifier) with the formula `jetify_include_list = (allArtifacts + jetifyIncludeList) - jetifyIncludeList`
+With these options, Grazel generates `jetify_include_list` as specified [here](https://github.com/bazelbuild/rules_jvm_external#jetifier) with the formula `jetify_include_list = (allArtifacts + jetifyIncludeList) - jetifyExcludeList`
