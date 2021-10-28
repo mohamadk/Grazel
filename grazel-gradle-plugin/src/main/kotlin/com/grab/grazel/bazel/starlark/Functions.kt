@@ -55,7 +55,7 @@ fun function(
     assignmentBuilder: AssignmentBuilder.() -> Unit = {}
 ) = FunctionStatement(
     name,
-    assignments(assignmentBuilder = assignmentBuilder),
+    Assignments(assignmentBuilder = assignmentBuilder),
     multilineParams
 )
 

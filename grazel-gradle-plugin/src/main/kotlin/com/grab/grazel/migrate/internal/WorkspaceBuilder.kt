@@ -39,6 +39,7 @@ import com.grab.grazel.bazel.rules.loadDaggerArtifactsAndRepositories
 import com.grab.grazel.bazel.rules.registerKotlinToolchain
 import com.grab.grazel.bazel.rules.workspace
 import com.grab.grazel.bazel.starlark.StatementsBuilder
+import com.grab.grazel.bazel.starlark.add
 import com.grab.grazel.bazel.starlark.statements
 import com.grab.grazel.di.qualifiers.RootProject
 import com.grab.grazel.gradle.GradleProjectInfo
@@ -188,7 +189,7 @@ internal class WorkspaceBuilder(
     private fun StatementsBuilder.setupBazelCommon() {
         val bazelCommonRepo = grazelExtension.rules.bazelCommon.repository
 
-        bazelCommonRepo.addTo(this)
+        add(bazelCommonRepo)
         bazelCommonRepo.remote?.run {
             androidToolsRepository(
                 commit = bazelCommonRepo.commit,

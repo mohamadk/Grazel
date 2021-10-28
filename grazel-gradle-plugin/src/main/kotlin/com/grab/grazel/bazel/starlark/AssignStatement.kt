@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:Suppress("NOTHING_TO_INLINE")
+
 package com.grab.grazel.bazel.starlark
 
 import com.grab.grazel.bazel.starlark.AssignmentOp.EQUAL
@@ -34,9 +36,13 @@ interface AssigneeBuilder {
     fun build(): Assignee
 }
 
-inline fun assigneeBuilder(crossinline builder: () -> Assignee) = object : AssigneeBuilder {
+inline fun assigneeBuilder(
+    crossinline builder: () -> Assignee
+) = object : AssigneeBuilder {
     override fun build(): Assignee = builder()
 }
+
+fun Assignee(builder: StatementsBuilder.() -> Unit): Assignee = statements(builder).asAssignee()
 
 enum class AssignmentOp(val op: String) {
     EQUAL("="),
@@ -73,6 +79,8 @@ class StringStatement(
 
     override fun isEmpty() = string.trim().isEmpty()
 }
+
+fun String.toStatement(): Assignee = StringStatement(this)
 
 object NewLineStatement : Statement {
     override fun write(level: Int, writer: PrintWriter) {
@@ -150,11 +158,10 @@ class DefaultAssignmentBuilder(private val assignmentOp: AssignmentOp = EQUAL) :
     }
 }
 
-fun assignments(
+@Suppress("FunctionName")
+fun Assignments(
     assignmentOp: AssignmentOp = EQUAL,
     assignmentBuilder: AssignmentBuilder.() -> Unit = {}
 ): List<AssignStatement> {
     return DefaultAssignmentBuilder(assignmentOp).apply(assignmentBuilder).assignments
 }
-
-fun List<Statement>.toAssignee() = StringStatement(asString())
