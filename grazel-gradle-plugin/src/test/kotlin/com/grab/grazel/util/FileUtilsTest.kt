@@ -19,7 +19,7 @@ package com.grab.grazel.util
 import org.junit.Assert
 import org.junit.Test
 
-class FileUtilsKtTest {
+class FileUtilsTest {
     @Test
     fun `when multiple paths are given assert common path is calculated`() {
         val paths = arrayOf(

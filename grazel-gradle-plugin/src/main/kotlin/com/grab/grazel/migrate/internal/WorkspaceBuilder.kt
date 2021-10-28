@@ -83,8 +83,8 @@ internal class WorkspaceBuilder(
         )
     }
 
-    private val dependenciesConfiguration get() = grazelExtension.dependencies
-    private val mavenInstallConfig get() = grazelExtension.rules.mavenInstall
+    private val dependenciesExtension get() = grazelExtension.dependencies
+    private val mavenInstall get() = grazelExtension.rules.mavenInstall
     private val hasDatabinding = gradleProjectInfo.hasDatabinding
 
     override fun build() = statements {
@@ -115,6 +115,7 @@ internal class WorkspaceBuilder(
         if (hasDagger) {
             daggerWorkspaceRules()
             loadDaggerArtifactsAndRepositories()
+            // TODO Remove dagger rules and build generic annotation processor config
             externalArtifacts += DAGGER_ARTIFACTS
             externalRepositories += DAGGER_REPOSITORIES
         }
@@ -127,7 +128,7 @@ internal class WorkspaceBuilder(
         val mavenArtifacts = dependenciesDataSource
             .resolvedArtifactsFor(
                 projects = projectsToMigrate,
-                overrideArtifactVersions = dependenciesConfiguration.overrideArtifactVersions.get()
+                overrideArtifactVersions = dependenciesExtension.overrideArtifactVersions.get()
             ).asSequence()
             .filter {
                 val dagger = if (hasDagger) !it.contains(DAGGER_GROUP) else true
@@ -161,12 +162,13 @@ internal class WorkspaceBuilder(
 
         val jetifierData = JetifierDataExtractor().extract(
             rootProject = rootProject,
-            includeList = mavenInstallConfig.jetifyIncludeList.get(),
-            excludeList = mavenInstallConfig.jetifyExcludeList.get(),
+            includeList = mavenInstall.jetifyIncludeList.get(),
+            excludeList = mavenInstall.jetifyExcludeList.get(),
             allArtifacts = allArtifacts
         )
 
         jvmRules(
+            rulesJvmExternalRule = mavenInstall.repository,
             artifacts = allArtifacts,
             mavenRepositories = (repositories + injectedRepositories).distinct().toList(),
             externalArtifacts = externalArtifacts.toList(),
@@ -174,8 +176,8 @@ internal class WorkspaceBuilder(
             jetify = jetifierData.isEnabled,
             jetifyIncludeList = jetifierData.includeList,
             failOnMissingChecksum = false,
-            resolveTimeout = mavenInstallConfig.resolveTimeout,
-            excludeArtifacts = mavenInstallConfig.excludeArtifacts.get()
+            resolveTimeout = mavenInstall.resolveTimeout,
+            excludeArtifacts = mavenInstall.excludeArtifacts.get()
         )
     }
 
