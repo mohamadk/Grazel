@@ -16,14 +16,13 @@
 
 package com.grab.grazel.bazel.rules
 
+import com.grab.grazel.bazel.starlark.Assignee
 import com.grab.grazel.bazel.starlark.BazelDependency
 import com.grab.grazel.bazel.starlark.StatementsBuilder
-import com.grab.grazel.bazel.starlark.StringStatement
-import com.grab.grazel.bazel.starlark.asString
 import com.grab.grazel.bazel.starlark.function
 import com.grab.grazel.bazel.starlark.load
 import com.grab.grazel.bazel.starlark.quote
-import com.grab.grazel.bazel.starlark.statements
+import com.grab.grazel.bazel.starlark.toStatement
 
 
 internal const val TOOLS_ANDROID = "tools_android"
@@ -63,15 +62,15 @@ fun StatementsBuilder.googleServicesWorkspaceDependencies(
 fun StatementsBuilder.googleServicesXml(
     packageName: String,
     googleServicesJson: String
-): StringStatement {
+): Assignee {
     load("@tools_android//tools/googleservices:defs.bzl", "google_services_xml")
-    GOOGLE_SERVICES_XML eq statements { // Create new statements scope so as to not add to current scope
+    GOOGLE_SERVICES_XML eq Assignee { // Create new statements scope to not add to current scope
         function("google_services_xml") {
             "package_name" eq packageName.quote()
             "google_services_json" eq googleServicesJson.quote()
         }
-    }.asString()
-    return StringStatement(GOOGLE_SERVICES_XML)
+    }
+    return GOOGLE_SERVICES_XML.toStatement()
 }
 
 /**

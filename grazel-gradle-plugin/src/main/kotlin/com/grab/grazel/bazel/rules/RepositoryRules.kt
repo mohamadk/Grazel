@@ -53,7 +53,7 @@ class GitRepositoryRule(
     var remote: String? = null,
     var shallowSince: String? = null
 ) : BazelRepositoryRule {
-    override fun StatementsBuilder.addRule() {
+    override fun StatementsBuilder.statements() {
         gitRepository(
             name = name,
             commit = commit,
@@ -92,7 +92,7 @@ class HttpArchiveRule(
     var type: String? = null,
     var stripPrefix: String? = null
 ) : BazelRepositoryRule {
-    override fun StatementsBuilder.addRule() {
+    override fun StatementsBuilder.statements() {
         httpArchive(
             name = name.quote(),
             url = url.quote(),

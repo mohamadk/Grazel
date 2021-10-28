@@ -17,12 +17,13 @@
 package com.grab.grazel.bazel.rules
 
 import com.grab.grazel.bazel.starlark.StatementsBuilder
+import com.grab.grazel.bazel.starlark.add
 import com.grab.grazel.bazel.starlark.load
 
 internal const val FORMAT_ROBOLECTRIC_ARTIFACT = "org.robolectric:robolectric:%s"
 
 fun StatementsBuilder.robolectricWorkspaceRules(repository: BazelRepositoryRule) {
-    repository.addTo(this)
+    add(repository)
     load("@robolectric//bazel:robolectric.bzl", "robolectric_repositories")
     add("robolectric_repositories()")
 }
