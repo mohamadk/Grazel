@@ -202,9 +202,9 @@ fun StatementsBuilder.androidLibrary(
     }
 }
 
-internal val DATABINDING_GROUP = "androidx.databinding"
-internal val ANDROIDX_GROUP = "androidx.annotation"
-internal val ANNOTATION_ARTIFACT = "annotation"
+internal const val DATABINDING_GROUP = "androidx.databinding"
+internal const val ANDROIDX_GROUP = "androidx.annotation"
+internal const val ANNOTATION_ARTIFACT = "annotation"
 internal val DATABINDING_ARTIFACTS by lazy {
     val version = "3.4.2"
     listOf(
