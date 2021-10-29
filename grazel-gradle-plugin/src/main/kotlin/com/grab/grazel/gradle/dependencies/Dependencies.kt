@@ -395,7 +395,11 @@ private fun ExternalDependency.toMavenArtifact(): MavenArtifact {
         group = group,
         name = name,
         version = version,
-        excludeRules = excludeRules.map { ExcludeRule(it.group, it.module ?: "") }.toSet()
+        excludeRules = excludeRules
+            .asSequence()
+            .map { ExcludeRule(it.group, it.module ?: "") }
+            .filterNot { it.artifact.isNullOrBlank() }
+            .toSet()
     )
 }
 
@@ -406,11 +410,7 @@ internal fun MavenArtifact.toMavenInstallArtifact(): MavenInstallArtifact {
             group = group!!,
             artifact = name!!,
             version = version!!,
-            exclusions = excludeRules
-                .asSequence()
-                .filterNot { it.artifact.isNullOrBlank() }
-                .map { SimpleExclusion("${it.group}:${it.artifact}") }
-                .toList()
+            exclusions = excludeRules.map { SimpleExclusion("${it.group}:${it.artifact}") }
         )
     }
 }
