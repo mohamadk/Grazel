@@ -27,7 +27,7 @@ Grazel automatically infers Android configuration via Gradle extensions and gene
 Known unsupported features
 
 * Annotation processors - Planned
-* Test targets - Planned
+* Test targets - ~~Planned~~ Available since 0.2.0 via [grab-bazel-common](https://github.com/grab/grab-bazel-common/blob/master/tools/test/test.bzl)
 * Local aar files - Planned
 
 ## Dependencies
@@ -41,6 +41,32 @@ During migration, Grazel performs Gradle's [dependency resolution](https://docs.
 * Gradle `Configuration`'s resolution strategy, forced modules and substitutions are supported.
 * Actual resolved version of the dependency is generated for `maven_install` rule.
 * Detect supported artifacts for migration. See [repositories](repositories).
+
+##### Artifact exclusions
+
+Grazel detects exclude rules declared in dependency declaration and maps it to rules_jvm_external's [artifact exclusions](https://github.com/bazelbuild/rules_jvm_external#detailed-dependency-information-specifications). Only full exclude rules with both `group` and `module` declared are supported. 
+
+For example, 
+```groovy
+implementation("androidx.constraintlayout:constraintlayout:2.1.1") {
+    exclude group: "androidx.appcompat", module: "appcompat"
+}
+```
+Will generate the following in `maven_install` in `WORKSPACE` file.
+```python
+maven_install(
+    artifacts = [
+        ...
+        maven.artifact(
+            group = "androidx.constraintlayout",
+            artifact = "constraintlayout",
+            version = "1.1.2",
+            exclusions = [
+                "androidx.appcompat:appcompat",
+            ],
+        ),
+)
+```
 
 ### Dependency Graph aware
 

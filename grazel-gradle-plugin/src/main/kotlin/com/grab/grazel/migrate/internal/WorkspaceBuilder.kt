@@ -46,6 +46,7 @@ import com.grab.grazel.gradle.GradleProjectInfo
 import com.grab.grazel.gradle.RepositoryDataSource
 import com.grab.grazel.gradle.dependencies.DependenciesDataSource
 import com.grab.grazel.gradle.dependencies.MavenArtifact
+import com.grab.grazel.gradle.dependencies.toMavenInstallArtifact
 import com.grab.grazel.gradle.isAndroidApplication
 import com.grab.grazel.migrate.BazelFileBuilder
 import com.grab.grazel.migrate.android.JetifierDataExtractor
@@ -132,13 +133,13 @@ internal class WorkspaceBuilder(
                 overrideArtifactVersions = dependenciesExtension.overrideArtifactVersions.get()
             ).asSequence()
             .filter {
-                val dagger = if (hasDagger) !it.contains(DAGGER_GROUP) else true
-                val db = if (hasDatabinding) !it.contains(DATABINDING_GROUP) else true
+                val dagger = if (hasDagger) !it.id.contains(DAGGER_GROUP) else true
+                val db = if (hasDatabinding) !it.id.contains(DATABINDING_GROUP) else true
                 dagger && db
             }
 
         val databindingArtifacts = if (!hasDatabinding) emptySequence() else {
-            DATABINDING_ARTIFACTS.map(MavenArtifact::toString).asSequence()
+            DATABINDING_ARTIFACTS.map(MavenArtifact::toMavenInstallArtifact).asSequence()
         }
 
         val repositories = repositoryDataSource.supportedRepositories
@@ -156,16 +157,13 @@ internal class WorkspaceBuilder(
                 )
             }
 
-        val allArtifacts = (mavenArtifacts + databindingArtifacts)
-            .distinct()
-            .sorted()
-            .toList()
+        val allArtifacts = (mavenArtifacts + databindingArtifacts).sortedBy { it.id }.toSet()
 
         val jetifierData = JetifierDataExtractor().extract(
             rootProject = rootProject,
             includeList = mavenInstall.jetifyIncludeList.get(),
             excludeList = mavenInstall.jetifyExcludeList.get(),
-            allArtifacts = allArtifacts
+            allArtifacts = allArtifacts.map { it.id }
         )
 
         jvmRules(

@@ -20,14 +20,17 @@ import com.android.build.gradle.LibraryExtension
 import com.google.common.truth.Truth
 import com.grab.grazel.GrazelExtension
 import com.grab.grazel.GrazelPluginTest
+import com.grab.grazel.bazel.rules.MavenInstallArtifact
 import com.grab.grazel.buildProject
 import com.grab.grazel.fake.FLAVOR1
 import com.grab.grazel.fake.FLAVOR2
 import com.grab.grazel.fake.FakeAndroidVariantDataSource
 import com.grab.grazel.gradle.dependencies.*
 import org.gradle.api.Project
+import org.gradle.kotlin.dsl.add
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.exclude
 import org.gradle.kotlin.dsl.project
 import org.gradle.kotlin.dsl.repositories
 import org.junit.Assert.assertFalse
@@ -98,9 +101,9 @@ class DefaultDependenciesDataSourceTest : GrazelPluginTest() {
     fun `when resolved artifacts is called for list of projects, assert correct artifacts are returned`() {
         setUpDepsWithResolutionStrategy()
         resolveConfigurations()
-        val resolvedArtifacts = dependenciesDataSource.resolvedArtifactsFor(
-            listOf(rootProject, subProject)
-        )
+        val resolvedArtifacts = dependenciesDataSource
+            .resolvedArtifactsFor(listOf(rootProject, subProject))
+            .map { it.id }
 
         // Even though APP_COMPAT was declared APP_COMPAT_FORCE_VERSION should be used due to forced module
         assertTrue(resolvedArtifacts.contains(APP_COMPAT.format(APP_COMPAT_FORCE_VERSION)))
@@ -114,7 +117,7 @@ class DefaultDependenciesDataSourceTest : GrazelPluginTest() {
         val resolvedArtifacts = dependenciesDataSource.resolvedArtifactsFor(
             projects = listOf(rootProject, subProject),
             overrideArtifactVersions = listOf(CONSTRAINT_LAYOUT.format(overrideVersion))
-        )
+        ).map { it.id }
         // Assert that user overriden version is used instead of automatically detected version
         assertTrue(resolvedArtifacts.contains(CONSTRAINT_LAYOUT.format(overrideVersion)))
 
@@ -133,7 +136,7 @@ class DefaultDependenciesDataSourceTest : GrazelPluginTest() {
         resolveConfigurations()
         val resolvedArtifacts = dependenciesDataSource.resolvedArtifactsFor(
             listOf(rootProject, subProject)
-        )
+        ).map { it.id }
         assertTrue(resolvedArtifacts.contains(DAGGER.format(DAGGER_FORCE_VERSION)))
         assertFalse(resolvedArtifacts.contains(DAGGER.format(DAGGER_VERSION)))
     }
@@ -182,7 +185,7 @@ class DefaultDependenciesDataSourceTest : GrazelPluginTest() {
     fun `when ignore artifacts is given, assert artifact is excluded in resolved and declared dependencies`() {
         setUpDepsWithResolutionStrategy()
         resolveConfigurations()
-        val resolvedArtifacts = dependenciesDataSource.resolvedArtifactsFor(listOf(subProject))
+        val resolvedArtifacts = dependenciesDataSource.resolvedArtifactsFor(listOf(subProject)).map { it.id }
         val declaredArtifacts = dependenciesDataSource.mavenDependencies(subProject)
         assertTrue(
             "Resolved artifacts does not contain ignored artifact",
@@ -244,15 +247,32 @@ class DefaultDependenciesDataSourceTest : GrazelPluginTest() {
             dependencyResolutionService = DefaultDependencyResolutionService.register(rootProject),
             grazelExtension = GrazelExtension(rootProject)
         )
-        val resolvedArtifacts = dependenciesDataSource.resolvedArtifactsFor(
-            listOf(rootProject, subProject)
-        )
+        val resolvedArtifacts = dependenciesDataSource
+            .resolvedArtifactsFor(listOf(rootProject, subProject))
+            .map { it.id }
         Truth.assertThat(resolvedArtifacts).doesNotContain(excludedDagger)
         assertTrue(
             dependenciesDataSource
                 .mavenDependencies(subProject)
                 .none { DAGGER.contains(it.name) }
         )
+    }
+
+    @Test
+    fun `assert resolvedArtifactsFor returns merged exclude rules from all nodes in project graph`() {
+        setupExclusions()
+        val resolvedArtifacts = dependenciesDataSource
+            .resolvedArtifactsFor(listOf(rootProject, subProject, flavor1Project))
+            .filterIsInstance<MavenInstallArtifact.DetailedArtifact>()
+        kotlin.test.assertTrue("resolvedArtifacts contains detailed artifacts specification") {
+            resolvedArtifacts.isNotEmpty()
+        }
+        kotlin.test.assertTrue("resolvedArtifacts contains exclusions") {
+            resolvedArtifacts.any { it.exclusions.isNotEmpty() }
+        }
+        kotlin.test.assertTrue("exclusion does not contain partially declared exclude rules") {
+            resolvedArtifacts.any { it.exclusions.size == 2 }
+        }
     }
 
 
@@ -320,6 +340,32 @@ class DefaultDependenciesDataSourceTest : GrazelPluginTest() {
                 add(IMPLEMENTATION, CONSTRAINT_LAYOUT.format(CL_VERSION))
                 add(IMPLEMENTATION, DAGGER.format(DAGGER_VERSION))
                 add(IMPLEMENTATION, "$KOTLIN_STDLIB:1.3.72")
+            }
+        }
+    }
+
+    private fun setupExclusions() {
+        setUpDepsWithResolutionStrategy()
+        subProject.run {
+            dependencies {
+                add(IMPLEMENTATION, CONSTRAINT_LAYOUT.format(CL_VERSION)) {
+                    exclude(group = "androidx.appcompat", module = "appcompat")
+                }
+            }
+        }
+        flavor1Project.run {
+            plugins.apply {
+                apply(KOTLIN_PLUGIN)
+            }
+            repositories {
+                google()
+                mavenCentral()
+            }
+            dependencies {
+                add(IMPLEMENTATION, CONSTRAINT_LAYOUT.format(CL_VERSION)) {
+                    exclude(group = "androidx.core", module = "core")
+                    exclude(group = "androidx.navigation", module = "") // Case where module is not given
+                }
             }
         }
     }
