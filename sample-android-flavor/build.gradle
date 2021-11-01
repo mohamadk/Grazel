@@ -51,11 +51,14 @@ dependencies {
     flavor2Implementation project(path: ":sample-lib-flavor2")
 
     implementation "androidx.appcompat:appcompat:1.3.1"
-    implementation "androidx.core:core:1.3.2"
+    implementation "androidx.core:core:1.5.0"
+    implementation "androidx.constraintlayout:constraintlayout-core:1.0.1"
 
     implementation("androidx.constraintlayout:constraintlayout:2.1.1") {
         // Sample for exclude rules.
         exclude group: "androidx.core", module: "core"
+        // Sample for excludeArtifactsDenyList
+        exclude group: "androidx.constraintlayout", module: "constraintlayout-core"
     }
 
     implementation "androidx.databinding:databinding-common:$agpVersion"

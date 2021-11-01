@@ -46,6 +46,7 @@ maven_install(
     artifacts = DAGGER_ARTIFACTS + GRAB_BAZEL_COMMON_ARTIFACTS + [
         "androidx.annotation:annotation:1.1.0",
         "androidx.appcompat:appcompat:1.3.1",
+        "androidx.constraintlayout:constraintlayout-core:1.0.1",
         maven.artifact(
             group = "androidx.constraintlayout",
             artifact = "constraintlayout",
@@ -72,6 +73,7 @@ maven_install(
     jetify_include_list = [
         "androidx.annotation:annotation",
         "androidx.constraintlayout:constraintlayout",
+        "androidx.constraintlayout:constraintlayout-core",
         "androidx.core:core",
         "androidx.databinding:databinding-adapters",
         "androidx.databinding:databinding-common",

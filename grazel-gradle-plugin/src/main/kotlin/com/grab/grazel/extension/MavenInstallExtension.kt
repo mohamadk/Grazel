@@ -36,11 +36,19 @@ internal val MAVEN_INSTALL_REPOSITORY = HttpArchiveRule(
 
 /**
  * Configuration for [rules_jvm_external](github.com/bazelbuild/rules_jvm_external)'s maven_install rule.
+ * @param repository `WORKSPACE` repository details for `rules_jvm_external`
+ * @param resolveTimeout Maps to `maven_install.resolve_timeout`
+ * @param excludeArtifactsDenyList By default, per
+ * [artifact exclude rules](https://github.com/bazelbuild/rules_jvm_external#detailed-dependency-information-specifications)
+ * are automatically generated from Gradle, `excludeArtifactsDenyList` can be used to prevent an artifact from getting
+ * automatically excluded. Specify in maven `groupId:artifact` format.
+ * @param excludeArtifacts Global exclude artifacts, maps to `maven_install.excluded_artifacts`. Specify in maven `groupId:artifact` format
  */
 data class MavenInstallExtension(
     private val objects: ObjectFactory,
     var repository: BazelRepositoryRule = MAVEN_INSTALL_REPOSITORY,
     var resolveTimeout: Int = 600,
+    var excludeArtifactsDenyList: ListProperty<String> = objects.listProperty(),
     var excludeArtifacts: ListProperty<String> = objects.listProperty(),
     var jetifyIncludeList: ListProperty<String> = objects.listProperty(),
     var jetifyExcludeList: ListProperty<String> = objects.listProperty()
