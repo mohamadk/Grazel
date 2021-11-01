@@ -80,7 +80,9 @@ internal val DEP_GROUP_EMBEDDED_BY_RULES = listOf(
 data class ExcludeRule(
     val group: String,
     val artifact: String
-)
+) {
+    override fun toString(): String = "$group:$artifact"
+}
 
 /**
  * Simple data holder for a Maven artifact containing its group, name and version.
@@ -160,6 +162,8 @@ internal class DefaultDependenciesDataSource @Inject constructor(
 ) : DependenciesDataSource {
 
     private val configurationScopes by lazy { grazelExtension.configurationScopes() }
+
+    private val excludeArtifactsDenyList by lazy { grazelExtension.rules.mavenInstall.excludeArtifactsDenyList.get() }
 
     private val resolvedVersions: Map</* maven coord */ String,/* version */  String> by lazy {
         rootProject
@@ -385,22 +389,23 @@ internal class DefaultDependenciesDataSource @Inject constructor(
                 put(key, key.id)
             }
     }.keys.asSequence()
-}
 
-/**
- * Map [ExternalDependency] to [MavenArtifact] with relevant details like exclude rules
- */
-private fun ExternalDependency.toMavenArtifact(): MavenArtifact {
-    return MavenArtifact(
-        group = group,
-        name = name,
-        version = version,
-        excludeRules = excludeRules
-            .asSequence()
-            .map { ExcludeRule(it.group, it.module ?: "") }
-            .filterNot { it.artifact.isNullOrBlank() }
-            .toSet()
-    )
+    /**
+     * Map [ExternalDependency] to [MavenArtifact] with relevant details like exclude rules.
+     */
+    private fun ExternalDependency.toMavenArtifact(): MavenArtifact {
+        return MavenArtifact(
+            group = group,
+            name = name,
+            version = version,
+            excludeRules = excludeRules
+                .asSequence()
+                .map { ExcludeRule(it.group, it.module ?: "") }
+                .filterNot { it.artifact.isNullOrBlank() }
+                .filterNot { excludeArtifactsDenyList.contains(it.toString()) }
+                .toSet()
+        )
+    }
 }
 
 internal fun MavenArtifact.toMavenInstallArtifact(): MavenInstallArtifact {

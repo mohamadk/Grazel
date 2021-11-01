@@ -117,6 +117,7 @@ grazel {
                 url = "https://github.com/bazelbuild/rules_jvm_external/archive/4.1.zip"
             }
             resolveTimeout = 1000
+            excludeArtifactsDenyList.add("androidx.constraintlayout:constraintlayout-core")
             excludeArtifacts.add("androidx.test.espresso:espresso-contrib")
             jetifyIncludeList.add("com.android.support:cardview-v7")
             jetifyExcludeList.add("androidx.appcompat:appcompat")
