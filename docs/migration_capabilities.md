@@ -27,12 +27,12 @@ Grazel automatically infers Android configuration via Gradle extensions and gene
 Known unsupported features
 
 * Annotation processors - Planned
-* Test targets - ~~Planned~~ Available since 0.2.0 via [grab-bazel-common](https://github.com/grab/grab-bazel-common/blob/master/tools/test/test.bzl)
+* Test targets - ~~Planned~~ Available since 0.2.0 via [grab-bazel-common](https://github.com/grab/grab-bazel-common)
 * Local aar files - Planned
 
 ## Dependencies
 
-Grazel generates [rules_jvm_external](https://github.com/bazelbuild/rules_jvm_external) rules to resove dependencies.
+Grazel generates [rules_jvm_external](https://github.com/bazelbuild/rules_jvm_external) rules to resolve dependencies.
 
 ### Versions
 
