@@ -107,7 +107,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath "com.grab.grazel:grazel-gradle-plugin:0.1.0"
+        classpath "com.grab.grazel:grazel-gradle-plugin:0.2.0"
     }
 }
 apply plugin: "com.grab.grazel"
