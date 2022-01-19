@@ -76,7 +76,7 @@ internal class QueryBazelDependencyAnalytics(
         gradleProjectInfo.rootProject.bazelCommand(
             "query",
             "deps(//${target})",
-            outputstream = stdout
+            outputStream = stdout
         )
         return stdout.toString()
             .lines()
