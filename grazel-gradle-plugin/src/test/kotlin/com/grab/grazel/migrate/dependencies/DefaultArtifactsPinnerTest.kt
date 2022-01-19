@@ -51,7 +51,7 @@ class DefaultArtifactsPinnerTest {
             rootProject,
             mavenInstallExtension
         )
-        assertEquals("@maven//:pin", artifactsPinner.determinePinningTarget())
+        assertEquals(MavenTargets.Pinned.targetName, artifactsPinner.determinePinningTarget())
         assertTrue("Artifacts pinning is enabled by default") { artifactsPinner.isEnabled }
         assertNull(artifactsPinner.mavenInstallJson(), "Maven install json is not used for the first time")
     }
@@ -66,7 +66,7 @@ class DefaultArtifactsPinnerTest {
         // Create dummy maven install file
         rootProject.file(mavenInstallExtension.artifactPinning.mavenInstallJson).writeText("")
 
-        assertEquals("@unpinned_maven//:pin", artifactsPinner.determinePinningTarget())
+        assertEquals(MavenTargets.Unpinned.targetName, artifactsPinner.determinePinningTarget())
         assertNotNull(artifactsPinner.mavenInstallJson(), "Maven install json target is added")
         assertTrue("Maven install json is converted to bazel label ") {
             artifactsPinner.mavenInstallJson()!!.startsWith("//")

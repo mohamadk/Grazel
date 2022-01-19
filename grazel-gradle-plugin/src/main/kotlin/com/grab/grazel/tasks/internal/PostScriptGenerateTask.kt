@@ -19,6 +19,7 @@ package com.grab.grazel.tasks.internal
 import com.grab.grazel.di.GrazelComponent
 import com.grab.grazel.di.qualifiers.RootProject
 import com.grab.grazel.migrate.dependencies.ArtifactsPinner
+import com.grab.grazel.util.WORKSPACE
 import dagger.Lazy
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
@@ -38,7 +39,9 @@ constructor(
     @TaskAction
     fun action() {
         // Run artifacts pinning
-        artifactsPinner.get().pin()
+        artifactsPinner
+            .get()
+            .pin(project.rootProject.file(WORKSPACE))
     }
 
     companion object {

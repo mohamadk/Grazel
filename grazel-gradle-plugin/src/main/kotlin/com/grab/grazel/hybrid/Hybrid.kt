@@ -95,7 +95,8 @@ internal fun Project.bazelCommand(
     command: String,
     vararg args: String,
     ignoreExit: Boolean = false,
-    outputstream: OutputStream? = null
+    outputStream: OutputStream? = null,
+    errorOutputStream: OutputStream? = null,
 ) {
     val commands: List<String> = mutableListOf("bazelisk", command).apply {
         addAll(args)
@@ -103,9 +104,9 @@ internal fun Project.bazelCommand(
     logger.quiet("Running ${commands.joinToString(separator = " ")}")
     exec {
         commandLine(*commands.toTypedArray())
-        standardOutput = outputstream ?: LogOutputStream(logger, QUIET)
+        standardOutput = outputStream ?: LogOutputStream(logger, QUIET)
         // Should be error but bazel wierdly outputs normal stuff to error
-        errorOutput = LogOutputStream(logger, QUIET)
+        errorOutput = errorOutputStream ?: LogOutputStream(logger, QUIET)
         isIgnoreExitValue = ignoreExit
     }
 }
