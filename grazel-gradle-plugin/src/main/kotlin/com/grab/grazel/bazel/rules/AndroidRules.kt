@@ -216,7 +216,6 @@ internal val DATABINDING_ARTIFACTS by lazy {
     )
 }
 
-
 fun StatementsBuilder.androidToolsRepository(commit: String? = null, remote: String) {
     load("@grab_bazel_common//:workspace_defs.bzl", "android_tools")
     function("android_tools") {
@@ -241,7 +240,6 @@ fun customRes(
     }
 }
 
-
 fun StatementsBuilder.grabAndroidLocalTest(
     name: String,
     customPackage: String,
@@ -251,7 +249,8 @@ fun StatementsBuilder.grabAndroidLocalTest(
     deps: List<BazelDependency> = emptyList(),
     associates: List<BazelDependency> = emptyList(),
     plugins: List<BazelDependency> = emptyList(),
-    tags: List<String> = emptyList()
+    tags: List<String> = emptyList(),
+    resourcesGlob: List<String> = emptyList(),
 ) {
     load("@grab_bazel_common//tools/test:test.bzl", "grab_android_local_test")
 
@@ -276,6 +275,9 @@ fun StatementsBuilder.grabAndroidLocalTest(
         }
         tags.notEmpty {
             "tags" eq array(tags.map(String::quote))
+        }
+        resourcesGlob.notEmpty {
+            "resources" eq glob(resourcesGlob.map(String::quote))
         }
     }
 }

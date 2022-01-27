@@ -57,6 +57,8 @@ internal class DefaultAndroidUnitTestDataExtractor @Inject constructor(
 
         val srcs = project.unitTestSources(migratableSourceSets).toList()
 
+        val resources = project.unitTestResources(migratableSourceSets).toList()
+
         val associate = calculateTestAssociate(project)
 
         val deps = projectDependencyGraphs.directProjectDependencies(project, ConfigurationScope.TEST) +
@@ -69,7 +71,8 @@ internal class DefaultAndroidUnitTestDataExtractor @Inject constructor(
             srcs = srcs,
             deps = deps,
             customPackage = extractPackageName(project),
-            associates = buildList { associate?.let(::add) }
+            associates = buildList { associate?.let(::add) },
+            resources = resources,
         )
     }
 
@@ -78,6 +81,15 @@ internal class DefaultAndroidUnitTestDataExtractor @Inject constructor(
         sourceSetType: SourceSetType = SourceSetType.JAVA_KOTLIN
     ): Sequence<String> {
         val dirs = sourceSets.flatMap { it.java.srcDirs.asSequence() }
+        val dirsKotlin = dirs.map { File(it.path.replace("/java", "/kotlin")) }
+        return filterSourceSetPaths(dirs + dirsKotlin, sourceSetType.patterns)
+    }
+
+    private fun Project.unitTestResources(
+        sourceSets: Sequence<AndroidSourceSet>,
+        sourceSetType: SourceSetType = SourceSetType.RESOURCES
+    ): Sequence<String> {
+        val dirs = sourceSets.flatMap { it.resources.srcDirs.asSequence() }
         val dirsKotlin = dirs.map { File(it.path.replace("/java", "/kotlin")) }
         return filterSourceSetPaths(dirs + dirsKotlin, sourceSetType.patterns)
     }
