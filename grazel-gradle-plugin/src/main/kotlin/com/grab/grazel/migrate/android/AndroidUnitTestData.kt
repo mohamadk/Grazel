@@ -7,7 +7,8 @@ data class AndroidUnitTestData(
     val srcs: List<String>,
     val deps: List<BazelDependency>,
     val customPackage: String,
-    val associates: List<BazelDependency>
+    val associates: List<BazelDependency>,
+    val resources: List<String>,
 )
 
 internal fun AndroidUnitTestData.toUnitTestTarget(): AndroidUnitTestTarget {
@@ -16,6 +17,7 @@ internal fun AndroidUnitTestData.toUnitTestTarget(): AndroidUnitTestTarget {
         srcs = srcs,
         deps = deps,
         associates = associates,
-        customPackage = customPackage
+        customPackage = customPackage,
+        resources = resources,
     )
 }

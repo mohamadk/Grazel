@@ -34,6 +34,9 @@ grab_android_local_test(
         "//sample-android-lib:sample-android-lib_kt",
     ],
     custom_package = "com.grab.grazel.android.sample.lib",
+    resources = glob([
+        "src/test/resources/**",
+    ]),
     visibility = [
         "//visibility:public",
     ],

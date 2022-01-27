@@ -29,7 +29,8 @@ internal data class AndroidUnitTestTarget(
     override val visibility: Visibility = Visibility.Public,
     val associates: List<BazelDependency> = emptyList(),
     val customPackage: String,
-    val tags: List<String> = emptyList()
+    val tags: List<String> = emptyList(),
+    val resources: List<String> = emptyList(),
 ) : BazelBuildTarget {
     override fun statements() = statements {
         if (srcs.isEmpty()) return@statements
@@ -40,7 +41,8 @@ internal data class AndroidUnitTestTarget(
             srcsGlob = srcs,
             associates = associates,
             tags = tags,
-            customPackage = customPackage
+            customPackage = customPackage,
+            resourcesGlob = resources,
         )
     }
 }
