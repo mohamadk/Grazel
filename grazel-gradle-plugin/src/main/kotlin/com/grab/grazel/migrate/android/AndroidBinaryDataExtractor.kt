@@ -86,6 +86,7 @@ internal class DefaultAndroidBinaryDataExtractor @Inject constructor(
             deps = deps,
             multidex = multidex,
             dexShards = dexShards,
+            incrementalDexing = grazelExtension.android.incrementalDexing,
             debugKey = debugKey,
             buildId = buildId,
             googleServicesJson = googleServicesJson,
