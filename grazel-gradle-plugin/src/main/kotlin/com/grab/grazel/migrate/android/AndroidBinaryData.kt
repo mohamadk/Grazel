@@ -25,6 +25,7 @@ internal data class AndroidBinaryData(
     val deps: List<BazelDependency>,
     val multidex: Multidex,
     val dexShards: Int? = null,
+    val incrementalDexing: Boolean = true,
     val debugKey: String? = null,
     val buildId: String? = null,
     val googleServicesJson: String? = null,
