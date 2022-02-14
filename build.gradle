@@ -83,6 +83,7 @@ grazel {
     android {
         dexShards = 5
         multiDexEnabled = true
+        incrementalDexing = true
         variantFilter { variant ->
             if (variant.name != "flavor1Debug" && variant.name != "debug" && variant.name != "debugUnitTest") {
                 variant.setIgnore(true)

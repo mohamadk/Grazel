@@ -28,12 +28,14 @@ import org.gradle.api.Action
  * @param multiDexEnabled Whether generated android_binary rules will have multidex enabled.
  * @param dexShards The dex_shards attribute to set in android_binary rule
  * @param variantFilter Variant filter instance configured by the user to filter android variants
+ * @param incrementalDexing Controls `android_binary`s` incremental dexing flag
  * @param features Enable/disable migration features. See [AndroidFeatures]
  */
 data class AndroidExtension(
     var multiDexEnabled: Boolean = true,
     var dexShards: Int? = null,
     var variantFilter: Action<VariantFilter>? = null,
+    var incrementalDexing: Boolean = false,
     var features: AndroidFeatures = DefaultAndroidFeatures()
 ) {
     fun variantFilter(action: Action<VariantFilter>) {

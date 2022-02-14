@@ -87,6 +87,7 @@ internal class AndroidBinaryTargetBuilder @Inject constructor(
             multidex = binaryData.multidex,
             debugKey = binaryData.debugKey,
             dexShards = binaryData.dexShards,
+            incrementalDexing = binaryData.incrementalDexing,
             enableDataBinding = binaryData.hasDatabinding,
             packageName = androidLibData.packageName,
             manifest = androidLibData.manifestFile,
