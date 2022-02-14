@@ -143,7 +143,7 @@ constructor(
     override fun pin(workspaceFile: File) {
         if (isEnabled) {
             val outputStream = MavenPinningOutputStream(rootProject.logger)
-            rootProject.bazelCommand(
+            val firstRunResult = rootProject.bazelCommand(
                 "run",
                 determinePinningTarget(),
                 "--noshow_progress",
@@ -176,6 +176,8 @@ constructor(
                         "maven_install_json"
                     )
                 )
+            } else if (firstRunResult.exitValue != 0) {
+                error("Artifact pinning failed, please see the logs for details")
             }
         }
     }
