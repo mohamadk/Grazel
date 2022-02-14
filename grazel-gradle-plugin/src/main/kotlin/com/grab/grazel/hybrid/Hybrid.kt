@@ -24,6 +24,7 @@ import com.grab.grazel.util.booleanProperty
 import com.grab.grazel.util.localProperties
 import org.gradle.api.Project
 import org.gradle.api.logging.LogLevel.QUIET
+import org.gradle.process.ExecResult
 import java.io.ByteArrayOutputStream
 import java.io.OutputStream
 
@@ -97,12 +98,12 @@ internal fun Project.bazelCommand(
     ignoreExit: Boolean = false,
     outputStream: OutputStream? = null,
     errorOutputStream: OutputStream? = null,
-) {
+): ExecResult {
     val commands: List<String> = mutableListOf("bazelisk", command).apply {
         addAll(args)
     }
     logger.quiet("Running ${commands.joinToString(separator = " ")}")
-    exec {
+    return exec {
         commandLine(*commands.toTypedArray())
         standardOutput = outputStream ?: LogOutputStream(logger, QUIET)
         // Should be error but bazel wierdly outputs normal stuff to error
