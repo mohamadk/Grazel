@@ -59,7 +59,6 @@ internal class DefaultKotlinUnitTestDataExtractor @Inject constructor(
         val deps: List<BazelDependency> = buildList {
             addAll(projectDependencyGraphs.directProjectDependencies(project, ConfigurationScope.TEST))
             addAll(dependenciesDataSource.collectMavenDeps(project, ConfigurationScope.TEST))
-            addAll(project.androidJarDeps())
             addAll(project.kotlinParcelizeDeps())
             if (projectDependency.toString() != associate.toString()) {
                 add(projectDependency)
@@ -69,7 +68,8 @@ internal class DefaultKotlinUnitTestDataExtractor @Inject constructor(
             name = FORMAT_UNIT_TEST_NAME.format(project.name),
             srcs = srcs,
             deps = deps,
-            associates = buildList { associate?.let(::add) }
+            associates = buildList { associate?.let(::add) },
+            hasAndroidJarDep = project.hasAndroidJarDep(),
         )
     }
 
@@ -84,14 +84,9 @@ internal class DefaultKotlinUnitTestDataExtractor @Inject constructor(
     }
 }
 
-internal fun Project.androidJarDeps(): List<BazelDependency> {
-    return if (configurations.findByName("compileOnly")
-            ?.dependencies
-            ?.filterIsInstance<DefaultSelfResolvingDependency>()
-            ?.any { dep -> dep.files.any { it.name.contains("android.jar") } } == true
-    ) {
-        listOf(BazelDependency.StringDependency("//shared_versions:android_sdk"))
-    } else {
-        emptyList()
-    }
+internal fun Project.hasAndroidJarDep(): Boolean {
+    return configurations.findByName("compileOnly")
+        ?.dependencies
+        ?.filterIsInstance<DefaultSelfResolvingDependency>()
+        ?.any {  dep -> dep.files.any { it.name.contains("android.jar") } } == true
 }
