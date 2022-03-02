@@ -96,3 +96,12 @@ internal fun Project.kotlinParcelizeDeps(): List<BazelDependency.StringDependenc
         else -> emptyList()
     }
 }
+
+internal fun Project.androidJarDeps(): List<BazelDependency> =
+    if (this.hasAndroidJarDep()) {
+        listOf(
+            BazelDependency.StringDependency("//shared_versions:android_sdk")
+        )
+    } else {
+        emptyList()
+    }
