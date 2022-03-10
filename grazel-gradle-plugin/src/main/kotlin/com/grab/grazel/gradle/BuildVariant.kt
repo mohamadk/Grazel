@@ -93,9 +93,11 @@ internal interface AndroidVariantsExtractor {
 @Singleton
 internal class DefaultAndroidVariantsExtractor @Inject constructor() : AndroidVariantsExtractor {
 
+    private val Project.isAndroidAppOrDynFeature get() = project.isAndroidApplication || project.isAndroidDynamicFeature
+
     override fun getVariants(project: Project): Set<BaseVariant> {
         return when {
-            project.isAndroidApplication -> project.the<AppExtension>().applicationVariants
+            project.isAndroidAppOrDynFeature -> project.the<AppExtension>().applicationVariants
             project.isAndroidLibrary -> project.the<LibraryExtension>().libraryVariants
             else -> emptySet()
         }
@@ -103,7 +105,7 @@ internal class DefaultAndroidVariantsExtractor @Inject constructor() : AndroidVa
 
     override fun getTestVariants(project: Project): Set<BaseVariant> {
         return when {
-            project.isAndroidApplication -> project.the<AppExtension>().testVariants
+            project.isAndroidAppOrDynFeature -> project.the<AppExtension>().testVariants
             project.isAndroidLibrary -> project.the<LibraryExtension>().testVariants
             else -> emptySet()
         }
@@ -111,7 +113,7 @@ internal class DefaultAndroidVariantsExtractor @Inject constructor() : AndroidVa
 
     override fun getUnitTestVariants(project: Project): Set<UnitTestVariant> {
         return when {
-            project.isAndroidApplication -> project.the<AppExtension>().unitTestVariants
+            project.isAndroidAppOrDynFeature -> project.the<AppExtension>().unitTestVariants
             project.isAndroidLibrary -> project.the<LibraryExtension>().unitTestVariants
             else -> emptySet()
         }
@@ -119,7 +121,7 @@ internal class DefaultAndroidVariantsExtractor @Inject constructor() : AndroidVa
 
     override fun getFlavors(project: Project): Set<ProductFlavor> {
         return when {
-            project.isAndroidApplication -> project.the<AppExtension>().productFlavors
+            project.isAndroidAppOrDynFeature -> project.the<AppExtension>().productFlavors
             project.isAndroidLibrary -> project.the<LibraryExtension>().productFlavors
             else -> emptySet()
         }
