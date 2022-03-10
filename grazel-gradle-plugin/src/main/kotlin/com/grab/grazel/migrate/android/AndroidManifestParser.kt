@@ -59,5 +59,5 @@ internal class DefaultAndroidManifestParser @Inject constructor() : AndroidManif
         sourceSets: List<AndroidSourceSet>
     ): File? = sourceSets
         .map { it.manifest.srcFile }
-        .last(File::exists) // Pick the last one since AGP gives source set in ascending order. See `BaseVariant.sourceSets`
+        .lastOrNull(File::exists) // Pick the last one since AGP gives source set in ascending order. See `BaseVariant.sourceSets`
 }
