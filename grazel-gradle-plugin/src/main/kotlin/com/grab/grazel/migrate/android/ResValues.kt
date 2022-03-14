@@ -18,8 +18,10 @@ package com.grab.grazel.migrate.android
 
 import com.android.build.gradle.BaseExtension
 
-data class ResValues(val stringValues: Map<String, String>) {
-    fun exist() = stringValues.isNotEmpty()
+data class ResValues(
+    val stringValues: Map<String, String> = emptyMap()
+) {
+    fun exists() = stringValues.isNotEmpty()
 }
 
 fun BaseExtension.extractResValue(): ResValues =
