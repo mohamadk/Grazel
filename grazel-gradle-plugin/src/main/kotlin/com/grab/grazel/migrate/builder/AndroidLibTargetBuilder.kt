@@ -66,13 +66,14 @@ internal class AndroidLibTargetBuilder @Inject constructor(
 
 private fun AndroidLibraryData.toAndroidLibTarget() = AndroidLibraryTarget(
     name = name,
-    enableDataBinding = hasDatabinding,
-    packageName = packageName,
     srcs = srcs,
-    manifest = manifestFile,
-    res = res,
-    extraRes = extraRes,
     deps = deps,
+    enableDataBinding = hasDatabinding,
+    res = res,
+    resValues = resValues,
+    customResourceSets = extraRes,
+    packageName = packageName,
+    manifest = manifestFile,
     assetsGlob = assets,
     assetsDir = assetsDir
 )

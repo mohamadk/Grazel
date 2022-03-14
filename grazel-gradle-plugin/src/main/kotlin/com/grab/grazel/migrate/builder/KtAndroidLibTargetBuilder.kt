@@ -35,7 +35,6 @@ import com.grab.grazel.migrate.android.BuildConfigTarget
 import com.grab.grazel.migrate.android.DefaultAndroidLibraryDataExtractor
 import com.grab.grazel.migrate.android.DefaultAndroidManifestParser
 import com.grab.grazel.migrate.android.DefaultAndroidUnitTestDataExtractor
-import com.grab.grazel.migrate.android.ResValueTarget
 import com.grab.grazel.migrate.android.SourceSetType
 import com.grab.grazel.migrate.android.toUnitTestTarget
 import com.grab.grazel.migrate.kotlin.KtLibraryTarget
@@ -86,10 +85,6 @@ internal class KtAndroidLibTargetBuilder @Inject constructor(
                     deps += it.toBazelDependency()
                     add(it)
                 }
-                toResValueTarget()?.also {
-                    deps += it.toBazelDependency()
-                    add(it)
-                }
             }
             projectData
                 .copy(deps = deps)
@@ -117,7 +112,8 @@ internal fun AndroidLibraryData.toKtLibraryTarget(
         srcs = srcs,
         manifest = manifestFile,
         res = res,
-        extraRes = extraRes,
+        resValues = resValues,
+        customResourceSets = extraRes,
         deps = deps,
         plugins = plugins,
         assetsGlob = assets,
@@ -147,24 +143,11 @@ internal fun AndroidLibraryData.toAarResTarget(): AndroidLibraryTarget? {
             manifest = manifestFile,
             projectName = name,
             res = res,
-            extraRes = extraRes,
+            customResourceSets = extraRes,
             visibility = Visibility.Public,
             deps = deps,
             assetsGlob = assets,
             assetsDir = assetsDir
-        )
-    } else null
-}
-
-internal fun AndroidLibraryData.toResValueTarget(): ResValueTarget? {
-    return if (resValues.exist()) {
-        ResValueTarget(
-            name = "$name-res-value",
-            // The package name should be different that the one in outer target for resource merging to work
-            // corrrectly.
-            packageName = "$packageName.res",
-            manifest = manifestFile.toString(),
-            strings = resValues.stringValues
         )
     } else null
 }

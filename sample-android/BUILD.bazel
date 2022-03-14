@@ -19,18 +19,8 @@ build_config(
     },
 )
 
-load("@grab_bazel_common//tools/res_value:res_value.bzl", "res_value")
-
-res_value(
-    name = "sample-android_lib-res-value",
-    custom_package = "com.grab.grazel.android.sample.res",
-    manifest = "src/debug/AndroidManifest.xml",
-    strings = {
-        "generated_value": "important-key",
-    },
-)
-
 load("@grab_bazel_common//tools/custom_res:custom_res.bzl", "custom_res")
+load("@grab_bazel_common//tools/res_value:res_value.bzl", "res_value")
 load("@grab_bazel_common//tools/kotlin:android.bzl", "kt_android_library")
 
 kt_android_library(
@@ -52,13 +42,17 @@ kt_android_library(
             "src/main/res-debug/values/strings.xml",
         ]),
         target = "sample-android_lib",
+    ) + res_value(
+        name = "sample-android_lib-res-value",
+        strings = {
+            "generated_value": "important-key",
+        },
     ),
     visibility = [
         "//visibility:public",
     ],
     deps = [
         ":sample-android_lib-build-config",
-        ":sample-android_lib-res-value",
         "//:dagger",
         "//:parcelize",
         "//sample-android-flavor",
@@ -125,7 +119,6 @@ android_binary(
         ":crashlytics_lib",
         ":sample-android_lib",
         ":sample-android_lib-build-config",
-        ":sample-android_lib-res-value",
         "@maven//:androidx_annotation_annotation",
         "@maven//:androidx_databinding_databinding_adapters",
         "@maven//:androidx_databinding_databinding_common",
