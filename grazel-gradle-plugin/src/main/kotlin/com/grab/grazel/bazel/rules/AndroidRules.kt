@@ -90,17 +90,16 @@ fun StatementsBuilder.buildConfig(
     }
 }
 
-fun StatementsBuilder.resValue(
-    name: String,
-    packageName: String,
-    manifest: String,
-    strings: Map<String, String>
-) {
+fun StatementsBuilder.loadResValue() {
     load("@$GRAB_BAZEL_COMMON//tools/res_value:res_value.bzl", "res_value")
+}
+
+fun resValue(
+    name: String,
+    strings: Map<String, String>
+) = Assignee {
     rule("res_value") {
         "name" eq name.quote()
-        "custom_package" eq packageName.quote()
-        "manifest" eq manifest.quote()
         "strings" eq strings.mapKeys { it.key.quote() }
             .mapValues { it.value.quote() }
             .toObject()

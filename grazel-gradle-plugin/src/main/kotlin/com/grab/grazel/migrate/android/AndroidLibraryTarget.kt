@@ -30,14 +30,15 @@ internal data class AndroidLibraryTarget(
     val enableDataBinding: Boolean = false,
     val projectName: String = name,
     val res: List<String>,
-    val extraRes: List<ResourceSet> = emptyList(),
+    val resValues: ResValues = ResValues(),
+    val customResourceSets: List<ResourceSet> = emptyList(),
     val packageName: String,
     val manifest: String? = null,
     val assetsGlob: List<String> = emptyList(),
     val assetsDir: String? = null
 ) : BazelBuildTarget {
     override fun statements() = statements {
-        val resourceFiles = buildResources(res, extraRes, projectName)
+        val resourceFiles = buildResources(res, resValues, customResourceSets, projectName)
         androidLibrary(
             name = name,
             packageName = packageName,

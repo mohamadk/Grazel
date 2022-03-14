@@ -39,7 +39,8 @@ internal data class AndroidBinaryTarget(
     val multidex: Multidex = Multidex.Off,
     val incrementalDexing: Boolean = false,
     val res: List<String>,
-    val extraRes: List<ResourceSet> = emptyList(),
+    val resValues: ResValues = ResValues(),
+    val customResourceSets: List<ResourceSet> = emptyList(),
     val manifest: String? = null,
     val manifestValues: Map<String, String?> = mapOf(),
     val enableDataBinding: Boolean = false,
@@ -50,7 +51,7 @@ internal data class AndroidBinaryTarget(
     val hasCrashlytics: Boolean
 ) : BazelBuildTarget {
     override fun statements(): List<Statement> = statements {
-        var resourceFiles = buildResources(res, extraRes, name)
+        var resourceFiles = buildResources(res, ResValues(), customResourceSets, name)
         var finalDeps = deps
         if (googleServicesJson != null) {
             val googleServicesXmlRes = googleServicesXml(
