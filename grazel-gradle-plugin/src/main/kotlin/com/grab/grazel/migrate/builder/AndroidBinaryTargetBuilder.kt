@@ -93,7 +93,8 @@ internal class AndroidBinaryTargetBuilder @Inject constructor(
             manifest = androidLibData.manifestFile,
             manifestValues = binaryData.manifestValues,
             res = androidLibData.res,
-            extraRes = androidLibData.extraRes,
+            resValues = androidLibData.resValues,
+            customResourceSets = androidLibData.extraRes,
             assetsGlob = androidLibData.assets,
             assetsDir = androidLibData.assetsDir,
             buildId = binaryData.buildId,
@@ -111,10 +112,6 @@ internal class AndroidBinaryTargetBuilder @Inject constructor(
             var deps = androidProjectData.deps
             with(androidProjectData) {
                 toBuildConfigTarget().also {
-                    deps += it.toBazelDependency()
-                    add(it)
-                }
-                toResValueTarget()?.also {
                     deps += it.toBazelDependency()
                     add(it)
                 }

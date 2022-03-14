@@ -20,6 +20,9 @@ import com.android.build.gradle.AppExtension
 import com.grab.grazel.GrazelExtension
 import com.grab.grazel.GrazelExtension.Companion.GRAZEL_EXTENSION
 import com.grab.grazel.GrazelPluginTest
+import com.grab.grazel.bazel.starlark.Assignee
+import com.grab.grazel.bazel.starlark.StatementsBuilder
+import com.grab.grazel.bazel.starlark.asString
 import com.grab.grazel.buildProject
 import com.grab.grazel.gradle.ANDROID_APPLICATION_PLUGIN
 import com.grab.grazel.util.doEvaluate
@@ -28,6 +31,7 @@ import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.the
 import org.junit.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class AndroidLibraryDataKtTest : GrazelPluginTest() {
 
@@ -50,6 +54,46 @@ class AndroidLibraryDataKtTest : GrazelPluginTest() {
             27,
             parseCompileSdkVersion(buildAndroidBinaryProject(27).compileSdkVersion())
         )
+    }
+
+    @Test
+    fun `assert build resources converts all types of resources to statements`() {
+        val resources = listOf("src/res/values.xml")
+        val resValues = ResValues(mapOf("value" to "hello"))
+        val customResourceSet = listOf(ResourceSet("res-debug", "src/main/res-debug/values/strings.xml"))
+        val targetName = "target"
+
+        // Setup
+        val statements = StatementsBuilder().buildResources(
+            resources,
+            resValues,
+            customResourceSet,
+            targetName
+        ).joinToString(separator = " + ", transform = Assignee::asString)
+
+        // Assert
+        assertTrue("custom_res is generated") {
+            statements.contains(
+                """ + custom_res(
+  target = "target",
+  dir_name = "res-debug",
+  resource_files = glob([
+    "src/main/res-debug/values/strings.xml", 
+])"""
+            )
+        }
+
+        assertTrue("res_value is generated") {
+            statements
+                .contains(
+                    """ + res_value(
+  name = "target-res-value",
+  strings = {
+    "value" : "hello",
+  }
+)"""
+                )
+        }
     }
 
     private fun buildAndroidBinaryProject(compilerSdkVersion: Int): Project {

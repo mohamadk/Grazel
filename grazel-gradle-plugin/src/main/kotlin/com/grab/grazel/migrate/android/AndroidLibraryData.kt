@@ -19,6 +19,8 @@ package com.grab.grazel.migrate.android
 import com.android.builder.core.DefaultApiVersion
 import com.grab.grazel.bazel.rules.customRes
 import com.grab.grazel.bazel.rules.loadCustomRes
+import com.grab.grazel.bazel.rules.loadResValue
+import com.grab.grazel.bazel.rules.resValue
 import com.grab.grazel.bazel.starlark.Assignee
 import com.grab.grazel.bazel.starlark.BazelDependency
 import com.grab.grazel.bazel.starlark.StatementsBuilder
@@ -29,7 +31,8 @@ import com.grab.grazel.bazel.starlark.quote
 /**
  * Light weight data structure to hold details about custom resource set
  *
- * @param folderName The root folder name of the custom resource set. Eg: res-debug.
+ * @param folderName The root folder name of the custom resource set.
+ *     Eg: res-debug.
  * @param entry The parsed entry in this folder. Eg: `src/main/res/`
  */
 internal data class ResourceSet(
@@ -59,22 +62,36 @@ internal data class AndroidLibraryData(
 /**
  * Calculate resources for Android targets
  *
- * @param res resource list come from Android project
- * @param extraRes // todo please help to provide more info
+ * @param resources resource list come from Android project
+ * @param resValues Gradle's res_value values
+ * @param customResourceSets The custom resource folders add as Gradle
+ *     resource set
  * @param targetName The name of the target
- *
  * @return List of `Assignee` to be used in `resource_files`
  */
 internal fun StatementsBuilder.buildResources(
-    res: List<String>,
-    extraRes: List<ResourceSet>,
+    resources: List<String>,
+    resValues: ResValues,
+    customResourceSets: List<ResourceSet>,
     targetName: String
 ): List<Assignee> {
-    if (extraRes.isNotEmpty()) loadCustomRes()
-    return res.map { glob(array(it.quote())) } +
-            extraRes.map { extraResSet ->
+
+    val localResources = resources.map { glob(array(it.quote())) }
+
+    val customResources = if (customResourceSets.isNotEmpty()) {
+        loadCustomRes()
+        customResourceSets
+            .map { extraResSet ->
                 customRes(targetName, extraResSet.folderName, extraResSet.entryGlob(this))
             }
+    } else emptyList()
+
+    val generatedResValues = if (resValues.exists()) {
+        loadResValue()
+        listOf(resValue("$targetName-res-value", resValues.stringValues))
+    } else emptyList()
+
+    return localResources + customResources + generatedResValues
 }
 
 /**
@@ -82,8 +99,7 @@ internal fun StatementsBuilder.buildResources(
  *
  * @param compileSdkVersion The compileSdkVersion from `BaseExtension`.
  * @return The api level. `null` if not found.
- *
- *@see `SdkVersionInfo`
+ * @see `SdkVersionInfo`
  */
 internal fun parseCompileSdkVersion(compileSdkVersion: String?): Int? {
     return if (compileSdkVersion != null) {
