@@ -102,7 +102,7 @@ grazel {
         }
         bazelCommon {
             gitRepository {
-                commit = "3568b6190f4f805d2c18af243e79b506dd99bfce"
+                commit = "540432b688186b0b6f52d6c49d116bf2cef82f3d"
                 remote = "https://github.com/grab/grab-bazel-common.git"
             }
         }

@@ -27,7 +27,7 @@ build --android_databinding_use_androidx
 build --experimental_google_legacy_api
 query --experimental_google_legacy_api
 
-build --strict_java_deps=off # Turn off strict java deps https://github.com/bazelbuild/bazel/issues/13647
+build --experimental_strict_java_deps=off # Turn off strict java deps https://github.com/bazelbuild/bazel/issues/13647
 
 # Resource Workers
 # build --persistent_android_resource_processor # https://github.com/bazelbuild/bazel/issues/13649
@@ -40,5 +40,8 @@ build --strategy=Javac=worker
 # Misc perf
 # build --experimental_multi_threaded_digest # SSD Optimization
 # build --nojava_header_compilation # Turn off Java header compilation (might affect incremental build performance)
+
+build --incompatible_java_common_parameters=false # Can be removed once migrated to Kotlin 1.5
+
 
 try-import local.bazelrc
