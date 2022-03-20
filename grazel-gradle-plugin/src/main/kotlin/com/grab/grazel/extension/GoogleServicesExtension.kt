@@ -16,10 +16,25 @@
 
 package com.grab.grazel.extension
 
+import com.grab.grazel.bazel.rules.BazelRepositoryRule
+import com.grab.grazel.bazel.rules.GitRepositoryRule
+import com.grab.grazel.bazel.rules.HttpArchiveRule
 import groovy.lang.Closure
 
+internal const val TOOLS_ANDROID = "tools_android"
+internal const val TOOLS_ANDROID_COMMIT = "58d67fd54a3b7f5f1e6ddfa865442db23a60e1b6"
+internal const val TOOLS_ANDROID_SHA = "a192553d52a42df306437a8166fc6b5ec043282ac4f72e96999ae845ece6812f"
+
+internal val TOOLS_ANDROID_REPOSITORY = HttpArchiveRule(
+    name = TOOLS_ANDROID,
+    sha256 = TOOLS_ANDROID_SHA,
+    stripPrefix = "tools_android-$TOOLS_ANDROID_COMMIT",
+    url = """https://github.com/bazelbuild/tools_android/archive/$TOOLS_ANDROID_COMMIT.tar.gz"""
+)
+
 data class GoogleServicesExtension(
-    val crashlytics: CrashlyticsExtension = CrashlyticsExtension()
+    val crashlytics: CrashlyticsExtension = CrashlyticsExtension(),
+    var repository: BazelRepositoryRule = TOOLS_ANDROID_REPOSITORY,
 ) {
     fun crashlytics(block: CrashlyticsExtension.() -> Unit) {
         block(crashlytics)
@@ -28,6 +43,38 @@ data class GoogleServicesExtension(
     fun crashlytics(closure: Closure<*>) {
         closure.delegate = crashlytics
         closure.call()
+    }
+
+    fun gitRepository(closure: Closure<*>) {
+        repository = GitRepositoryRule(name = repository.name, remote = "")
+        closure.delegate = repository
+        closure.call()
+    }
+
+    fun gitRepository(builder: GitRepositoryRule.() -> Unit) {
+        repository = GitRepositoryRule(name = repository.name, remote = "").apply(builder)
+    }
+
+    /**
+     * Configure an HTTP Archive for `tools_android`.
+     *
+     * @param closure closure called with default value set to
+     *     [TOOLS_ANDROID_REPOSITORY]
+     */
+    fun httpArchiveRepository(closure: Closure<*>) {
+        repository = TOOLS_ANDROID_REPOSITORY
+        closure.delegate = repository
+        closure.call()
+    }
+
+    /**
+     * Configure an HTTP Archive for `tools_android`.
+     *
+     * @param builder Builder called with default value of
+     *     [TOOLS_ANDROID_REPOSITORY]
+     */
+    fun httpArchiveRepository(builder: HttpArchiveRule.() -> Unit) {
+        repository = TOOLS_ANDROID_REPOSITORY.apply(builder)
     }
 }
 
