@@ -30,13 +30,13 @@ import com.grab.grazel.bazel.rules.androidNdkRepository
 import com.grab.grazel.bazel.rules.androidSdkRepository
 import com.grab.grazel.bazel.rules.androidToolsRepository
 import com.grab.grazel.bazel.rules.daggerWorkspaceRules
-import com.grab.grazel.bazel.rules.googleServicesWorkspaceDependencies
 import com.grab.grazel.bazel.rules.jvmRules
 import com.grab.grazel.bazel.rules.kotlinCompiler
 import com.grab.grazel.bazel.rules.kotlinRepository
 import com.grab.grazel.bazel.rules.loadBazelCommonArtifacts
 import com.grab.grazel.bazel.rules.loadDaggerArtifactsAndRepositories
 import com.grab.grazel.bazel.rules.registerKotlinToolchain
+import com.grab.grazel.bazel.rules.toolAndroidRepository
 import com.grab.grazel.bazel.rules.workspace
 import com.grab.grazel.bazel.starlark.StatementsBuilder
 import com.grab.grazel.bazel.starlark.add
@@ -188,9 +188,7 @@ internal class WorkspaceBuilder(
     }
 
 
-    /**
-     * Configure imports for Grab bazel common repository
-     */
+    /** Configure imports for Grab bazel common repository */
     private fun StatementsBuilder.setupBazelCommon() {
         val bazelCommonRepo = grazelExtension.rules.bazelCommon.repository
 
@@ -205,7 +203,7 @@ internal class WorkspaceBuilder(
 
     private fun StatementsBuilder.toolsAndroid() {
         if (gradleProjectInfo.hasGooglePlayServices) {
-            googleServicesWorkspaceDependencies()
+            toolAndroidRepository(grazelExtension.rules.googleServices.repository)
         }
     }
 
