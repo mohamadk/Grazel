@@ -142,15 +142,13 @@ android_ndk_repository(
     name = "androidndk",
 )
 
-TOOLS_ANDROID_COMMIT = "58d67fd54a3b7f5f1e6ddfa865442db23a60e1b6"
-
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
     name = "tools_android",
     sha256 = "a192553d52a42df306437a8166fc6b5ec043282ac4f72e96999ae845ece6812f",
-    strip_prefix = "tools_android-" + TOOLS_ANDROID_COMMIT,
-    url = "https://github.com/bazelbuild/tools_android/archive/%s.tar.gz" % TOOLS_ANDROID_COMMIT,
+    strip_prefix = "tools_android-58d67fd54a3b7f5f1e6ddfa865442db23a60e1b6",
+    url = "https://github.com/bazelbuild/tools_android/archive/58d67fd54a3b7f5f1e6ddfa865442db23a60e1b6.tar.gz",
 )
 
 load("@tools_android//tools/googleservices:defs.bzl", "google_services_workspace_dependencies")
