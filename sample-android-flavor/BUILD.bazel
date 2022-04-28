@@ -31,5 +31,6 @@ kt_db_android_library(
         "@maven//:androidx_constraintlayout_constraintlayout",
         "@maven//:androidx_constraintlayout_constraintlayout_core",
         "@maven//:androidx_core_core",
+        "@maven//:org_jacoco_org_jacoco_ant",
     ],
 )

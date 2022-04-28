@@ -20,6 +20,7 @@ kt_android_library(
     deps = [
         ":sample-android-lib-build-config",
         "//:parcelize",
+        "@maven//:org_jacoco_org_jacoco_ant",
     ],
 )
 
