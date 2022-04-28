@@ -60,6 +60,7 @@ kt_android_library(
         "//sample-kotlin-lib",
         "@maven//:androidx_appcompat_appcompat",
         "@maven//:androidx_constraintlayout_constraintlayout",
+        "@maven//:org_jacoco_org_jacoco_ant",
     ],
 )
 

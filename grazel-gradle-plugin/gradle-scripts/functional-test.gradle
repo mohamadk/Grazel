@@ -18,7 +18,7 @@ sourceSets {
     functionalTest {
         java.srcDir file("src/functionalTest/kotlin")
         resources.srcDir file("src/functionalTest/resources")
-        compileClasspath += sourceSets.main.output + configurations.testRuntime
+        compileClasspath += sourceSets.main.output + configurations.runtimeClasspath
         runtimeClasspath += output + compileClasspath
     }
 }

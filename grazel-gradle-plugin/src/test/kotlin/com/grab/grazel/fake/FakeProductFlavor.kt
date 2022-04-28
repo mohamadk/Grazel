@@ -20,7 +20,6 @@ import com.android.build.gradle.api.BaseVariant
 import com.android.builder.model.ApiVersion
 import com.android.builder.model.ClassField
 import com.android.builder.model.ProductFlavor
-import com.android.builder.model.SigningConfig
 import com.android.builder.model.VectorDrawablesOptions
 import com.grab.grazel.extension.VariantFilter
 import com.grab.grazel.gradle.AndroidVariantDataSource
@@ -80,8 +79,6 @@ class FakeProductFlavor(private val name: String) : ProductFlavor {
     override val resValues: Map<String, ClassField>
         get() = TODO("Not yet implemented")
     override val resourceConfigurations: Collection<String>
-        get() = TODO("Not yet implemented")
-    override val signingConfig: SigningConfig?
         get() = TODO("Not yet implemented")
     override val targetSdkVersion: ApiVersion?
         get() = TODO("Not yet implemented")
