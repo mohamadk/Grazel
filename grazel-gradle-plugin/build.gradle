@@ -1,3 +1,6 @@
+import org.gradle.api.internal.classpath.ModuleRegistry
+import org.gradle.api.internal.project.ProjectInternal
+
 /*
  * Copyright 2021 Grabtaxi Holdings PTE LTD (GRAB)
  *
@@ -88,16 +91,29 @@ dependencies {
     testImplementation "junit:junit:$jUnitVersion"
     testImplementation "com.android.tools.build:gradle:$agpVersion"
     testImplementation gradleTestKit()
+
+    /**
+     * In Gradle 6.7-rc-1 BuildEventsListenerRegistry service is not created in we need it in order
+     * to instantiate AGP. This creates a fake one and injects it
+     * https://issuetracker.google.com/issues/193859160
+     * https://github.com/gradle/gradle/issues/17783
+     */
+    def toolingApiBuildersJar = (project as ProjectInternal).services.get(ModuleRegistry.class)
+            .getModule("gradle-tooling-api-builders")
+            .classpath
+            .asFiles
+            .first()
+    testRuntimeOnly(files(toolingApiBuildersJar))
 }
 
 tasks.withType(JavaCompile).configureEach { task ->
-    task.sourceCompatibility = JavaVersion.VERSION_1_8
-    task.targetCompatibility = JavaVersion.VERSION_1_8
+    task.sourceCompatibility = JavaVersion.VERSION_11
+    task.targetCompatibility = JavaVersion.VERSION_11
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach { task ->
     task.kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
         freeCompilerArgs += "-Xopt-in=kotlin.ExperimentalStdlibApi"
     }
 }
@@ -116,4 +132,3 @@ afterEvaluate {
         dependsOn(tasks.named("publishReleasePublicationToSonatypeRepository"))
     }
 }
-

@@ -29,7 +29,6 @@ import com.android.build.gradle.tasks.RenderscriptCompile
 import com.android.builder.model.BuildType
 import com.android.builder.model.ClassField
 import com.android.builder.model.ProductFlavor
-import com.android.builder.model.SigningConfig
 import com.android.builder.model.SourceProvider
 import org.gradle.api.DomainObjectCollection
 import org.gradle.api.Task
@@ -256,6 +255,20 @@ class FakeVariant(
     override fun getCompileClasspath(key: Any?): FileCollection {
         TODO("Not yet implemented")
     }
+
+    override fun registerJavaGeneratingTask(
+        taskProvider: TaskProvider<out Task>?,
+        vararg sourceFolders: File?
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override fun registerJavaGeneratingTask(
+        taskProvider: TaskProvider<out Task>?,
+        sourceFolders: MutableCollection<File>?
+    ) {
+        TODO("Not yet implemented")
+    }
 }
 
 class FakeBuildType : BuildType {
@@ -294,8 +307,6 @@ class FakeBuildType : BuildType {
     override val renderscriptOptimLevel: Int
         get() = TODO("Not yet implemented")
     override val resValues: Map<String, ClassField>
-        get() = TODO("Not yet implemented")
-    override val signingConfig: SigningConfig?
         get() = TODO("Not yet implemented")
     override val testProguardFiles: Collection<File>
         get() = TODO("Not yet implemented")

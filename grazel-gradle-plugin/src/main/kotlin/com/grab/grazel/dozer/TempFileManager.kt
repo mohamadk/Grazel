@@ -17,7 +17,7 @@
 package com.grab.grazel.dozer
 
 import com.google.common.io.Files
-import org.apache.commons.io.FileUtils
+import org.gradle.internal.impldep.org.apache.commons.io.FileUtils
 import java.io.File
 
 

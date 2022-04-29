@@ -152,7 +152,7 @@ rules {
             abiJars = true
             multiplexWorkers = true
             languageVersion = "1.4"
-            jvmTarget = "1.8"
+            jvmTarget = "11"
         }
     }    
 }

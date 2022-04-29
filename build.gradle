@@ -57,19 +57,19 @@ allprojects {
 
     plugins.withType(com.android.build.gradle.BasePlugin).configureEach { plugin ->
         (project.extensions.getByName("android") as BaseExtension).compileOptions {
-            sourceCompatibility = JavaVersion.VERSION_1_8
-            targetCompatibility = JavaVersion.VERSION_1_8
+            sourceCompatibility = JavaVersion.VERSION_11
+            targetCompatibility = JavaVersion.VERSION_11
         }
     }
 
     tasks.withType(JavaCompile).configureEach { task ->
-        task.sourceCompatibility = JavaVersion.VERSION_1_8
-        task.targetCompatibility = JavaVersion.VERSION_1_8
+        task.sourceCompatibility = JavaVersion.VERSION_11
+        task.targetCompatibility = JavaVersion.VERSION_11
     }
 
     tasks.withType(KotlinJvmCompile).configureEach {
         kotlinOptions {
-            jvmTarget = "1.8"
+            jvmTarget = "11"
         }
     }
 }
@@ -150,7 +150,7 @@ grazel {
                 abiJars = true
                 multiplexWorkers = true
                 languageVersion = "1.4"
-                jvmTarget = "1.8"
+                jvmTarget = "11"
             }
         }
     }
