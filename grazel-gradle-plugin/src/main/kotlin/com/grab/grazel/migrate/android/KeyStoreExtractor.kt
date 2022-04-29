@@ -17,6 +17,7 @@
 package com.grab.grazel.migrate.android
 
 import com.android.build.gradle.api.BaseVariant
+import com.android.build.gradle.internal.api.ReadOnlyBuildType
 import com.grab.grazel.bazel.starlark.filegroup
 import com.grab.grazel.bazel.starlark.statements
 import com.grab.grazel.bazel.starlark.writeToFile
@@ -41,8 +42,8 @@ class DefaultKeyStoreExtractor @Inject constructor() : KeyStoreExtractor {
      * @param variant The android variant for which key store needs to be extracted
      * @return The bazel target string for the keystore
      */
-    override fun extract(rootProject: Project, variant: BaseVariant?): String? = variant
-        ?.buildType
+    override fun extract(rootProject: Project, variant: BaseVariant?): String? = (variant
+        ?.buildType as? ReadOnlyBuildType)
         ?.signingConfig
         ?.storeFile
         ?.let { storeFile ->
