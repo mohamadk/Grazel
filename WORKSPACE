@@ -105,30 +105,24 @@ load("@maven//:defs.bzl", "pinned_maven_install")
 
 pinned_maven_install()
 
-load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-git_repository(
+http_archive(
     name = "io_bazel_rules_kotlin",
-    commit = "eae21653baad4b403fee9e8a706c9d4fbd0c27c6",
-    remote = "https://github.com/bazelbuild/rules_kotlin.git",
+    sha256 = "f1a4053eae0ea381147f5056bb51e396c5c494c7f8d50d0dee4cc2f9d5c701b0",
+    url = "https://github.com/bazelbuild/rules_kotlin/releases/download/1.6.0-RC-1/rules_kotlin_release.tgz",
 )
-
-load("@io_bazel_rules_kotlin//kotlin:dependencies.bzl", "kt_download_local_dev_dependencies")
-
-kt_download_local_dev_dependencies()
 
 KOTLIN_VERSION = "1.4.21"
 
 KOTLINC_RELEASE_SHA = "46720991a716e90bfc0cf3f2c81b2bd735c14f4ea6a5064c488e04fd76e6b6c7"
 
-KOTLINC_RELEASE = {
-    "urls": [
-        "https://github.com/JetBrains/kotlin/releases/download/v{v}/kotlin-compiler-{v}.zip".format(v = KOTLIN_VERSION),
-    ],
-    "sha256": KOTLINC_RELEASE_SHA,
-}
+load("@io_bazel_rules_kotlin//kotlin:repositories.bzl", "kotlin_repositories", "kotlinc_version")
 
-load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kotlin_repositories")
+KOTLINC_RELEASE = kotlinc_version(
+    release = KOTLIN_VERSION,
+    sha256 = KOTLINC_RELEASE_SHA,
+)
 
 kotlin_repositories(compiler_release = KOTLINC_RELEASE)
 
