@@ -23,8 +23,8 @@ import groovy.lang.Closure
 
 internal const val RULE_KOTLIN_NAME = "io_bazel_rules_kotlin"
 internal const val RULES_KOTLIN_SHA =
-    "da0e6e1543fcc79e93d4d93c3333378f3bd5d29e82c1bc2518de0dbe048e6598"
-internal const val RULES_KOTLIN_VERSION = "legacy-1.4.0-rc3"
+    "12d22a3d9cbcf00f2e2d8f0683ba87d3823cb8c7f6837568dd7e48846e023307"
+internal const val RULES_KOTLIN_VERSION = "v1.5.0"
 
 /**
  * Options for Kotlin Compiler.
@@ -62,7 +62,7 @@ class KotlinToolChain(
 internal val KOTLIN_REPOSITORY = HttpArchiveRule(
     name = RULE_KOTLIN_NAME,
     sha256 = RULES_KOTLIN_SHA,
-    url = """https://github.com/bazelbuild/rules_kotlin/releases/download/%s/rules_kotlin_release.tgz % $RULES_KOTLIN_VERSION"""
+    url = """https://github.com/bazelbuild/rules_kotlin/releases/download/$RULES_KOTLIN_VERSION/rules_kotlin_release.tgz"""
 )
 
 data class KotlinCompiler(

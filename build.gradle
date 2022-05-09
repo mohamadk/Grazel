@@ -131,9 +131,9 @@ grazel {
             )
         }
         kotlin {
-            gitRepository {
-                commit = "eae21653baad4b403fee9e8a706c9d4fbd0c27c6"
-                remote = "https://github.com/bazelbuild/rules_kotlin.git"
+            httpArchiveRepository {
+                url = "https://github.com/bazelbuild/rules_kotlin/releases/download/1.6.0-RC-1/rules_kotlin_release.tgz"
+                sha256 = "f1a4053eae0ea381147f5056bb51e396c5c494c7f8d50d0dee4cc2f9d5c701b0"
             }
             compiler {
                 version = "1.4.20"
