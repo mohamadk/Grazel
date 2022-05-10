@@ -58,14 +58,18 @@ fun StatementsBuilder.kotlinCompiler(
     KOTLINC_RELEASE_SHA eq kotlinCompilerReleaseSha.quote()
     newLine()
 
-    KOTLINC_RELEASE eq obj {
-        "urls".quote() eq array(
-            """"https://github.com/JetBrains/kotlin/releases/download/v{v}/kotlin-compiler-{v}.zip".format(v = $KOTLIN_VERSION)"""
-        )
-        "sha256".quote() eq KOTLINC_RELEASE_SHA
-    }
+    load(
+        "@io_bazel_rules_kotlin//kotlin:repositories.bzl",
+        "kotlin_repositories",
+        "kotlinc_version"
+    )
 
-    load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kotlin_repositories")
+    KOTLINC_RELEASE eq """kotlinc_version(
+        release = $KOTLIN_VERSION,
+        sha256 = $KOTLINC_RELEASE_SHA
+    )
+    """.trimIndent()
+
     add("""kotlin_repositories(compiler_release = $KOTLINC_RELEASE)""")
 }
 
@@ -99,7 +103,7 @@ fun StatementsBuilder.rootKotlinSetup(
         val kotlinCTarget = "kt_kotlinc_options"
         val javaTarget = "kt_javac_options"
         load(
-            "@io_bazel_rules_kotlin//kotlin:kotlin.bzl",
+            "@io_bazel_rules_kotlin//kotlin:core.bzl",
             javaTarget,
             kotlinCTarget,
             "define_kt_toolchain"
@@ -138,7 +142,7 @@ fun StatementsBuilder.loadKtRules(
             "kt_db_android_library"
         )
         isAndroid -> load("@$GRAB_BAZEL_COMMON//tools/kotlin:android.bzl", "kt_android_library")
-        isJvm -> load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kt_jvm_library")
+        isJvm -> load("@io_bazel_rules_kotlin//kotlin:jvm.bzl", "kt_jvm_library")
     }
 }
 
