@@ -9,6 +9,7 @@ import org.gradle.api.PathValidation
 import org.gradle.api.Project
 import org.gradle.api.ProjectState
 import org.gradle.api.Task
+import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.dsl.ArtifactHandler
 import org.gradle.api.artifacts.dsl.DependencyHandler
@@ -45,6 +46,7 @@ import java.net.URI
 import java.util.concurrent.Callable
 
 class FakeProject(private val name: String) : Project {
+    var shadowConfigurations : List<Configuration> = emptyList()
 
     override fun toString(): String = name
 
@@ -364,9 +366,8 @@ class FakeProject(private val name: String) : Project {
         TODO("Not yet implemented")
     }
 
-    override fun getConfigurations(): ConfigurationContainer {
-        TODO("Not yet implemented")
-    }
+    override fun getConfigurations(): ConfigurationContainer =
+        FakeConfigurationContainer(shadowConfigurations)
 
     override fun configurations(configureClosure: Closure<*>) {
         TODO("Not yet implemented")
