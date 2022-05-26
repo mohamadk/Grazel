@@ -69,6 +69,7 @@ internal class DefaultConfigurationDataSource @Inject constructor(
             .filter { !it.name.contains("coreLibraryDesugaring") }
             .filter { !it.name.contains("_internal_aapt2_binary") }
             .filter { !it.name.contains("archives") }
+            .filter { !it.isDynamicConfiguration() } // Remove when Grazel support dynamic-feature plugin
             .filter {
                 when {
                     scopes.isEmpty() -> it.isNotTest() // If the scopes is empty, the build scope will be used by default.
@@ -100,4 +101,5 @@ internal class DefaultConfigurationDataSource @Inject constructor(
 
 internal fun Configuration.isUnitTest() = name.contains("UnitTest", true) || name.startsWith("test")
 internal fun Configuration.isAndroidTest() = name.contains("androidTest", true)
+internal fun Configuration.isDynamicConfiguration() = name.contains("ReverseMetadata", true)
 internal fun Configuration.isNotTest() = !name.contains("test", true)
