@@ -21,7 +21,8 @@ import org.gradle.api.specs.Spec
 import org.gradle.api.tasks.TaskDependency
 import java.io.File
 
-class FakeConfiguration : Configuration {
+class FakeConfiguration(private val name : String = "") : Configuration {
+
     override fun iterator(): MutableIterator<File> {
         TODO("Not yet implemented")
     }
@@ -106,9 +107,7 @@ class FakeConfiguration : Configuration {
         TODO("Not yet implemented")
     }
 
-    override fun getName(): String {
-        TODO("Not yet implemented")
-    }
+    override fun getName(): String = name
 
     override fun isVisible(): Boolean {
         TODO("Not yet implemented")

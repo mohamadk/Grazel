@@ -22,11 +22,14 @@ import com.grab.grazel.buildProject
 import com.grab.grazel.fake.FLAVOR1
 import com.grab.grazel.fake.FLAVOR2
 import com.grab.grazel.fake.FakeAndroidVariantDataSource
+import com.grab.grazel.fake.FakeConfiguration
+import com.grab.grazel.fake.FakeProject
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 
@@ -52,6 +55,24 @@ class DefaultConfigurationDataSourceTest : GrazelPluginTest() {
                     }
                 }
             }
+    }
+
+    @Test
+    fun `assert configurations filter out dynamic-feature configuration`() {
+        val dynamicFeatureConfigurationName = "debugReverseMetadataValues"
+        val configurationDataSource = createNoFlavorFilterDataSource()
+        val project = FakeProject("project").also {
+            it.shadowConfigurations = listOf(
+                FakeConfiguration("implementation"),
+                FakeConfiguration(dynamicFeatureConfigurationName),
+            )
+        }
+
+        val configurations = configurationDataSource.configurations(project).toList()
+        assertTrue(configurations.isNotEmpty())
+        configurations.forEach {
+            assertNotEquals(dynamicFeatureConfigurationName, it.name)
+        }
     }
 
     @Test
