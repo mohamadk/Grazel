@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Grabtaxi Holdings PTE LTD (GRAB)
+ * Copyright 2022 Grabtaxi Holdings PTE LTD (GRAB)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,27 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// TODO migrate to version catalogs
-ext {
-    groupId = "com.grab.grazel"
-    versionName = "0.4.0-alpha10"
 
-    kotlinVersion = "1.6.10"
-    agpVersion = "7.1.2"
+package com.grab.grazel.extension
 
-    jUnitVersion = "4.13.2"
-    truthVersion = "1.0"
+import groovy.lang.Closure
 
-    daggerVersion = "2.37"
+data class CommonToolchainExtension(
+    val buildifier: BuildifierExtension = BuildifierExtension()
+) {
+    fun buildifier(closure: Closure<*>) {
+        closure.delegate = buildifier
+        closure.call()
+    }
 
-    guavaVersion = "29.0-jre"
-    picnicVersion = "0.4.0"
-
-    fabricPluginVersion = "2.2.0"
-    googleServicesPluginVersion = "4.3.3"
-
-    nexusVersion = "1.1.0"
-    dokkaVersion = "1.4.32"
-
-    website = "https://grab.github.io/Grazel/"
+    fun buildifier(builder: BuildifierExtension.() -> Unit) {
+        builder(buildifier)
+    }
 }

@@ -103,8 +103,15 @@ grazel {
         }
         bazelCommon {
             gitRepository {
-                commit = "540432b688186b0b6f52d6c49d116bf2cef82f3d"
+                commit = "1d48088efeb6de455350192e10437abc2c2e0f7a"
                 remote = "https://github.com/grab/grab-bazel-common.git"
+            }
+            toolchains {
+                buildifier {
+                    releaseVersion = "5.1.0"
+                    supportedOs = ["linux", "darwin"]
+                    supportedArch = ["amd64", "arm64"]
+                }
             }
         }
         googleServices {
@@ -136,20 +143,17 @@ grazel {
                 sha256 = "f1a4053eae0ea381147f5056bb51e396c5c494c7f8d50d0dee4cc2f9d5c701b0"
             }
             compiler {
-                tag = "1.4.20"
-                sha = "46720991a716e90bfc0cf3f2c81b2bd735c14f4ea6a5064c488e04fd76e6b6c7"
-            }
-            kotlinC {
-                useIr = false
+                tag = "1.6.10"
+                sha = "432267996d0d6b4b17ca8de0f878e44d4a099b7e9f1587a98edc4d27e76c215a"
             }
             toolchain {
                 enabled = true
-                apiVersion = "1.4"
+                apiVersion = "1.6"
                 reportUnusedDeps = "off"
                 strictKotlinDeps = "off"
                 abiJars = true
                 multiplexWorkers = true
-                languageVersion = "1.4"
+                languageVersion = "1.6"
                 jvmTarget = "11"
             }
         }

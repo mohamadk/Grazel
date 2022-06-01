@@ -1,0 +1,7 @@
+```mermaid
+flowchart TD
+  A(Run migrateToBazel) --> B(Merge supported buildscript changes)
+  B --> H(Validate with Hybrid build)
+  H --> C(Implement Grazel support / Widen migration criteria)
+  C --> A
+```
