@@ -19,18 +19,18 @@ package com.grab.grazel.bazel.rules
 import com.grab.grazel.bazel.starlark.StatementsBuilder
 import com.grab.grazel.bazel.starlark.load
 import com.grab.grazel.bazel.starlark.quote
+import com.grab.grazel.extension.DaggerExtension
 
 internal const val DAGGER_GROUP = "com.google.dagger"
 
 fun StatementsBuilder.daggerWorkspaceRules(
-    daggerTag: String = "2.28.1",
-    daggerSha: String = "9e69ab2f9a47e0f74e71fe49098bea908c528aa02fa0c5995334447b310d0cdd"
+    daggerExt: DaggerExtension
 ) {
     val tag = "DAGGER_TAG"
     val sha256 = "DAGGER_SHA"
 
-    tag eq daggerTag.quote()
-    sha256 eq daggerSha.quote()
+    tag eq daggerExt.tag.quote()
+    sha256 eq daggerExt.sha.quote()
     httpArchive(
         name = "dagger",
         stripPrefix = """"dagger-dagger-%s" % $tag""",
