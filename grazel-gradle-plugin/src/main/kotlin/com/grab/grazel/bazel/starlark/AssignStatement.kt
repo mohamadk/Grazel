@@ -134,6 +134,32 @@ interface AssignmentBuilder {
     fun List<*>.notEmpty(block: () -> Unit) {
         if (isNotEmpty()) block()
     }
+
+    /**
+     * Calls the specified function [block] with `this` value as its argument and returns its result
+     * if this nullable list is either null or empty.
+     * Otherwise, the specified function [default] is called and returns its result
+     */
+    fun <T, R> List<T>?.notNullOrEmpty(default: () -> R, block: (List<T>) -> R): R {
+        return if (!isNullOrEmpty()) {
+            block(this)
+        } else {
+            default()
+        }
+    }
+
+    /**
+     * Calls the specified function [block] with `this` value as its argument and returns its result
+     * if this nullable string is either null or empty or consists solely of whitespace characters.
+     * Otherwise, the specified function [default] is called and returns its result
+     */
+    fun <R> String?.notNullOrBlank(default: () -> R, block: (String) -> R): R {
+        return if (!isNullOrBlank()) {
+            block(this)
+        } else {
+            default()
+        }
+    }
 }
 
 class DefaultAssignmentBuilder(private val assignmentOp: AssignmentOp = EQUAL) : AssignmentBuilder {

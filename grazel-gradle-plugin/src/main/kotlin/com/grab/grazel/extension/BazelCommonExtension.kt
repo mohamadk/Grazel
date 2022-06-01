@@ -21,7 +21,8 @@ import com.grab.grazel.bazel.rules.GitRepositoryRule
 import groovy.lang.Closure
 
 class BazelCommonExtension(
-    var repository: GitRepositoryRule = GitRepositoryRule(name = GRAB_BAZEL_COMMON)
+    var repository: GitRepositoryRule = GitRepositoryRule(name = GRAB_BAZEL_COMMON),
+    var toolchains: CommonToolchainExtension = CommonToolchainExtension()
 ) {
     fun gitRepository(closure: Closure<*>) {
         closure.delegate = repository
@@ -30,5 +31,14 @@ class BazelCommonExtension(
 
     fun gitRepository(builder: GitRepositoryRule.() -> Unit) {
         builder(repository)
+    }
+
+    fun toolchains(closure: Closure<*>) {
+        closure.delegate = toolchains
+        closure.call()
+    }
+
+    fun toolchains(builder: CommonToolchainExtension.() -> Unit) {
+        builder(toolchains)
     }
 }

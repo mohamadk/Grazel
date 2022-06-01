@@ -29,7 +29,7 @@ grazel {
     rules {
         bazelCommon {
             gitRepository {
-                commit = "bdc80483256fca3e652413dd7096eb4307ae27cc"
+                commit = "1d48088efeb6de455350192e10437abc2c2e0f7a"
                 remote = "https://github.com/grab/grab-bazel-common.git"
             }
         }
@@ -39,8 +39,8 @@ grazel {
                 remote = "https://github.com/bazelbuild/rules_kotlin.git"
             }
             compiler {
-                tag = "1.4.20"
-                sha = "46720991a716e90bfc0cf3f2c81b2bd735c14f4ea6a5064c488e04fd76e6b6c7"
+                tag = "1.6.10"
+                sha = "432267996d0d6b4b17ca8de0f878e44d4a099b7e9f1587a98edc4d27e76c215a"
             }
             toolchain {
                 enabled = true
