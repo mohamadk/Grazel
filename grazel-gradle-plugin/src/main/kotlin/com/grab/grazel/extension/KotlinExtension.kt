@@ -32,7 +32,7 @@ internal const val RULES_KOTLIN_VERSION = "v1.5.0"
  * @see [https://bazelbuild.github.io/rules_kotlin/kotlin#kt_kotlinc_options]
  */
 data class KotlinCOptions(
-    var useIr: Boolean = false
+    var useIr: Boolean? = null
 )
 
 /**
@@ -66,7 +66,7 @@ internal val KOTLIN_REPOSITORY = HttpArchiveRule(
 )
 
 data class KotlinCompiler(
-    var version: String = "1.4.21",
+    var tag: String = "1.4.20",
     var sha: String = "46720991a716e90bfc0cf3f2c81b2bd735c14f4ea6a5064c488e04fd76e6b6c7"
 )
 

@@ -119,7 +119,7 @@ internal class WorkspaceBuilder(
         val externalRepositories = mutableListOf<String>()
 
         if (hasDagger) {
-            daggerWorkspaceRules()
+            daggerWorkspaceRules(grazelExtension.rules.dagger)
             loadDaggerArtifactsAndRepositories()
             // TODO Remove dagger rules and build generic annotation processor config
             externalArtifacts += DAGGER_ARTIFACTS
@@ -245,7 +245,7 @@ internal class WorkspaceBuilder(
     private fun StatementsBuilder.buildKotlinRules() {
         val kotlin = grazelExtension.rules.kotlin
         kotlinRepository(repositoryRule = kotlin.repository)
-        kotlinCompiler(kotlin.compiler.version, kotlin.compiler.sha)
+        kotlinCompiler(kotlin.compiler.tag, kotlin.compiler.sha)
         registerKotlinToolchain(toolchain = kotlin.toolchain)
     }
 }
