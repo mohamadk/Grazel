@@ -39,7 +39,7 @@ grazel {
                 remote = "https://github.com/bazelbuild/rules_kotlin.git"
             }
             compiler {
-                version = "1.4.20"
+                tag = "1.4.20"
                 sha = "46720991a716e90bfc0cf3f2c81b2bd735c14f4ea6a5064c488e04fd76e6b6c7"
             }
             kotlinC {

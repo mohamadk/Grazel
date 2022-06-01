@@ -15,9 +15,9 @@ android_tools(
     remote = "https://github.com/grab/grab-bazel-common.git",
 )
 
-DAGGER_TAG = "2.28.1"
+DAGGER_TAG = "2.37"
 
-DAGGER_SHA = "9e69ab2f9a47e0f74e71fe49098bea908c528aa02fa0c5995334447b310d0cdd"
+DAGGER_SHA = "0f001ed38ed4ebc6f5c501c20bd35a68daf01c8dbd7541b33b7591a84fcc7b1c"
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
@@ -113,7 +113,7 @@ http_archive(
     url = "https://github.com/bazelbuild/rules_kotlin/releases/download/1.6.0-RC-1/rules_kotlin_release.tgz",
 )
 
-KOTLIN_VERSION = "1.4.21"
+KOTLIN_VERSION = "1.4.20"
 
 KOTLINC_RELEASE_SHA = "46720991a716e90bfc0cf3f2c81b2bd735c14f4ea6a5064c488e04fd76e6b6c7"
 

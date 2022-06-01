@@ -112,7 +112,9 @@ fun StatementsBuilder.rootKotlinSetup(
         )
         rule(kotlinCTarget) {
             "name" eq kotlinCTarget.quote()
-            "x_use_ir" eq kotlinCOptions.useIr.toString().capitalize()
+            if (kotlinCOptions.useIr != null) {
+                "x_use_ir" eq kotlinCOptions.useIr.toString().capitalize()
+            }
         }
         rule(javaTarget) {
             "name" eq javaTarget.quote()
