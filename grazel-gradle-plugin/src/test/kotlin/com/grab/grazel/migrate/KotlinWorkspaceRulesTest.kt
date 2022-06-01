@@ -27,7 +27,6 @@ import com.grab.grazel.gradle.KOTLIN_ANDROID_PLUGIN
 import com.grab.grazel.migrate.internal.WorkspaceBuilder
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
-import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.repositories
 import org.junit.Before
 import org.junit.Test
@@ -55,16 +54,18 @@ class KotlinWorkspaceRulesTest {
                 mavenCentral()
                 google()
             }
-            dependencies {
-                add("implementation", "com.google.dagger:dagger:2.33")
-            }
         }
     }
 
     @Test
     fun `assert default rule_kotlin repository and compiler in WORKSPACE`() {
+        val kotlinTag = "1.6.21"
+        val kotlinSha = "somesha256"
         rootProject.configure<GrazelExtension> {
-            // Default setup
+            rules.kotlin.compiler {
+                tag = kotlinTag
+                sha = kotlinSha
+            }
         }
         val workspaceStatements = workspaceFactory
             .create(listOf(rootProject, subProject))
@@ -78,11 +79,10 @@ class KotlinWorkspaceRulesTest {
             )
 
             // Compiler
-            val kotlinCompiler = KotlinCompiler()
             contains(
                 """
-                    KOTLIN_VERSION = "${kotlinCompiler.version}"
-                    KOTLINC_RELEASE_SHA = "${kotlinCompiler.sha}"
+                    KOTLIN_VERSION = "$kotlinTag"
+                    KOTLINC_RELEASE_SHA = "$kotlinSha"
                     """.trimIndent()
             )
             contains("kotlin_repositories(compiler_release = KOTLINC_RELEASE)")

@@ -76,6 +76,9 @@ class KotlinRootBazelRulesTest {
         rootProject.configure<GrazelExtension> {
             rules {
                 kotlin {
+                    kotlinC {
+                        useIr = false
+                    }
                     toolchain {
                         enabled = true
                         abiJars = true

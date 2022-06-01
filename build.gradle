@@ -136,7 +136,7 @@ grazel {
                 sha256 = "f1a4053eae0ea381147f5056bb51e396c5c494c7f8d50d0dee4cc2f9d5c701b0"
             }
             compiler {
-                version = "1.4.20"
+                tag = "1.4.20"
                 sha = "46720991a716e90bfc0cf3f2c81b2bd735c14f4ea6a5064c488e04fd76e6b6c7"
             }
             kotlinC {
@@ -152,6 +152,10 @@ grazel {
                 languageVersion = "1.4"
                 jvmTarget = "11"
             }
+        }
+        dagger {
+            tag = "2.37"
+            sha = "0f001ed38ed4ebc6f5c501c20bd35a68daf01c8dbd7541b33b7591a84fcc7b1c"
         }
     }
 }
