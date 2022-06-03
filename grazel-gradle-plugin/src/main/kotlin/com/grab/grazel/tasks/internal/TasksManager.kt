@@ -62,9 +62,15 @@ internal class TaskManager @Inject constructor(
             grazelComponent
         )
 
+        val generateBuildifierScriptTask = GenerateBuildifierScriptTask.register(
+            rootProject
+        ) {
+            dependsOn(rootGenerateBazelScriptsTasks)
+        }
+
         // Root formatting task depends on sub project formatting and root generation task
         val formatBazelFilesTask = FormatBazelFileTask.register(rootProject) {
-            dependsOn(rootGenerateBazelScriptsTasks)
+            dependsOn(generateBuildifierScriptTask)
         }
 
         // Post script generate task must run after scripts are generated
@@ -83,7 +89,7 @@ internal class TaskManager @Inject constructor(
 
             // Project level Bazel formatting depends on generation tasks
             FormatBazelFileTask.register(project) {
-                dependsOn(generateBazelScriptsTasks)
+                dependsOn(generateBazelScriptsTasks, generateBuildifierScriptTask)
             }
         }
 

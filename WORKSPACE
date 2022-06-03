@@ -4,16 +4,32 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
 git_repository(
     name = "grab_bazel_common",
-    commit = "540432b688186b0b6f52d6c49d116bf2cef82f3d",
+    commit = "1d48088efeb6de455350192e10437abc2c2e0f7a",
     remote = "https://github.com/grab/grab-bazel-common.git",
 )
 
 load("@grab_bazel_common//:workspace_defs.bzl", "android_tools")
 
 android_tools(
-    commit = "540432b688186b0b6f52d6c49d116bf2cef82f3d",
+    commit = "1d48088efeb6de455350192e10437abc2c2e0f7a",
     remote = "https://github.com/grab/grab-bazel-common.git",
 )
+
+load("@grab_bazel_common//toolchains:toolchains.bzl", "buildifier_version", "register_common_toolchains")
+
+BUILDIFIER_RELEASE = buildifier_version(
+    supported_arch = [
+        "amd64",
+        "arm64",
+    ],
+    supported_os = [
+        "linux",
+        "darwin",
+    ],
+    version = "5.1.0",
+)
+
+register_common_toolchains(buildifier = BUILDIFIER_RELEASE)
 
 DAGGER_TAG = "2.37"
 
@@ -48,13 +64,13 @@ maven_install(
         "androidx.appcompat:appcompat:1.3.1",
         "androidx.constraintlayout:constraintlayout-core:1.0.1",
         maven.artifact(
-            group = "androidx.constraintlayout",
             artifact = "constraintlayout",
-            version = "1.1.2",
             exclusions = [
                 "androidx.appcompat:appcompat",
                 "androidx.core:core",
             ],
+            group = "androidx.constraintlayout",
+            version = "1.1.2",
         ),
         "androidx.core:core:1.5.0",
         "androidx.databinding:databinding-adapters:3.4.2",
@@ -63,8 +79,7 @@ maven_install(
         "androidx.databinding:databinding-runtime:3.4.2",
         "junit:junit:4.13.2",
         "org.jacoco:org.jacoco.ant:0.8.3",
-        "org.jetbrains.kotlin:kotlin-annotation-processing-gradle:1.4.32",
-        "org.jetbrains.kotlin:kotlin-parcelize-runtime:1.4.32",
+        "org.jetbrains.kotlin:kotlin-annotation-processing-gradle:1.6.10",
         "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4.32",
         "org.jetbrains.kotlin:kotlin-stdlib:1.4.32",
     ],
@@ -84,7 +99,6 @@ maven_install(
         "junit:junit",
         "org.jacoco:org.jacoco.ant",
         "org.jetbrains.kotlin:kotlin-annotation-processing-gradle",
-        "org.jetbrains.kotlin:kotlin-parcelize-runtime",
         "org.jetbrains.kotlin:kotlin-stdlib",
         "org.jetbrains.kotlin:kotlin-stdlib-jdk8",
     ],
@@ -113,9 +127,9 @@ http_archive(
     url = "https://github.com/bazelbuild/rules_kotlin/releases/download/1.6.0-RC-1/rules_kotlin_release.tgz",
 )
 
-KOTLIN_VERSION = "1.4.20"
+KOTLIN_VERSION = "1.6.10"
 
-KOTLINC_RELEASE_SHA = "46720991a716e90bfc0cf3f2c81b2bd735c14f4ea6a5064c488e04fd76e6b6c7"
+KOTLINC_RELEASE_SHA = "432267996d0d6b4b17ca8de0f878e44d4a099b7e9f1587a98edc4d27e76c215a"
 
 load("@io_bazel_rules_kotlin//kotlin:repositories.bzl", "kotlin_repositories", "kotlinc_version")
 

@@ -103,7 +103,6 @@ and feature development was causing lot of graph changes.
 
 Migration workflow with Grazel could look like below.
 
-<img src="../images/migration_workflow.png" width="100%">
+[![](https://mermaid.ink/img/pako:eNo1jz1vwkAMhv-K5SlIoO4ZkAhUTYcuFLVLliNnEov7iByfEEX8914islny8z6v_cA2WsISLy7e2t6IwunQBIBdcUwBPHdilE6xMn_kVrDZbKEqvkg6gjENQxQlC-fEzo6t8KCQHaGjcTU5qpmvix_j2GYN3Fh7qO9n4VdoxuoZ2xeffnDkKSh8yFS3NMAb_LKl5RqOAXKXkrCZ8_s5v8M1ehJv2OZ3HtOiQe2zsMEyj9bItcEmPDOXhumcd8saBcuLcSOt0SSN3_fQYqmSaIEObHKpf1HPf3ioZjc)](https://mermaid-js.github.io/mermaid-live-editor/edit#pako:eNo1jz1vwkAMhv-K5SlIoO4ZkAhUTYcuFLVLliNnEov7iByfEEX8914islny8z6v_cA2WsISLy7e2t6IwunQBIBdcUwBPHdilE6xMn_kVrDZbKEqvkg6gjENQxQlC-fEzo6t8KCQHaGjcTU5qpmvix_j2GYN3Fh7qO9n4VdoxuoZ2xeffnDkKSh8yFS3NMAb_LKl5RqOAXKXkrCZ8_s5v8M1ehJv2OZ3HtOiQe2zsMEyj9bItcEmPDOXhumcd8saBcuLcSOt0SSN3_fQYqmSaIEObHKpf1HPf3ioZjc)
 
 This way 100% compatible build can be acheived while having defined results along the way.
-

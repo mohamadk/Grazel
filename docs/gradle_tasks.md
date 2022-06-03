@@ -24,6 +24,11 @@ not, it renames `BUILD.bazel` to `BUILD.bazelignore` when module becomes unmigra
 
 Attached to root project, this task generates `BUILD.bazel` and `WORKPSACE` files.
 
+### generateBuildifierScript
+
+Depends on `generateRootBazelScripts` and responsible for downloading the 
+appropriate `buildifier` binary that is used for formatting the bazel scripts.
+
 ### formatBazelScripts
 
 Depends on `generateBazelScripts` and responsible for formatting the generated file
@@ -40,7 +45,4 @@ to work and Grazel may run any cleanup or post migrate Bazel commands as part of
 The task graph allows project's migration tasks to run in parallel to increase `migrateToBazel`
 performance.
 
-<img src="../images/task_graph.png" width="100%">
-
-
-
+[![](https://mermaid.ink/img/pako:eNp1kc1ugzAQhF8F-eRKyQtwqMRfKNcSqRculr0kLj-LjFGURnn3mjXUh6i3-WbG2Ls8mEQFLGZtjzd5FcZG57wZoyjhFxjBCAup-IG-lkZPdn5bo_Qv-kS0L3HGjbPjFs0gXtOcb8Gie0Up2cVmf6Hp6klIIPfEJ4PfIP_9WsknnK13yu1RZzF3FH7wQV_IwXBRFeZaX6BbDcafdzGdio7H9ygLsvR-RpAHWQR58pWSIFmBRiWsdiwCusl22GWySlo8YeprlQd2YAO4BWjl_tSDmsxeYYCGxU4qYbqGNePT9ZZJudkKpS0aFrein-HAxGKxvo-SxdYssJdyLdx6hq31_AUP1Kg9)](https://mermaid-js.github.io/mermaid-live-editor/edit#pako:eNp1kc1ugzAQhF8F-eRKyQtwqMRfKNcSqRculr0kLj-LjFGURnn3mjXUh6i3-WbG2Ls8mEQFLGZtjzd5FcZG57wZoyjhFxjBCAup-IG-lkZPdn5bo_Qv-kS0L3HGjbPjFs0gXtOcb8Gie0Up2cVmf6Hp6klIIPfEJ4PfIP_9WsknnK13yu1RZzF3FH7wQV_IwXBRFeZaX6BbDcafdzGdio7H9ygLsvR-RpAHWQR58pWSIFmBRiWsdiwCusl22GWySlo8YeprlQd2YAO4BWjl_tSDmsxeYYCGxU4qYbqGNePT9ZZJudkKpS0aFrein-HAxGKxvo-SxdYssJdyLdx6hq31_AUP1Kg9)

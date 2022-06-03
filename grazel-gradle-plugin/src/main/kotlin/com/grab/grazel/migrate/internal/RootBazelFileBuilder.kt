@@ -18,6 +18,7 @@ package com.grab.grazel.migrate.internal
 
 import com.grab.grazel.GrazelExtension
 import com.grab.grazel.bazel.rules.androidExtensionsRules
+import com.grab.grazel.bazel.rules.configureCommonToolchains
 import com.grab.grazel.bazel.rules.daggerBuildRules
 import com.grab.grazel.bazel.rules.rootKotlinSetup
 import com.grab.grazel.bazel.starlark.Statement
@@ -36,6 +37,10 @@ internal class RootBazelFileBuilder @Inject constructor(
         setupKotlin()
         if (gradleProjectInfo.hasDagger) daggerBuildRules()
         if (gradleProjectInfo.hasAndroidExtension) androidExtensionsRules()
+        configureCommonToolchains(
+            bazelCommonRepoName = grazelExtension.rules.bazelCommon.repository.name,
+            toolchains = grazelExtension.rules.bazelCommon.toolchains
+        )
     }
 
     private fun StatementsBuilder.setupKotlin() {

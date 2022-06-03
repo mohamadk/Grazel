@@ -35,6 +35,7 @@ import com.grab.grazel.bazel.rules.kotlinCompiler
 import com.grab.grazel.bazel.rules.kotlinRepository
 import com.grab.grazel.bazel.rules.loadBazelCommonArtifacts
 import com.grab.grazel.bazel.rules.loadDaggerArtifactsAndRepositories
+import com.grab.grazel.bazel.rules.registerCommonToolchains
 import com.grab.grazel.bazel.rules.registerKotlinToolchain
 import com.grab.grazel.bazel.rules.toolAndroidRepository
 import com.grab.grazel.bazel.rules.workspace
@@ -190,7 +191,8 @@ internal class WorkspaceBuilder(
 
     /** Configure imports for Grab bazel common repository */
     private fun StatementsBuilder.setupBazelCommon() {
-        val bazelCommonRepo = grazelExtension.rules.bazelCommon.repository
+        val bazelCommon = grazelExtension.rules.bazelCommon
+        val bazelCommonRepo = bazelCommon.repository
 
         add(bazelCommonRepo)
         bazelCommonRepo.remote?.run {
@@ -199,6 +201,12 @@ internal class WorkspaceBuilder(
                 remote = this
             )
         }
+
+        val toolchains = bazelCommon.toolchains
+        registerCommonToolchains(
+            bazelCommonRepoName = bazelCommon.repository.name,
+            toolchains = toolchains,
+        )
     }
 
     private fun StatementsBuilder.toolsAndroid() {
