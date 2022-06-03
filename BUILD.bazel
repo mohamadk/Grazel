@@ -2,7 +2,6 @@ load("@io_bazel_rules_kotlin//kotlin:core.bzl", "define_kt_toolchain", "kt_javac
 
 kt_kotlinc_options(
     name = "kt_kotlinc_options",
-    x_use_ir = False,
 )
 
 kt_javac_options(
@@ -11,7 +10,7 @@ kt_javac_options(
 
 define_kt_toolchain(
     name = "kotlin_toolchain",
-    api_version = "1.4",
+    api_version = "1.6",
     experimental_multiplex_workers = True,
     experimental_report_unused_deps = "off",
     experimental_strict_kotlin_deps = "off",
@@ -19,7 +18,7 @@ define_kt_toolchain(
     javac_options = "//:kt_javac_options",
     jvm_target = "11",
     kotlinc_options = "//:kt_kotlinc_options",
-    language_version = "1.4",
+    language_version = "1.6",
 )
 
 load("@dagger//:workspace_defs.bzl", "dagger_rules")
@@ -29,3 +28,7 @@ dagger_rules()
 load("@grab_bazel_common//tools/parcelize:parcelize.bzl", "parcelize_rules")
 
 parcelize_rules()
+
+load("@grab_bazel_common//toolchains:toolchains.bzl", "configure_common_toolchains")
+
+configure_common_toolchains()

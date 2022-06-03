@@ -21,6 +21,7 @@ import com.grab.grazel.util.WORKSPACE
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskProvider
@@ -38,6 +39,9 @@ abstract class FormatBazelFileTask : DefaultTask() {
     @get:OutputFile
     var bazelFile: File = File(project.projectDir, BUILD_BAZEL)
 
+    @InputFile
+    val buildifierScript: File = File(project.rootProject.buildDir, "buildifier")
+
     init {
         outputs.upToDateWhen { false } // This task is supposed to run always until we figure out up-to-date checks
     }
@@ -48,7 +52,10 @@ abstract class FormatBazelFileTask : DefaultTask() {
     fun action() {
         if (bazelFile.exists()) {
             execOperations.exec {
-                commandLine = listOf("buildifier", bazelFile.absolutePath)
+                commandLine = listOf(
+                    buildifierScript.path,
+                    bazelFile.absolutePath
+                )
             }
         }
     }
