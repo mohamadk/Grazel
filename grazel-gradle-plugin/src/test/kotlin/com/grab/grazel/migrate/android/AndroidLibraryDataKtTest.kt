@@ -83,8 +83,8 @@ class AndroidLibraryDataKtTest : GrazelPluginTest() {
   target = "target",
   dir_name = "res-debug",
   resource_files = glob([
-    "src/main/res-debug/values/strings.xml", 
-])"""
+    "src/main/res-debug/values/strings.xml",
+  ])"""
             )
         }
 
@@ -95,8 +95,7 @@ class AndroidLibraryDataKtTest : GrazelPluginTest() {
   name = "target-res-value",
   strings = {
     "value" : "hello",
-  }
-)"""
+  }"""
                 )
         }
     }
