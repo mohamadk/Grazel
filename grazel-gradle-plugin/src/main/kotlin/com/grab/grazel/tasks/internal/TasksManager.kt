@@ -47,13 +47,17 @@ internal class TaskManager @Inject constructor(
      * A <-- B means B depends on A
      *
      * * Root Scripts generation <-- Project level generation
-     * * Root Scripts generation <-- Root formatting
+     * * Root Scripts generation <-- Buildifier Script generation
      * * Project level generation <-- Project level formatting
      * * Project level generation <-- Post script generate task
+     * * Buildifier Script generation <-- Root formatting
+     * * Buildifier Script generation <-- Project level formatting
      * * Root formatting <-- Formatting
      * * Project level formatting <-- Formatting
      * * Formatting <-- Migrate To Bazel
      * * Post script generate task <-- Migrate To Bazel
+     *
+     * See [Task Graph](https://grab.github.io/Grazel/gradle_tasks/#task-graph)
      */
     fun configTasks() {
         // Root bazel file generation task that should run at the start of migration
@@ -68,9 +72,14 @@ internal class TaskManager @Inject constructor(
             dependsOn(rootGenerateBazelScriptsTasks)
         }
 
+        val buildifierScriptProvider = generateBuildifierScriptTask.flatMap { it.buildifierScript }
+
         // Root formatting task depends on sub project formatting and root generation task
-        val formatBazelFilesTask = FormatBazelFileTask.register(rootProject) {
-            dependsOn(generateBuildifierScriptTask)
+        val formatBazelFilesTask = FormatBazelFileTask.register(
+            project = rootProject,
+            buildifierScriptProvider = buildifierScriptProvider,
+        ) {
+            dependsOn(rootGenerateBazelScriptsTasks)
         }
 
         // Post script generate task must run after scripts are generated
@@ -88,8 +97,11 @@ internal class TaskManager @Inject constructor(
             postScriptGenerateTask.dependsOn(generateBazelScriptsTasks)
 
             // Project level Bazel formatting depends on generation tasks
-            FormatBazelFileTask.register(project) {
-                dependsOn(generateBazelScriptsTasks, generateBuildifierScriptTask)
+            FormatBazelFileTask.register(
+                project = project,
+                buildifierScriptProvider = buildifierScriptProvider,
+            ) {
+                dependsOn(generateBazelScriptsTasks)
             }
         }
 
