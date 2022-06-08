@@ -215,12 +215,13 @@ internal const val DATABINDING_GROUP = "androidx.databinding"
 internal const val ANDROIDX_GROUP = "androidx.annotation"
 internal const val ANNOTATION_ARTIFACT = "annotation"
 internal val DATABINDING_ARTIFACTS by lazy {
-    val version = "3.4.2"
+    val version = "7.1.2" // TODO(arun) Infer this from AGP
     listOf(
         MavenArtifact(DATABINDING_GROUP, "databinding-adapters", version),
         MavenArtifact(DATABINDING_GROUP, "databinding-compiler", version),
         MavenArtifact(DATABINDING_GROUP, "databinding-common", version),
         MavenArtifact(DATABINDING_GROUP, "databinding-runtime", version),
+        MavenArtifact(DATABINDING_GROUP, "viewbinding", version),
         MavenArtifact(ANDROIDX_GROUP, ANNOTATION_ARTIFACT, "1.1.0")
     )
 }
