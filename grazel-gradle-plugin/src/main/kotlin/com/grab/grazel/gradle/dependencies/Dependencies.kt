@@ -25,9 +25,6 @@ import com.grab.grazel.gradle.ConfigurationScope
 import com.grab.grazel.gradle.RepositoryDataSource
 import com.grab.grazel.gradle.configurationScopes
 import com.grab.grazel.util.GradleProvider
-import dagger.Binds
-import dagger.Module
-import dagger.Provides
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.Dependency
@@ -36,29 +33,9 @@ import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.artifacts.ResolvedDependency
 import org.gradle.api.internal.artifacts.DefaultResolvedDependency
 import org.gradle.api.internal.artifacts.result.ResolvedComponentResultInternal
+import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
-
-@Module(includes = [DependenciesBinder::class])
-internal object DependenciesModule {
-
-    @Provides
-    @Singleton
-    fun GrazelExtension.provideArtifactsConfig(): ArtifactsConfig = toArtifactsConfig()
-
-    @Singleton
-    @Provides
-    fun dependencyResolutionCacheService(
-        @RootProject rootProject: Project
-    ): GradleProvider<@JvmSuppressWildcards DefaultDependencyResolutionService> =
-        DefaultDependencyResolutionService.register(rootProject)
-}
-
-@Module
-internal interface DependenciesBinder {
-    @Binds
-    fun DefaultDependenciesDataSource.dependenciesDataSource(): DependenciesDataSource
-}
 
 /**
  * TODO To remove this once test rules support is added
@@ -102,11 +79,6 @@ internal data class ArtifactsConfig(
     val ignoredList: List<String> = emptyList()
 )
 
-private fun GrazelExtension.toArtifactsConfig() = ArtifactsConfig(
-    excludedList = rules.mavenInstall.excludeArtifacts.get(),
-    ignoredList = dependencies.ignoreArtifacts.get()
-)
-
 internal interface DependenciesDataSource {
     /**
      * Return the project's maven dependencies before the resolution strategy and any other custom substitution by Gradle
@@ -121,7 +93,6 @@ internal interface DependenciesDataSource {
         project: Project,
         vararg scopes: ConfigurationScope
     ): Sequence<Pair<Configuration, ProjectDependency>>
-
 
     /**
      * Returns the resolved artifacts dependencies for the given projects in the fully qualified Maven format.
@@ -149,6 +120,19 @@ internal interface DependenciesDataSource {
      * @param project the project to check against.
      */
     fun hasIgnoredArtifacts(project: Project): Boolean
+
+    /**
+     * Returns map of [MavenArtifact] and the corresponding artifact file (aar or jar). Guarantees the
+     * returned file is downloaded and available on disk
+     *
+     * @param rootProject The root project instance
+     * @param fileExtension The file extension to look for. Use this to reduce the overall number of
+     * values returned
+     */
+    fun dependencyArtifactMap(
+        rootProject: Project,
+        fileExtension: String? = null
+    ): Map<MavenArtifact, File>
 }
 
 @Singleton
@@ -321,6 +305,36 @@ internal class DefaultDependenciesDataSource @Inject constructor(
         .filter { it.second is ProjectDependency }
         .map { it.first to it.second as ProjectDependency }
 
+    override fun dependencyArtifactMap(
+        rootProject: Project,
+        fileExtension: String?
+    ): Map<MavenArtifact, File> {
+        val results = mutableMapOf<MavenArtifact, File>()
+
+        fun add(defaultResolvedDependency: DefaultResolvedDependency) {
+            defaultResolvedDependency.moduleArtifacts
+                .firstOrNull()
+                ?.file
+                ?.let { file ->
+                    if (fileExtension == null || file.extension == fileExtension) {
+                        results.getOrPut(defaultResolvedDependency.toMavenArtifact()) { file }
+                    }
+                }
+        }
+        rootProject.subprojects
+            .flatMap { it.firstLevelModuleDependencies() }
+            .onEach(::add)
+            // It would be easier to just flatMapTo(set) but we are dealing with graphs and we need
+            // to avoid unnecessary recalculation
+            .forEach { defaultResolvedDependency ->
+                defaultResolvedDependency
+                    .outgoingEdges // will get all transitives of this artifact
+                    .filterIsInstance<DefaultResolvedDependency>()
+                    .forEach(::add)
+            }
+        return results
+    }
+
     /**
      * Resolves all the external dependencies for the given project. By resolving all the dependencies, we get accurate
      * dependency information that respects resolution strategy, substitution and any other modification by Gradle apart
@@ -349,7 +363,7 @@ internal class DefaultDependenciesDataSource @Inject constructor(
      */
     private fun Project.firstLevelModuleDependencies(): Sequence<DefaultResolvedDependency> {
         return resolvableConfigurations()
-            .map(Configuration::getResolvedConfiguration)
+            .map { it.resolvedConfiguration.lenientConfiguration }
             .flatMap {
                 try {
                     it.firstLevelModuleDependencies.asSequence()
@@ -409,12 +423,21 @@ internal class DefaultDependenciesDataSource @Inject constructor(
             version = version,
             excludeRules = excludeRules
                 .asSequence()
-                .map { ExcludeRule(it.group, it.module ?: "") }
+                .map {
+                    @Suppress("USELESS_ELVIS") // Gradle lying, module can be null
+                    ExcludeRule(it.group, it.module ?: "")
+                }
                 .filterNot { it.artifact.isNullOrBlank() }
                 .filterNot { excludeArtifactsDenyList.contains(it.toString()) }
                 .toSet()
         )
     }
+
+    private fun DefaultResolvedDependency.toMavenArtifact() = MavenArtifact(
+        group = moduleGroup,
+        name = moduleName,
+        version = moduleVersion,
+    )
 }
 
 internal fun MavenArtifact.toMavenInstallArtifact(): MavenInstallArtifact {
