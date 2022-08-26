@@ -184,7 +184,8 @@ internal class WorkspaceBuilder(
             mavenInstallJson = artifactsPinner.mavenInstallJson(),
             resolveTimeout = mavenInstall.resolveTimeout,
             excludeArtifacts = mavenInstall.excludeArtifacts.get(),
-            overrideTargets = mavenInstall.overrideTargetLabels.get()
+            overrideTargets = mavenInstall.overrideTargetLabels.get(),
+            versionConflictPolicy = mavenInstall.versionConflictPolicy,
         )
     }
 
