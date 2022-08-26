@@ -64,7 +64,8 @@ data class MavenInstallExtension(
     var overrideTargetLabels: MapProperty<String, String> = objects.mapProperty(),
     var excludeArtifacts: ListProperty<String> = objects.listProperty(),
     var jetifyIncludeList: ListProperty<String> = objects.listProperty(),
-    var jetifyExcludeList: ListProperty<String> = objects.listProperty()
+    var jetifyExcludeList: ListProperty<String> = objects.listProperty(),
+    var versionConflictPolicy: String? = null,
 ) {
     // TODO GitRepositoryRule
     /**

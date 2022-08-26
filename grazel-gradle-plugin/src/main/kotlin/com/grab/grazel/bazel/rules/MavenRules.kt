@@ -75,7 +75,8 @@ fun StatementsBuilder.mavenInstall(
     failOnMissingChecksum: Boolean = true,
     resolveTimeout: Int = 600,
     excludeArtifacts: List<String> = emptyList(),
-    overrideTargets: Map<String, String> = emptyMap()
+    overrideTargets: Map<String, String> = emptyMap(),
+    versionConflictPolicy: String? = null,
 ) {
     load("@$rulesJvmExternalName//:defs.bzl", "maven_install")
     load("@$rulesJvmExternalName//:specs.bzl", "maven")
@@ -119,6 +120,10 @@ fun StatementsBuilder.mavenInstall(
         }
         mavenInstallJson?.let {
             "maven_install_json" eq mavenInstallJson.quote()
+        }
+
+        versionConflictPolicy?.let {
+            "version_conflict_policy" eq it.quote()
         }
     }
 }
@@ -199,6 +204,7 @@ fun StatementsBuilder.jvmRules(
     jetify: Boolean = false,
     jetifyIncludeList: List<String> = emptyList(),
     failOnMissingChecksum: Boolean = true,
+    versionConflictPolicy: String? = null,
 ) {
     add(rulesJvmExternalRule)
 
@@ -216,7 +222,8 @@ fun StatementsBuilder.jvmRules(
         jetifyIncludeList = jetifyIncludeList,
         failOnMissingChecksum = failOnMissingChecksum,
         resolveTimeout = resolveTimeout,
-        excludeArtifacts = excludeArtifacts
+        excludeArtifacts = excludeArtifacts,
+        versionConflictPolicy = versionConflictPolicy,
     )
 
     if (artifactPinning) {
