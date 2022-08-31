@@ -21,6 +21,7 @@ import com.android.build.gradle.LibraryExtension
 import com.android.build.gradle.api.BaseVariant
 import com.android.build.gradle.api.TestVariant
 import com.android.build.gradle.api.UnitTestVariant
+import com.android.builder.model.BuildType
 import com.android.builder.model.ProductFlavor
 import com.grab.grazel.extension.DefaultVariantFilter
 import com.grab.grazel.extension.VariantFilter
@@ -88,6 +89,7 @@ internal interface AndroidVariantsExtractor {
     fun getTestVariants(project: Project): Set<BaseVariant>
     fun getVariants(project: Project): Set<BaseVariant>
     fun getFlavors(project: Project): Set<ProductFlavor>
+    fun getBuildTypes(project: Project): Set<BuildType>
 }
 
 
@@ -124,6 +126,14 @@ internal class DefaultAndroidVariantsExtractor @Inject constructor() : AndroidVa
         return when {
             project.isAndroidAppOrDynFeature -> project.the<AppExtension>().productFlavors
             project.isAndroidLibrary -> project.the<LibraryExtension>().productFlavors
+            else -> emptySet()
+        }
+    }
+
+    override fun getBuildTypes(project: Project): Set<BuildType> {
+        return when {
+            project.isAndroidAppOrDynFeature -> project.the<AppExtension>().buildTypes
+            project.isAndroidLibrary -> project.the<LibraryExtension>().buildTypes
             else -> emptySet()
         }
     }

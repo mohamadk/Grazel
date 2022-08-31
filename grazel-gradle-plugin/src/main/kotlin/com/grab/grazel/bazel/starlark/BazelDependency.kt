@@ -17,20 +17,26 @@
 package com.grab.grazel.bazel.starlark
 
 import com.grab.grazel.gradle.buildTargetName
+import com.grab.grazel.gradle.dependencies.BuildGraphType
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
 
-
 sealed class BazelDependency {
-    data class ProjectDependency(val project: Project) : BazelDependency() {
+    data class ProjectDependency(
+        val dependencyProject: Project,
+        val suffix: String = ""
+    ) : BazelDependency() {
 
         override fun toString(): String {
-            val relativeProjectPath = project.rootProject.relativePath(project.projectDir)
+            val relativeProjectPath =
+                dependencyProject.rootProject.relativePath(dependencyProject.projectDir)
             return if (relativeProjectPath.contains("/")) {
                 val path = relativeProjectPath.split("/").dropLast(1).joinToString("/")
-                "//" + path + "/" + project.buildTargetName()
+                "//" + path + "/" + dependencyProject.buildTargetName() + ":" +
+                    dependencyProject.buildTargetName() + suffix
             } else {
-                "//" + project.buildTargetName()
+                "//" + dependencyProject.buildTargetName() + ":" +
+                    dependencyProject.buildTargetName() + suffix
             }
         }
     }

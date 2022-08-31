@@ -16,14 +16,17 @@
 package com.grab.grazel.migrate.android
 
 import com.android.build.gradle.api.AndroidSourceSet
+import com.android.build.gradle.api.BaseVariant
 import com.grab.grazel.GrazelExtension
 import com.grab.grazel.bazel.starlark.BazelDependency
 import com.grab.grazel.extension.KotlinExtension
 import com.grab.grazel.gradle.AndroidVariantDataSource
 import com.grab.grazel.gradle.ConfigurationScope
+import com.grab.grazel.gradle.dependencies.BuildGraphType
 import com.grab.grazel.gradle.dependencies.DependenciesDataSource
 import com.grab.grazel.gradle.dependencies.DependencyGraphs
-import com.grab.grazel.gradle.dependencies.directProjectDependencies
+import com.grab.grazel.gradle.dependencies.GradleDependencyToBazelDependency
+import com.grab.grazel.gradle.dependencies.variantNameSuffix
 import com.grab.grazel.gradle.getMigratableBuildVariants
 import com.grab.grazel.gradle.getMigratableUnitTestVariants
 import com.grab.grazel.migrate.common.calculateTestAssociate
@@ -39,7 +42,7 @@ import javax.inject.Singleton
 internal const val FORMAT_UNIT_TEST_NAME = "%s-test"
 
 internal interface AndroidUnitTestDataExtractor {
-    fun extract(project: Project): AndroidUnitTestData
+    fun extract(project: Project, variant: BaseVariant): AndroidUnitTestData
 }
 
 @Singleton
@@ -49,13 +52,14 @@ internal class DefaultAndroidUnitTestDataExtractor @Inject constructor(
     private val dependencyGraphsProvider: Lazy<DependencyGraphs>,
     private val androidManifestParser: AndroidManifestParser,
     private val grazelExtension: GrazelExtension,
+    private val gradleDependencyToBazelDependency: GradleDependencyToBazelDependency
 ) : AndroidUnitTestDataExtractor {
 
     private val projectDependencyGraphs get() = dependencyGraphsProvider.get()
 
     private val kotlinExtension: KotlinExtension get() = grazelExtension.rules.kotlin
 
-    override fun extract(project: Project): AndroidUnitTestData {
+    override fun extract(project: Project, variant: BaseVariant): AndroidUnitTestData {
         val name = FORMAT_UNIT_TEST_NAME.format(project.name)
 
         val migratableSourceSets = variantDataSource
@@ -72,8 +76,16 @@ internal class DefaultAndroidUnitTestDataExtractor @Inject constructor(
         val associate = calculateTestAssociate(project)
 
         val deps = projectDependencyGraphs
-            .directProjectDependencies(project, ConfigurationScope.TEST) +
-            dependenciesDataSource.collectMavenDeps(project, ConfigurationScope.TEST) +
+            .directDependencies(
+                project,
+                BuildGraphType(ConfigurationScope.TEST, variant)
+            ).map { dependent ->
+                gradleDependencyToBazelDependency.map(project, dependent, variant)
+            } +
+            dependenciesDataSource.collectMavenDeps(
+                project,
+                BuildGraphType(ConfigurationScope.TEST, variant)
+            ) +
             project.kotlinParcelizeDeps() +
             BazelDependency.ProjectDependency(project)
 
@@ -82,7 +94,7 @@ internal class DefaultAndroidUnitTestDataExtractor @Inject constructor(
         } else emptyList()
 
         return AndroidUnitTestData(
-            name = name,
+            name = "$name${variant.name.variantNameSuffix()}",
             srcs = srcs,
             additionalSrcSets = additionalSrcSets,
             deps = deps,

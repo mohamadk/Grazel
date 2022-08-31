@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Grabtaxi Holdings PTE LTD (GRAB)
+ * Copyright 2022 Grabtaxi Holdings PTE LTD (GRAB)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-rootProject.name = "grazel"
+package com.grab.grazel.gradle.dependencies
 
-include(":sample-android")
-include(':sample-android-library')
-include(":sample-android-flavor")
-include(':sample-library-flavor1')
-include(":sample-library-flavor2")
-include(':sample-kotlin-library')
+import com.android.build.gradle.api.BaseVariant
+import com.grab.grazel.gradle.ConfigurationScope
 
+data class BuildGraphType(
+    val configurationScope: ConfigurationScope,
+    val variant: BaseVariant? = null
+)
 
-includeBuild("grazel-gradle-plugin") {
-    dependencySubstitution {
-        substitute module("com.grab:grazel") with project(":")
-    }
-}
+private val humps = "(?<=.)(?=\\p{Upper})".toRegex()
+fun String.variantNameSuffix() = "_${replace(humps, "_").toLowerCase()}"

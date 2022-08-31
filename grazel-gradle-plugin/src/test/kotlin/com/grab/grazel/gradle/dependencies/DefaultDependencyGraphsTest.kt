@@ -19,8 +19,10 @@ class DefaultDependencyGraphsTest {
     private val projectE = FakeProject("E")
 
     private val dependenciesGraphs = DefaultDependencyGraphs(
-        testGraph = buildTestGraphs(),
-        buildGraph = buildBuildGraphs()
+        buildGraphs = mapOf(
+            BuildGraphType(ConfigurationScope.BUILD) to buildBuildGraphs(),
+            BuildGraphType(ConfigurationScope.TEST) to buildTestGraphs()
+        )
     )
 
     @Test
@@ -36,11 +38,14 @@ class DefaultDependencyGraphsTest {
     fun nodesShouldReturnTheCorrectItemsBaseOnScopes() {
         val buildNodes = setOf(projectA, projectB, projectC)
         val testNodes = setOf(projectA, projectB, projectC, projectD, projectE)
-        assertEquals(buildNodes, dependenciesGraphs.nodes(ConfigurationScope.BUILD))
-        assertEquals(testNodes, dependenciesGraphs.nodes(ConfigurationScope.TEST))
+        assertEquals(buildNodes, dependenciesGraphs.nodes(BuildGraphType(ConfigurationScope.BUILD)))
+        assertEquals(testNodes, dependenciesGraphs.nodes(BuildGraphType(ConfigurationScope.TEST)))
         assertEquals(
             testNodes + buildNodes,
-            dependenciesGraphs.nodes(ConfigurationScope.TEST, ConfigurationScope.BUILD)
+            dependenciesGraphs.nodes(
+                BuildGraphType(ConfigurationScope.TEST),
+                BuildGraphType(ConfigurationScope.BUILD)
+            )
         )
     }
 
@@ -49,20 +54,7 @@ class DefaultDependencyGraphsTest {
         val directDepsFromAWithBuildScope = setOf(projectB, projectC)
         assertEquals(
             directDepsFromAWithBuildScope,
-            dependenciesGraphs.directDependencies(projectA, ConfigurationScope.BUILD)
-        )
-    }
-
-    @Test
-    fun directDependenciesShouldReturnDirectDepsFromBuildAndTestScope() {
-        val directDepsFromAWithBuildAndTestScope = setOf(projectB, projectC, projectE)
-        assertEquals(
-            directDepsFromAWithBuildAndTestScope,
-            dependenciesGraphs.directDependencies(
-                projectA,
-                ConfigurationScope.BUILD,
-                ConfigurationScope.TEST
-            )
+            dependenciesGraphs.directDependencies(projectA, BuildGraphType(ConfigurationScope.BUILD))
         )
     }
 
@@ -80,7 +72,10 @@ class DefaultDependencyGraphsTest {
         val expectDeps = setOf(projectB, projectC)
         assertEquals(
             expectDeps,
-            dependenciesGraphs.dependenciesSubGraph(projectB, ConfigurationScope.BUILD)
+            dependenciesGraphs.dependenciesSubGraph(
+                projectB,
+                BuildGraphType(ConfigurationScope.BUILD)
+            )
         )
     }
 
@@ -91,8 +86,8 @@ class DefaultDependencyGraphsTest {
             expectDeps,
             dependenciesGraphs.dependenciesSubGraph(
                 projectB,
-                ConfigurationScope.BUILD,
-                ConfigurationScope.TEST
+                BuildGraphType(ConfigurationScope.BUILD),
+                BuildGraphType(ConfigurationScope.TEST)
             )
         )
     }

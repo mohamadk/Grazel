@@ -17,12 +17,13 @@
 package com.grab.grazel.gradle
 
 import com.grab.grazel.GrazelExtension
+import com.grab.grazel.gradle.dependencies.BuildGraphType
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import javax.inject.Inject
 import javax.inject.Singleton
 
-internal enum class ConfigurationScope {
+enum class ConfigurationScope {
     BUILD, TEST, ANDROID_TEST;
 }
 
@@ -41,14 +42,17 @@ internal interface ConfigurationDataSource {
      */
     fun resolvedConfigurations(
         project: Project,
-        vararg scopes: ConfigurationScope
+        vararg buildGraphTypes: BuildGraphType
     ): Sequence<Configuration>
 
     /**
      * Return a sequence of the configurations filtered out by the ignore flavors, build variants and the configuration scopes
      * If the scopes is empty, the build scope will be used by default.
      */
-    fun configurations(project: Project, vararg scopes: ConfigurationScope): Sequence<Configuration>
+    fun configurations(
+        project: Project,
+        vararg scope: ConfigurationScope
+    ): Sequence<Configuration>
 }
 
 @Singleton
@@ -69,14 +73,14 @@ internal class DefaultConfigurationDataSource @Inject constructor(
             .filter { !it.name.contains("_internal_aapt2_binary") }
             .filter { !it.name.contains("archives") }
             .filter { !it.isDynamicConfiguration() } // Remove when Grazel support dynamic-feature plugin
-            .filter {
+            .filter { configuration ->
                 when {
-                    scopes.isEmpty() -> it.isNotTest() // If the scopes is empty, the build scope will be used by default.
+                    scopes.isEmpty() -> configuration.isNotTest() // If the scopes is empty, the build scope will be used by default.
                     else -> scopes.any { scope ->
                         when (scope) {
-                            ConfigurationScope.TEST -> !it.isAndroidTest() && it.isUnitTest()
-                            ConfigurationScope.ANDROID_TEST -> !it.isUnitTest()
-                            ConfigurationScope.BUILD -> it.isNotTest()
+                            ConfigurationScope.TEST -> !configuration.isAndroidTest() && configuration.isUnitTest()
+                            ConfigurationScope.ANDROID_TEST -> !configuration.isUnitTest()
+                            ConfigurationScope.BUILD -> configuration.isNotTest()
                         }
                     }
                 }
@@ -92,9 +96,12 @@ internal class DefaultConfigurationDataSource @Inject constructor(
 
     override fun resolvedConfigurations(
         project: Project,
-        vararg scopes: ConfigurationScope
+        vararg buildGraphTypes: BuildGraphType
     ): Sequence<Configuration> {
-        return configurations(project, *scopes).filter { it.isCanBeResolved }
+        return configurations(
+            project,
+            *buildGraphTypes.map { it.configurationScope }.toTypedArray()
+        ).filter { it.isCanBeResolved }
     }
 }
 

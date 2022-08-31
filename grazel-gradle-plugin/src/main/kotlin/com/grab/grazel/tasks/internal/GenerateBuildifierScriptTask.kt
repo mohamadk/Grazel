@@ -40,6 +40,11 @@ abstract class GenerateBuildifierScriptTask : DefaultTask() {
 
     @TaskAction
     fun action() {
+        println(
+            "run"+
+            " @grab_bazel_common//:buildifier"+
+            " --script_path=${buildifierScript.get().asFile.absolutePath}"
+        )
         project.bazelCommand(
             "run",
             "@grab_bazel_common//:buildifier",

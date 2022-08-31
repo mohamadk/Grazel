@@ -1,0 +1,11 @@
+load("@io_bazel_rules_kotlin//kotlin:jvm.bzl", "kt_jvm_library")
+
+kt_jvm_library(
+    name = "sample-kotlin-library",
+    srcs = glob([
+        "src/main/java/com/grab/grazel/sample/HelloWorld.kt",
+    ]),
+    visibility = [
+        "//visibility:public",
+    ],
+)

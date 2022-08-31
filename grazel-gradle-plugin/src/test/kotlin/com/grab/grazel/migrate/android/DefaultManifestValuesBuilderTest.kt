@@ -24,7 +24,10 @@ import com.grab.grazel.GrazelExtension
 import com.grab.grazel.GrazelExtension.Companion.GRAZEL_EXTENSION
 import com.grab.grazel.GrazelPluginTest
 import com.grab.grazel.buildProject
+import com.grab.grazel.fake.DEBUG_FLAVOR1
+import com.grab.grazel.fake.FLAVOR1
 import com.grab.grazel.fake.FakeDependencyGraphs
+import com.grab.grazel.fake.FakeVariant
 import com.grab.grazel.gradle.ANDROID_APPLICATION_PLUGIN
 import com.grab.grazel.gradle.ANDROID_LIBRARY_PLUGIN
 import com.grab.grazel.gradle.AndroidVariantDataSource
@@ -43,6 +46,7 @@ class DefaultManifestValuesBuilderTest : GrazelPluginTest() {
     private lateinit var androidBinary: Project
     private lateinit var androidLibrary: Project
     private lateinit var defaultManifestValuesBuilder: DefaultManifestValuesBuilder
+    private val fakeVariant = FakeVariant(DEBUG_FLAVOR1, FLAVOR1)
 
     @Before
     fun setUp() {
@@ -100,6 +104,7 @@ class DefaultManifestValuesBuilderTest : GrazelPluginTest() {
         val defaultConfig = androidBinary.the<BaseAppModuleExtension>().defaultConfig
         val androidBinaryManifestValues = defaultManifestValuesBuilder.build(
             androidBinary,
+            fakeVariant,
             defaultConfig,
             "test.packageName"
         )

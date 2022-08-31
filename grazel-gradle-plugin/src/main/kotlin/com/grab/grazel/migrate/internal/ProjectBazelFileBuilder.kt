@@ -17,11 +17,13 @@
 package com.grab.grazel.migrate.internal
 
 import com.grab.grazel.bazel.starlark.Statement
+import com.grab.grazel.bazel.starlark.asString
 import com.grab.grazel.migrate.BazelFileBuilder
 import com.grab.grazel.migrate.TargetBuilder
 import org.gradle.api.Project
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType
 
 class ProjectBazelFileBuilder(
     private val project: Project,
@@ -38,5 +40,6 @@ class ProjectBazelFileBuilder(
             .filter { it.canHandle(project) }
             .flatMap { it.build(project) }
             .flatMap { it.statements() }
+            .distinctBy { it.asString() }
     }
 }

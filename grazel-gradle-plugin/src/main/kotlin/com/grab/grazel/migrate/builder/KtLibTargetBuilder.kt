@@ -18,6 +18,7 @@ package com.grab.grazel.migrate.builder
 
 import com.grab.grazel.extension.KotlinExtension
 import com.grab.grazel.extension.TestExtension
+import com.grab.grazel.gradle.AndroidVariantsExtractor
 import com.grab.grazel.gradle.isAndroid
 import com.grab.grazel.gradle.isKotlin
 import com.grab.grazel.migrate.BazelTarget
@@ -33,6 +34,7 @@ import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoSet
 import org.gradle.api.Project
+import org.gradle.api.internal.BuildType
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -59,9 +61,9 @@ internal class KtLibTargetBuilder @Inject constructor(
 ) : TargetBuilder {
     override fun build(project: Project): List<BazelTarget> {
         val projectData = projectDataExtractor.extract(project)
-        val unitTestData = kotlinUnitTestDataExtractor.extract(project)
 
         return if (testExtension.enableTestMigration) {
+            val unitTestData = kotlinUnitTestDataExtractor.extract(project)
             listOf(
                 projectData.toKtLibraryTarget(kotlinExtension.enabledTransitiveReduction),
                 unitTestData.toUnitTestTarget()

@@ -1,69 +1,3 @@
-load("@grab_bazel_common//tools/build_config:build_config.bzl", "build_config")
-
-build_config(
-    name = "sample-android_lib-build-config",
-    package_name = "com.grab.grazel.android.sample",
-    booleans = {
-        "SOME_BOOLEAN": "false",
-    },
-    ints = {
-        "SOME_INT": 0,
-        "VERSION_CODE": 1,
-    },
-    longs = {
-        "SOME_LONG": 0,
-    },
-    strings = {
-        "SOME_STRING": "Something",
-        "VERSION_NAME": "1.0",
-    },
-)
-
-load("@grab_bazel_common//tools/custom_res:custom_res.bzl", "custom_res")
-load("@grab_bazel_common//tools/res_value:res_value.bzl", "res_value")
-load("@grab_bazel_common//tools/kotlin:android.bzl", "kt_android_library")
-
-kt_android_library(
-    name = "sample-android_lib",
-    srcs = glob([
-        "src/main/java/com/grab/grazel/android/sample/MainActivity.kt",
-    ]),
-    assets = glob([
-        "src/main/assets/assert-file.png",
-    ]),
-    assets_dir = "src/main/assets",
-    custom_package = "com.grab.grazel.android.sample",
-    manifest = "src/debug/AndroidManifest.xml",
-    resource_files = glob([
-        "src/main/res/**",
-    ]) + custom_res(
-        dir_name = "res-debug",
-        resource_files = glob([
-            "src/main/res-debug/values/strings.xml",
-        ]),
-        target = "sample-android_lib",
-    ) + res_value(
-        name = "sample-android_lib-res-value",
-        strings = {
-            "generated_value": "important-key",
-        },
-    ),
-    visibility = [
-        "//visibility:public",
-    ],
-    deps = [
-        ":sample-android_lib-build-config",
-        "//:dagger",
-        "//:parcelize",
-        "//sample-android-flavor",
-        "//sample-android-lib",
-        "//sample-kotlin-lib",
-        "@maven//:androidx_appcompat_appcompat",
-        "@maven//:androidx_constraintlayout_constraintlayout",
-        "@maven//:org_jacoco_org_jacoco_ant",
-    ],
-)
-
 load("@grab_bazel_common//tools/custom_res:custom_res.bzl", "custom_res")
 load("@tools_android//tools/googleservices:defs.bzl", "google_services_xml")
 
@@ -82,7 +16,7 @@ crashlytics_android_library(
 )
 
 android_binary(
-    name = "sample-android",
+    name = "sample-android_flavor2_debug",
     assets = glob([
         "src/main/assets/assert-file.png",
     ]),
@@ -111,19 +45,401 @@ android_binary(
         resource_files = glob([
             "src/main/res-debug/values/strings.xml",
         ]),
-        target = "sample-android",
+        target = "sample-android_flavor2_debug",
     ) + GOOGLE_SERVICES_XML,
     visibility = [
         "//visibility:public",
     ],
     deps = [
         ":crashlytics_lib",
-        ":sample-android_lib",
-        ":sample-android_lib-build-config",
+        ":sample-android_lib_flavor2_debug",
         "@maven//:androidx_annotation_annotation",
         "@maven//:androidx_databinding_databinding_adapters",
         "@maven//:androidx_databinding_databinding_common",
         "@maven//:androidx_databinding_databinding_runtime",
         "@maven//:androidx_databinding_viewbinding",
+    ],
+)
+
+android_binary(
+    name = "sample-android_flavor1_debug",
+    assets = glob([
+        "src/main/assets/assert-file.png",
+    ]),
+    assets_dir = "src/main/assets",
+    crunch_png = False,
+    custom_package = "com.grab.grazel.android.sample",
+    debug_key = "//buildsystem:debug-keystore",
+    dex_shards = 5,
+    enable_data_binding = True,
+    incremental_dexing = True,
+    manifest = "src/debug/AndroidManifest.xml",
+    manifest_values = {
+        "versionCode": "1",
+        "versionName": "1.0",
+        "minSdkVersion": "16",
+        "targetSdkVersion": "29",
+        "applicationId": "com.grab.grazel.android.sample",
+        "orientation": "portrait",
+        "libraryManifestHolder": "value",
+    },
+    multidex = "native",
+    resource_files = glob([
+        "src/main/res/**",
+    ]) + custom_res(
+        dir_name = "res-debug",
+        resource_files = glob([
+            "src/main/res-debug/values/strings.xml",
+        ]),
+        target = "sample-android_flavor1_debug",
+    ) + GOOGLE_SERVICES_XML,
+    visibility = [
+        "//visibility:public",
+    ],
+    deps = [
+        ":crashlytics_lib",
+        ":sample-android_lib_flavor1_debug",
+        "@maven//:androidx_annotation_annotation",
+        "@maven//:androidx_databinding_databinding_adapters",
+        "@maven//:androidx_databinding_databinding_common",
+        "@maven//:androidx_databinding_databinding_runtime",
+        "@maven//:androidx_databinding_viewbinding",
+    ],
+)
+
+android_binary(
+    name = "sample-android_flavor2_release",
+    assets = glob([
+        "src/main/assets/assert-file.png",
+    ]),
+    assets_dir = "src/main/assets",
+    crunch_png = False,
+    custom_package = "com.grab.grazel.android.sample",
+    debug_key = "//buildsystem:debug-keystore",
+    dex_shards = 5,
+    enable_data_binding = True,
+    incremental_dexing = True,
+    manifest = "src/main/AndroidManifest.xml",
+    manifest_values = {
+        "versionCode": "1",
+        "versionName": "1.0",
+        "minSdkVersion": "16",
+        "targetSdkVersion": "29",
+        "applicationId": "com.grab.grazel.android.sample",
+        "orientation": "portrait",
+        "libraryManifestHolder": "value",
+    },
+    multidex = "native",
+    resource_files = glob([
+        "src/main/res/**",
+    ]) + custom_res(
+        dir_name = "res-release",
+        resource_files = glob([
+            "src/main/res-release/values/strings.xml",
+        ]),
+        target = "sample-android_flavor2_release",
+    ) + GOOGLE_SERVICES_XML,
+    visibility = [
+        "//visibility:public",
+    ],
+    deps = [
+        ":crashlytics_lib",
+        ":sample-android_lib_flavor2_release",
+        "@maven//:androidx_annotation_annotation",
+        "@maven//:androidx_databinding_databinding_adapters",
+        "@maven//:androidx_databinding_databinding_common",
+        "@maven//:androidx_databinding_databinding_runtime",
+        "@maven//:androidx_databinding_viewbinding",
+    ],
+)
+
+android_binary(
+    name = "sample-android_flavor1_release",
+    assets = glob([
+        "src/main/assets/assert-file.png",
+    ]),
+    assets_dir = "src/main/assets",
+    crunch_png = False,
+    custom_package = "com.grab.grazel.android.sample",
+    debug_key = "//buildsystem:debug-keystore",
+    dex_shards = 5,
+    enable_data_binding = True,
+    incremental_dexing = True,
+    manifest = "src/main/AndroidManifest.xml",
+    manifest_values = {
+        "versionCode": "1",
+        "versionName": "1.0",
+        "minSdkVersion": "16",
+        "targetSdkVersion": "29",
+        "applicationId": "com.grab.grazel.android.sample",
+        "orientation": "portrait",
+        "libraryManifestHolder": "value",
+    },
+    multidex = "native",
+    resource_files = glob([
+        "src/main/res/**",
+    ]) + custom_res(
+        dir_name = "res-release",
+        resource_files = glob([
+            "src/main/res-release/values/strings.xml",
+        ]),
+        target = "sample-android_flavor1_release",
+    ) + GOOGLE_SERVICES_XML,
+    visibility = [
+        "//visibility:public",
+    ],
+    deps = [
+        ":crashlytics_lib",
+        ":sample-android_lib_flavor1_release",
+        "@maven//:androidx_annotation_annotation",
+        "@maven//:androidx_databinding_databinding_adapters",
+        "@maven//:androidx_databinding_databinding_common",
+        "@maven//:androidx_databinding_databinding_runtime",
+        "@maven//:androidx_databinding_viewbinding",
+    ],
+)
+
+load("@grab_bazel_common//tools/build_config:build_config.bzl", "build_config")
+
+build_config(
+    name = "sample-android_lib_flavor2_debug-build-config",
+    package_name = "com.grab.grazel.android.sample",
+    booleans = {
+        "SOME_BOOLEAN": "false",
+    },
+    ints = {
+        "SOME_INT": 0,
+        "VERSION_CODE": 1,
+    },
+    longs = {
+        "SOME_LONG": 0,
+    },
+    strings = {
+        "SOME_STRING": "Something",
+        "VERSION_NAME": "1.0",
+    },
+)
+
+load("@grab_bazel_common//tools/res_value:res_value.bzl", "res_value")
+load("@grab_bazel_common//tools/kotlin:android.bzl", "kt_android_library")
+
+kt_android_library(
+    name = "sample-android_lib_flavor2_debug",
+    srcs = glob([
+        "src/main/java/com/grab/grazel/android/sample/MainActivity.kt",
+    ]),
+    assets = glob([
+        "src/main/assets/assert-file.png",
+    ]),
+    assets_dir = "src/main/assets",
+    custom_package = "com.grab.grazel.android.sample",
+    manifest = "src/debug/AndroidManifest.xml",
+    resource_files = glob([
+        "src/main/res/**",
+    ]) + custom_res(
+        dir_name = "res-debug",
+        resource_files = glob([
+            "src/main/res-debug/values/strings.xml",
+        ]),
+        target = "sample-android_lib_flavor2_debug",
+    ) + res_value(
+        name = "sample-android_lib_flavor2_debug-res-value",
+        strings = {
+            "generated_value": "important-key",
+        },
+    ),
+    visibility = [
+        "//visibility:public",
+    ],
+    deps = [
+        ":sample-android_lib_flavor2_debug-build-config",
+        "//:dagger",
+        "//:parcelize",
+        "//sample-android-flavor:sample-android-flavor_flavor2_debug",
+        "//sample-android-library:sample-android-library_debug",
+        "//sample-kotlin-library",
+        "@maven//:androidx_appcompat_appcompat",
+        "@maven//:androidx_constraintlayout_constraintlayout",
+        "@maven//:org_jacoco_org_jacoco_ant",
+    ],
+)
+
+build_config(
+    name = "sample-android_lib_flavor1_debug-build-config",
+    package_name = "com.grab.grazel.android.sample",
+    booleans = {
+        "SOME_BOOLEAN": "false",
+    },
+    ints = {
+        "SOME_INT": 0,
+        "VERSION_CODE": 1,
+    },
+    longs = {
+        "SOME_LONG": 0,
+    },
+    strings = {
+        "SOME_STRING": "Something",
+        "VERSION_NAME": "1.0",
+    },
+)
+
+kt_android_library(
+    name = "sample-android_lib_flavor1_debug",
+    srcs = glob([
+        "src/main/java/com/grab/grazel/android/sample/MainActivity.kt",
+    ]),
+    assets = glob([
+        "src/main/assets/assert-file.png",
+    ]),
+    assets_dir = "src/main/assets",
+    custom_package = "com.grab.grazel.android.sample",
+    manifest = "src/debug/AndroidManifest.xml",
+    resource_files = glob([
+        "src/main/res/**",
+    ]) + custom_res(
+        dir_name = "res-debug",
+        resource_files = glob([
+            "src/main/res-debug/values/strings.xml",
+        ]),
+        target = "sample-android_lib_flavor1_debug",
+    ) + res_value(
+        name = "sample-android_lib_flavor1_debug-res-value",
+        strings = {
+            "generated_value": "important-key",
+        },
+    ),
+    visibility = [
+        "//visibility:public",
+    ],
+    deps = [
+        ":sample-android_lib_flavor1_debug-build-config",
+        "//:dagger",
+        "//:parcelize",
+        "//sample-android-flavor:sample-android-flavor_flavor1_debug",
+        "//sample-android-library:sample-android-library_debug",
+        "//sample-kotlin-library",
+        "@maven//:androidx_appcompat_appcompat",
+        "@maven//:androidx_constraintlayout_constraintlayout",
+        "@maven//:org_jacoco_org_jacoco_ant",
+    ],
+)
+
+build_config(
+    name = "sample-android_lib_flavor2_release-build-config",
+    package_name = "com.grab.grazel.android.sample",
+    booleans = {
+        "SOME_BOOLEAN": "false",
+    },
+    ints = {
+        "SOME_INT": 0,
+        "VERSION_CODE": 1,
+    },
+    longs = {
+        "SOME_LONG": 0,
+    },
+    strings = {
+        "SOME_STRING": "Something",
+        "VERSION_NAME": "1.0",
+    },
+)
+
+kt_android_library(
+    name = "sample-android_lib_flavor2_release",
+    srcs = glob([
+        "src/main/java/com/grab/grazel/android/sample/MainActivity.kt",
+    ]),
+    assets = glob([
+        "src/main/assets/assert-file.png",
+    ]),
+    assets_dir = "src/main/assets",
+    custom_package = "com.grab.grazel.android.sample",
+    manifest = "src/main/AndroidManifest.xml",
+    resource_files = glob([
+        "src/main/res/**",
+    ]) + custom_res(
+        dir_name = "res-release",
+        resource_files = glob([
+            "src/main/res-release/values/strings.xml",
+        ]),
+        target = "sample-android_lib_flavor2_release",
+    ) + res_value(
+        name = "sample-android_lib_flavor2_release-res-value",
+        strings = {
+            "generated_value": "important-key",
+        },
+    ),
+    visibility = [
+        "//visibility:public",
+    ],
+    deps = [
+        ":sample-android_lib_flavor2_release-build-config",
+        "//:dagger",
+        "//:parcelize",
+        "//sample-android-flavor:sample-android-flavor_flavor2_release",
+        "//sample-android-library:sample-android-library_release",
+        "//sample-kotlin-library",
+        "@maven//:androidx_appcompat_appcompat",
+        "@maven//:androidx_constraintlayout_constraintlayout",
+        "@maven//:org_jacoco_org_jacoco_ant",
+    ],
+)
+
+build_config(
+    name = "sample-android_lib_flavor1_release-build-config",
+    package_name = "com.grab.grazel.android.sample",
+    booleans = {
+        "SOME_BOOLEAN": "false",
+    },
+    ints = {
+        "SOME_INT": 0,
+        "VERSION_CODE": 1,
+    },
+    longs = {
+        "SOME_LONG": 0,
+    },
+    strings = {
+        "SOME_STRING": "Something",
+        "VERSION_NAME": "1.0",
+    },
+)
+
+kt_android_library(
+    name = "sample-android_lib_flavor1_release",
+    srcs = glob([
+        "src/main/java/com/grab/grazel/android/sample/MainActivity.kt",
+    ]),
+    assets = glob([
+        "src/main/assets/assert-file.png",
+    ]),
+    assets_dir = "src/main/assets",
+    custom_package = "com.grab.grazel.android.sample",
+    manifest = "src/main/AndroidManifest.xml",
+    resource_files = glob([
+        "src/main/res/**",
+    ]) + custom_res(
+        dir_name = "res-release",
+        resource_files = glob([
+            "src/main/res-release/values/strings.xml",
+        ]),
+        target = "sample-android_lib_flavor1_release",
+    ) + res_value(
+        name = "sample-android_lib_flavor1_release-res-value",
+        strings = {
+            "generated_value": "important-key",
+        },
+    ),
+    visibility = [
+        "//visibility:public",
+    ],
+    deps = [
+        ":sample-android_lib_flavor1_release-build-config",
+        "//:dagger",
+        "//:parcelize",
+        "//sample-android-flavor:sample-android-flavor_flavor1_release",
+        "//sample-android-library:sample-android-library_release",
+        "//sample-kotlin-library",
+        "@maven//:androidx_appcompat_appcompat",
+        "@maven//:androidx_constraintlayout_constraintlayout",
+        "@maven//:org_jacoco_org_jacoco_ant",
     ],
 )

@@ -100,7 +100,7 @@ grazel {
     }
     rules {
         test {
-            enableTestMigration = true
+            enableTestMigration = false
             detectSourceSets = true
         }
         bazelCommon {

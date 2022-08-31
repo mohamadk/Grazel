@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Grabtaxi Holdings PTE LTD (GRAB)
+ * Copyright 2022 Grabtaxi Holdings PTE LTD (GRAB)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-rootProject.name = "grazel"
+package com.grab.grazel.gradle.dependencies
 
-include(":sample-android")
-include(':sample-android-library')
-include(":sample-android-flavor")
-include(':sample-library-flavor1')
-include(":sample-library-flavor2")
-include(':sample-kotlin-library')
+import org.junit.Assert.*
+import org.junit.Test
 
+class BuildGraphTypeKtTest{
 
-includeBuild("grazel-gradle-plugin") {
-    dependencySubstitution {
-        substitute module("com.grab:grazel") with project(":")
+    @Test
+    fun test(){
+        assertEquals("_app_gps_debug","appGpsDebug".variantNameSuffix())
+        assertEquals("_app_gps_debug","AppGpsDebug".variantNameSuffix())
     }
+
 }

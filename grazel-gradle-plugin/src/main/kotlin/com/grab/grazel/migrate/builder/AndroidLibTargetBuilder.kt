@@ -17,6 +17,7 @@
 package com.grab.grazel.migrate.builder
 
 import com.grab.grazel.extension.TestExtension
+import com.grab.grazel.gradle.AndroidVariantsExtractor
 import com.grab.grazel.gradle.isAndroid
 import com.grab.grazel.gradle.isAndroidApplication
 import com.grab.grazel.gradle.isKotlin
@@ -45,17 +46,20 @@ internal interface AndroidLibTargetBuilderModule {
 internal class AndroidLibTargetBuilder @Inject constructor(
     private val projectDataExtractor: AndroidLibraryDataExtractor,
     private val unitTestDataExtractor: AndroidUnitTestDataExtractor,
-    private val testExtension: TestExtension
+    private val testExtension: TestExtension,
+    private val androidVariantsExtractor: AndroidVariantsExtractor
 ) : TargetBuilder {
 
     override fun build(project: Project): List<BazelTarget> {
-        return if (testExtension.enableTestMigration) {
-            listOf(
-                projectDataExtractor.extract(project).toAndroidLibTarget(),
-                unitTestDataExtractor.extract(project).toUnitTestTarget()
-            )
-        } else {
-            listOf(projectDataExtractor.extract(project).toAndroidLibTarget())
+        return androidVariantsExtractor.getVariants(project).flatMap { variant ->
+            if (testExtension.enableTestMigration) {
+                listOf(
+                    projectDataExtractor.extract(project, variant).toAndroidLibTarget(),
+                    unitTestDataExtractor.extract(project, variant).toUnitTestTarget()
+                )
+            } else {
+                listOf(projectDataExtractor.extract(project, variant).toAndroidLibTarget())
+            }
         }
     }
 
