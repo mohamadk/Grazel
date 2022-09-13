@@ -62,10 +62,8 @@ internal class DefaultAndroidUnitTestDataExtractor @Inject constructor(
     override fun extract(project: Project, variant: BaseVariant): AndroidUnitTestData {
         val name = FORMAT_UNIT_TEST_NAME.format(project.name)
 
-        val migratableSourceSets = variantDataSource
-            .getMigratableUnitTestVariants(project)
+        val migratableSourceSets = variant.sourceSets
             .asSequence()
-            .flatMap { it.sourceSets.asSequence() }
             .filterIsInstance<AndroidSourceSet>()
 
         val srcs = project.unitTestSources(migratableSourceSets).toList()
@@ -73,7 +71,7 @@ internal class DefaultAndroidUnitTestDataExtractor @Inject constructor(
 
         val resources = project.unitTestResources(migratableSourceSets).toList()
 
-        val associate = calculateTestAssociate(project)
+        val associate = calculateTestAssociate(project, targetVariantSuffix(variant))
 
         val deps = projectDependencyGraphs
             .directDependencies(
@@ -87,7 +85,10 @@ internal class DefaultAndroidUnitTestDataExtractor @Inject constructor(
                 BuildGraphType(ConfigurationScope.TEST, variant)
             ) +
             project.kotlinParcelizeDeps() +
-            BazelDependency.ProjectDependency(project)
+            BazelDependency.ProjectDependency(
+                project,
+                targetVariantSuffix(variant)
+            )
 
         val tags = if (kotlinExtension.enabledTransitiveReduction) {
             deps.calculateDirectDependencyTags(name)
@@ -104,6 +105,9 @@ internal class DefaultAndroidUnitTestDataExtractor @Inject constructor(
             resources = resources,
         )
     }
+
+    private fun targetVariantSuffix(variant: BaseVariant) =
+        ("${variant.flavorName}${variant.buildType.name.capitalize()}".variantNameSuffix())
 
     private fun Project.unitTestSources(
         sourceSets: Sequence<AndroidSourceSet>,

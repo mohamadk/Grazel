@@ -34,7 +34,7 @@ internal class GradleDependencyToBazelDependency @Inject constructor(
     fun map(
         project: Project,
         dependency: Project,
-        variant: BaseVariant?
+        variant: BaseVariant? = null
     ): BazelDependency.ProjectDependency {
 
         return if (project.isAndroid) {

@@ -16,7 +16,6 @@
 
 package com.grab.grazel.migrate.kotlin
 
-import com.android.build.gradle.api.BaseVariant
 import com.grab.grazel.GrazelExtension
 import com.grab.grazel.bazel.starlark.BazelDependency
 import com.grab.grazel.extension.KotlinExtension
@@ -43,7 +42,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 internal interface KotlinUnitTestDataExtractor {
-    fun extract(project: Project, variant: BaseVariant? = null): UnitTestData
+    fun extract(project: Project): UnitTestData
 }
 
 @Singleton
@@ -58,7 +57,7 @@ internal class DefaultKotlinUnitTestDataExtractor @Inject constructor(
 
     private val projectDependencyGraphs get() = dependencyGraphsProvider.get()
 
-    override fun extract(project: Project, variant: BaseVariant?): UnitTestData {
+    override fun extract(project: Project): UnitTestData {
         val name = FORMAT_UNIT_TEST_NAME.format(project.name)
         val sourceSets = project.the<KotlinJvmProjectExtension>().sourceSets
 
@@ -72,15 +71,15 @@ internal class DefaultKotlinUnitTestDataExtractor @Inject constructor(
             addAll(
                 projectDependencyGraphs.directDependencies(
                     project,
-                    BuildGraphType(ConfigurationScope.TEST, variant)
+                    BuildGraphType(ConfigurationScope.TEST)
                 ).map { dependent ->
-                    gradleDependencyToBazelDependency.map(project, dependent, variant)
+                    gradleDependencyToBazelDependency.map(project, dependent)
                 }
             )
             addAll(
                 dependenciesDataSource.collectMavenDeps(
                     project,
-                    BuildGraphType(ConfigurationScope.TEST, variant)
+                    BuildGraphType(ConfigurationScope.TEST)
                 )
             )
             addAll(project.kotlinParcelizeDeps())

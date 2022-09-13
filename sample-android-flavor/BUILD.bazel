@@ -35,10 +35,14 @@ kt_db_android_library(
     ],
 )
 
+load("@grab_bazel_common//tools/build_config:build_config.bzl", "build_config")
+
 build_config(
     name = "sample-android-flavor-flavor2-debug-build-config",
     package_name = "com.grab.grazel.android.flavor",
 )
+
+load("@grab_bazel_common//tools/databinding:databinding.bzl", "kt_db_android_library")
 
 kt_db_android_library(
     name = "sample-android-flavor-flavor2-debug",
@@ -67,10 +71,14 @@ kt_db_android_library(
     ],
 )
 
+load("@grab_bazel_common//tools/build_config:build_config.bzl", "build_config")
+
 build_config(
     name = "sample-android-flavor-flavor1-release-build-config",
     package_name = "com.grab.grazel.android.flavor",
 )
+
+load("@grab_bazel_common//tools/databinding:databinding.bzl", "kt_db_android_library")
 
 kt_db_android_library(
     name = "sample-android-flavor-flavor1-release",
@@ -100,10 +108,14 @@ kt_db_android_library(
     ],
 )
 
+load("@grab_bazel_common//tools/build_config:build_config.bzl", "build_config")
+
 build_config(
     name = "sample-android-flavor-flavor2-release-build-config",
     package_name = "com.grab.grazel.android.flavor",
 )
+
+load("@grab_bazel_common//tools/databinding:databinding.bzl", "kt_db_android_library")
 
 kt_db_android_library(
     name = "sample-android-flavor-flavor2-release",
