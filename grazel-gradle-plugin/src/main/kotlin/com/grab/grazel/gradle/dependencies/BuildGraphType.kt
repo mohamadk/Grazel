@@ -24,5 +24,5 @@ data class BuildGraphType(
     val variant: BaseVariant? = null
 )
 
-private val humps = "(?<=.)(?=\\p{Upper})".toRegex()
-fun String.variantNameSuffix() = "_${replace(humps, "_").toLowerCase()}"
+private val HUMPS = "(?<=.)(?=\\p{Upper})".toRegex()
+fun String.variantNameSuffix() = "-${replace(HUMPS, "-").toLowerCase()}"

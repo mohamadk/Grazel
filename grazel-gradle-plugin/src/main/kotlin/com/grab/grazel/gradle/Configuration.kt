@@ -16,6 +16,8 @@
 
 package com.grab.grazel.gradle
 
+import com.android.build.gradle.api.BaseVariant
+import com.android.build.gradle.internal.variant.BaseVariantFactory
 import com.grab.grazel.GrazelExtension
 import com.grab.grazel.gradle.dependencies.BuildGraphType
 import org.gradle.api.Project
@@ -53,6 +55,11 @@ internal interface ConfigurationDataSource {
         project: Project,
         vararg scope: ConfigurationScope
     ): Sequence<Configuration>
+
+    fun isThisConfigurationBelongsToThisVariants(
+        vararg variants: BaseVariant?,
+        configuration: Configuration
+    ): Boolean
 }
 
 @Singleton
@@ -92,6 +99,16 @@ internal class DefaultConfigurationDataSource @Inject constructor(
                         || ignoreVariants.any { configurationName.contains(it.name, true) }
                 }
             }
+    }
+
+    override fun isThisConfigurationBelongsToThisVariants(
+        vararg variants: BaseVariant?,
+        configuration: Configuration
+    ) = variants.any { variant ->
+        variant == null ||
+            variant.compileConfiguration.hierarchy.contains(configuration) ||
+            variant.runtimeConfiguration.hierarchy.contains(configuration) ||
+            variant.annotationProcessorConfiguration.hierarchy.contains(configuration)
     }
 
     override fun resolvedConfigurations(

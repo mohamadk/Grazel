@@ -40,8 +40,7 @@ internal class GradleDependencyToBazelDependency @Inject constructor(
         return if (project.isAndroid) {
             if (variant == null) {
                 throw IllegalStateException(
-                    "please provide the variant for the android project " +
-                        "${project.name}"
+                    "please provide the variant for the android project=${project.name}"
                 )
             }
             if (dependency.isAndroid) {// project is an android project, dependent is also

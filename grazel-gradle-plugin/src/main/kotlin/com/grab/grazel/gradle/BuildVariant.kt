@@ -87,7 +87,11 @@ internal class DefaultAndroidVariantDataSource(
 internal interface AndroidVariantsExtractor {
     fun getUnitTestVariants(project: Project): Set<BaseVariant>
     fun getTestVariants(project: Project): Set<BaseVariant>
-    fun getVariants(project: Project): Set<BaseVariant>
+    fun getVariants(
+        project: Project,
+        configurationScope: ConfigurationScope? = null
+    ): Set<BaseVariant>
+
     fun getFlavors(project: Project): Set<ProductFlavor>
     fun getBuildTypes(project: Project): Set<BuildType>
 }
@@ -98,11 +102,24 @@ internal class DefaultAndroidVariantsExtractor @Inject constructor() : AndroidVa
 
     private val Project.isAndroidAppOrDynFeature get() = project.isAndroidApplication || project.isAndroidDynamicFeature
 
-    override fun getVariants(project: Project): Set<BaseVariant> {
-        return when {
-            project.isAndroidAppOrDynFeature -> project.the<AppExtension>().applicationVariants
-            project.isAndroidLibrary -> project.the<LibraryExtension>().libraryVariants
-            else -> emptySet()
+    override fun getVariants(
+        project: Project,
+        configurationScope: ConfigurationScope?
+    ): Set<BaseVariant> {
+        return when (configurationScope) {
+            ConfigurationScope.TEST -> {
+                getUnitTestVariants(project)
+            }
+            ConfigurationScope.ANDROID_TEST -> {
+                getTestVariants(project)
+            }
+            else -> {
+                when {
+                    project.isAndroidAppOrDynFeature -> project.the<AppExtension>().applicationVariants
+                    project.isAndroidLibrary -> project.the<LibraryExtension>().libraryVariants
+                    else -> emptySet()
+                }
+            }
         }
     }
 

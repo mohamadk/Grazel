@@ -23,8 +23,8 @@ class BuildGraphTypeKtTest{
 
     @Test
     fun test(){
-        assertEquals("_app_gps_debug","appGpsDebug".variantNameSuffix())
-        assertEquals("_app_gps_debug","AppGpsDebug".variantNameSuffix())
+        assertEquals("-app-gps-debug","appGpsDebug".variantNameSuffix())
+        assertEquals("-app-gps-debug","AppGpsDebug".variantNameSuffix())
     }
 
 }

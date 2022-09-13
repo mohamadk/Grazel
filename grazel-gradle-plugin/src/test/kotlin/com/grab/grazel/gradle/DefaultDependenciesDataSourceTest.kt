@@ -290,7 +290,8 @@ class DefaultDependenciesDataSourceTest : GrazelPluginTest() {
             artifactsConfig = ArtifactsConfig(excludedList = listOf()),
             repositoryDataSource = repositoryDataSource,
             dependencyResolutionService = DefaultDependencyResolutionService.register(rootProject),
-            grazelExtension = GrazelExtension(rootProject)
+            grazelExtension = GrazelExtension(rootProject),
+            androidVariantsExtractor = DefaultAndroidVariantsExtractor()
         )
         val dependencyArtifactMap = dependenciesDataSource.dependencyArtifactMap(
             rootProject,

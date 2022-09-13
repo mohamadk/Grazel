@@ -23,7 +23,6 @@ import com.grab.grazel.di.qualifiers.RootProject
 import com.grab.grazel.gradle.AndroidVariantsExtractor
 import com.grab.grazel.gradle.ConfigurationDataSource
 import com.grab.grazel.gradle.ConfigurationScope
-import com.grab.grazel.gradle.DefaultAndroidVariantsExtractor
 import com.grab.grazel.gradle.RepositoryDataSource
 import com.grab.grazel.gradle.configurationScopes
 import com.grab.grazel.util.GradleProvider
@@ -180,11 +179,6 @@ internal class DefaultDependenciesDataSource @Inject constructor(
             .toMap()
     }
 
-    private fun Project.resolvableConfigurations(): Sequence<Configuration> {
-        return configurationDataSource
-            .resolvedConfigurations(this, *buildGraphTypes().toTypedArray())
-    }
-
     private fun Project.buildGraphTypes() =
         configurationScopes.flatMap { configurationScope ->
             androidVariantsExtractor.getVariants(this).map { variant ->
@@ -320,7 +314,10 @@ internal class DefaultDependenciesDataSource @Inject constructor(
                 if (buildGraphTypes.isEmpty()) {
                     true
                 } else {
-                    filterVariantConfigurations(buildGraphTypes, configuration)
+                    configurationDataSource.isThisConfigurationBelongsToThisVariants(
+                        *buildGraphTypes.map { it.variant }.toTypedArray(),
+                        configuration = configuration
+                    )
                 }
             }
             .map { it.second }
@@ -329,16 +326,6 @@ internal class DefaultDependenciesDataSource @Inject constructor(
                 val artifact = MavenArtifact(it.group, it.name)
                 !artifact.isExcluded && !artifact.isIgnored
             }.filter { it !is ProjectDependency }
-
-    private fun filterVariantConfigurations(
-        buildGraphTypes: Array<out BuildGraphType>,
-        configuration: Configuration
-    ) = buildGraphTypes.map { it.variant }.any { variant ->
-        variant == null ||
-            variant.compileConfiguration.hierarchy.contains(configuration) ||
-            variant.runtimeConfiguration.hierarchy.contains(configuration) ||
-            variant.annotationProcessorConfiguration.hierarchy.contains(configuration)
-    }
 
     override fun projectDependencies(
         project: Project, vararg scopes: ConfigurationScope
@@ -384,7 +371,10 @@ internal class DefaultDependenciesDataSource @Inject constructor(
     private fun Project.externalResolvedDependencies() = dependencyResolutionService.get()
         .resolve(
             project = this,
-            configurations = resolvableConfigurations()
+            configurations = configurationDataSource.resolvedConfigurations(
+                this,
+                *buildGraphTypes().toTypedArray()
+            )
         )
 
     /**
@@ -403,7 +393,10 @@ internal class DefaultDependenciesDataSource @Inject constructor(
      * @return Sequence of [DefaultResolvedDependency] in the first level
      */
     private fun Project.firstLevelModuleDependencies(): Sequence<DefaultResolvedDependency> {
-        return resolvableConfigurations()
+        return configurationDataSource.resolvedConfigurations(
+            this,
+            *buildGraphTypes().toTypedArray()
+        )
             .map { it.resolvedConfiguration.lenientConfiguration }
             .flatMap {
                 try {

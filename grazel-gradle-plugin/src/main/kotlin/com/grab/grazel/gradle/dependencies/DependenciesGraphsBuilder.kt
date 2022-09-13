@@ -22,6 +22,7 @@ import com.google.common.graph.ValueGraphBuilder
 import com.grab.grazel.di.qualifiers.RootProject
 import com.grab.grazel.extension.TestExtension
 import com.grab.grazel.gradle.AndroidVariantsExtractor
+import com.grab.grazel.gradle.ConfigurationDataSource
 import com.grab.grazel.gradle.ConfigurationScope
 import com.grab.grazel.gradle.isAndroid
 import org.gradle.api.Project
@@ -31,6 +32,7 @@ import javax.inject.Inject
 internal class DependenciesGraphsBuilder @Inject constructor(
     @param:RootProject private val rootProject: Project,
     private val dependenciesDataSource: DependenciesDataSource,
+    private val configurationDataSource: ConfigurationDataSource,
     private val androidVariantsExtractor: AndroidVariantsExtractor,
     private val testExtension: TestExtension
 ) {
@@ -53,22 +55,21 @@ internal class DependenciesGraphsBuilder @Inject constructor(
                 addEdges(sourceProject, configurationScope, buildGraphs)
                 dependenciesDataSource.projectDependencies(sourceProject, configurationScope)
                     .forEach { (configuration, projectDependency) ->
-                        sourceProject.variants(configurationScope).forEach { variant ->
-                            if (
-                                variant.compileConfiguration.hierarchy.contains(configuration) ||
-                                variant.runtimeConfiguration.hierarchy.contains(configuration) ||
-                                variant.annotationProcessorConfiguration.hierarchy.contains(
-                                    configuration
-                                )
-                            ) {
-                                buildGraphs.putEdgeValue(
-                                    BuildGraphType(configurationScope, variant),
-                                    sourceProject,
-                                    projectDependency.dependencyProject,
-                                    configuration
-                                )
+                        androidVariantsExtractor.getVariants(sourceProject, configurationScope)
+                            .forEach { variant ->
+                                if (configurationDataSource.isThisConfigurationBelongsToThisVariants(
+                                        variant,
+                                        configuration = configuration
+                                    )
+                                ) {
+                                    buildGraphs.putEdgeValue(
+                                        BuildGraphType(configurationScope, variant),
+                                        sourceProject,
+                                        projectDependency.dependencyProject,
+                                        configuration
+                                    )
+                                }
                             }
-                        }
                     }
             }
         }
@@ -87,16 +88,17 @@ internal class DependenciesGraphsBuilder @Inject constructor(
     ) {
         dependenciesDataSource.projectDependencies(project, configurationScope)
             .forEach { (configuration, projectDependency) ->
-                project.variants(configurationScope).forEach { variant ->
-                    if (variant.compileConfiguration.hierarchy.contains(configuration)) {
-                        graph.putEdgeValue(
-                            BuildGraphType(configurationScope, variant),
-                            project,
-                            projectDependency.dependencyProject,
-                            configuration
-                        )
+                androidVariantsExtractor.getVariants(project, configurationScope)
+                    .forEach { variant ->
+                        if (variant.compileConfiguration.hierarchy.contains(configuration)) {
+                            graph.putEdgeValue(
+                                BuildGraphType(configurationScope, variant),
+                                project,
+                                projectDependency.dependencyProject,
+                                configuration
+                            )
+                        }
                     }
-                }
             }
     }
 
@@ -106,26 +108,14 @@ internal class DependenciesGraphsBuilder @Inject constructor(
         buildGraphs: MutableMap<BuildGraphType, MutableValueGraph<Project, Configuration>>
     ) {
         if (sourceProject.isAndroid) {
-            sourceProject.variants(configurationScope).forEach { variant ->
-                buildGraphs.addNode(BuildGraphType(configurationScope, variant), sourceProject)
-            }
+            androidVariantsExtractor.getVariants(sourceProject, configurationScope)
+                .forEach { variant ->
+                    buildGraphs.addNode(BuildGraphType(configurationScope, variant), sourceProject)
+                }
         } else {
             buildGraphs.addNode(BuildGraphType(configurationScope, null), sourceProject)
         }
     }
-
-    private fun Project.variants(configurationScope: ConfigurationScope) =
-        when (configurationScope) {
-            ConfigurationScope.TEST -> {
-                androidVariantsExtractor.getUnitTestVariants(this)
-            }
-            ConfigurationScope.ANDROID_TEST -> {
-                androidVariantsExtractor.getTestVariants(this)
-            }
-            else -> {
-                androidVariantsExtractor.getVariants(this)
-            }
-        }
 }
 
 private fun MutableMap<BuildGraphType, MutableValueGraph<Project, Configuration>>.putEdgeValue(

@@ -170,7 +170,10 @@ class DefaultAndroidUnitTestDataExtractorTest : GrazelPluginTest() {
         }
 
         subProject.doEvaluate()
-        val androidUnitTestData = defaultAndroidUnitTestDataExtractor.extract(subProject)
+        val androidUnitTestData = defaultAndroidUnitTestDataExtractor.extract(
+            subProject,
+            fakeVariant
+        )
 
         Truth.assertThat(androidUnitTestData.additionalSrcSets).apply {
             containsExactlyElementsIn(additionalTestSourceSets)
