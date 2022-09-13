@@ -16,7 +16,7 @@ internal interface DependencyGraphs {
 
     fun directDependencies(
         project: Project,
-        buildGraphTypes: BuildGraphType?
+        buildGraphType: BuildGraphType
     ): Set<Project>
 }
 
@@ -28,7 +28,7 @@ internal class DefaultDependencyGraphs(
             buildGraphType.isEmpty() -> buildGraphs.values.flatMap { it.nodes() }.toSet()
             else -> {
                 buildGraphType.flatMap {
-                    buildGraphs[it]?.nodes() ?: emptyList()
+                    buildGraphs.getValue(it).nodes()
                 }.toSet()
             }
         }
@@ -44,19 +44,12 @@ internal class DefaultDependencyGraphs(
             }
         } else {
             buildGraphTypes.flatMap { buildGraphType ->
-                Graphs.reachableNodes(buildGraphs[buildGraphType]!!.asGraph(), project)
+                Graphs.reachableNodes(buildGraphs.getValue(buildGraphType).asGraph(), project)
             }
         }.toSet()
 
     override fun directDependencies(
         project: Project,
-        buildGraphType: BuildGraphType?
-    ): Set<Project> =
-        if (buildGraphType == null) {
-            buildGraphs.values.flatMap {
-                Graphs.reachableNodes(it.asGraph(), project)
-            }
-        } else {
-            buildGraphs[buildGraphType]!!.successors(project)
-        }.toSet()
+        buildGraphType: BuildGraphType
+    ): Set<Project> = buildGraphs.getValue(buildGraphType).successors(project).toSet()
 }

@@ -74,9 +74,11 @@ internal class DependenciesGraphsBuilder @Inject constructor(
             }
         }
 
-        val immutableBuildGraphs = buildGraphs.mapValues { (_, graph) ->
-            ImmutableValueGraph.copyOf(graph)
-        }
+        val immutableBuildGraphs = buildGraphs
+            .withDefault { buildGraph(0) }
+            .mapValues { (_, graph) ->
+                ImmutableValueGraph.copyOf(graph)
+            }
 
         return DefaultDependencyGraphs(buildGraphs = immutableBuildGraphs)
     }

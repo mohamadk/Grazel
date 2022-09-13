@@ -40,6 +40,5 @@ class ProjectBazelFileBuilder(
             .filter { it.canHandle(project) }
             .flatMap { it.build(project) }
             .flatMap { it.statements() }
-            .distinctBy { it.asString() }
     }
 }
