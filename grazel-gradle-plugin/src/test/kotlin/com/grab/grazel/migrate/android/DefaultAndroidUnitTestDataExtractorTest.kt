@@ -21,15 +21,21 @@ import com.google.common.truth.Truth
 import com.grab.grazel.GrazelExtension
 import com.grab.grazel.GrazelPluginTest
 import com.grab.grazel.buildProject
+import com.grab.grazel.fake.DEBUG_FLAVOR1
+import com.grab.grazel.fake.FLAVOR1
 import com.grab.grazel.fake.FakeDependencyGraphs
+import com.grab.grazel.fake.FakeVariant
 import com.grab.grazel.gradle.ANDROID_LIBRARY_PLUGIN
+import com.grab.grazel.gradle.AndroidVariantsExtractor
 import com.grab.grazel.gradle.DefaultAndroidVariantDataSource
 import com.grab.grazel.gradle.DefaultConfigurationDataSource
 import com.grab.grazel.gradle.DefaultRepositoryDataSource
+import com.grab.grazel.gradle.FakeAndroidVariantsExtractor
 import com.grab.grazel.gradle.KOTLIN_ANDROID_PLUGIN
 import com.grab.grazel.gradle.dependencies.ArtifactsConfig
 import com.grab.grazel.gradle.dependencies.DefaultDependenciesDataSource
 import com.grab.grazel.gradle.dependencies.DefaultDependencyResolutionService
+import com.grab.grazel.gradle.dependencies.GradleDependencyToBazelDependency
 import com.grab.grazel.util.doEvaluate
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
@@ -47,6 +53,9 @@ class DefaultAndroidUnitTestDataExtractorTest : GrazelPluginTest() {
     private lateinit var subProjectDir: File
 
     private lateinit var defaultAndroidUnitTestDataExtractor: DefaultAndroidUnitTestDataExtractor
+    private lateinit var androidVariantsExtractor: FakeAndroidVariantsExtractor
+    private lateinit var gradleDependencyToBazelDependency: GradleDependencyToBazelDependency
+    private val fakeVariant = FakeVariant(DEBUG_FLAVOR1, FLAVOR1)
 
     @get:Rule
     val temporaryFolder = TemporaryFolder()
@@ -71,7 +80,9 @@ class DefaultAndroidUnitTestDataExtractorTest : GrazelPluginTest() {
                 }
             }
         }
-
+        androidVariantsExtractor = FakeAndroidVariantsExtractor()
+        gradleDependencyToBazelDependency =
+            GradleDependencyToBazelDependency(androidVariantsExtractor)
         File(subProjectDir, "src/main/AndroidManifest.xml").apply {
             parentFile.mkdirs()
             createNewFile()
@@ -95,6 +106,7 @@ class DefaultAndroidUnitTestDataExtractorTest : GrazelPluginTest() {
             repositoryDataSource = repositoryDataSource,
             dependencyResolutionService = DefaultDependencyResolutionService.register(rootProject),
             grazelExtension = GrazelExtension(rootProject),
+            androidVariantsExtractor = androidVariantsExtractor
         )
 
         val dependencyGraphs = FakeDependencyGraphs()
@@ -105,7 +117,8 @@ class DefaultAndroidUnitTestDataExtractorTest : GrazelPluginTest() {
             variantDataSource = variantDataSource,
             dependencyGraphsProvider = { dependencyGraphs },
             androidManifestParser = androidManifestParser,
-            grazelExtension = GrazelExtension(rootProject)
+            grazelExtension = GrazelExtension(rootProject),
+            gradleDependencyToBazelDependency = gradleDependencyToBazelDependency
         )
     }
 
@@ -117,7 +130,8 @@ class DefaultAndroidUnitTestDataExtractorTest : GrazelPluginTest() {
         }
 
         subProject.doEvaluate()
-        val androidUnitTestData = defaultAndroidUnitTestDataExtractor.extract(subProject)
+        val androidUnitTestData =
+            defaultAndroidUnitTestDataExtractor.extract(subProject, fakeVariant)
         Truth.assertThat(androidUnitTestData.resources).apply {
             contains("src/test/resources/test.json")
         }
@@ -136,7 +150,8 @@ class DefaultAndroidUnitTestDataExtractorTest : GrazelPluginTest() {
         }
 
         subProject.doEvaluate()
-        val androidUnitTestData = defaultAndroidUnitTestDataExtractor.extract(subProject)
+        val androidUnitTestData =
+            defaultAndroidUnitTestDataExtractor.extract(subProject, fakeVariant)
         Truth.assertThat(androidUnitTestData.resources).apply {
             contains("src/test/resources/**")
         }
@@ -155,7 +170,10 @@ class DefaultAndroidUnitTestDataExtractorTest : GrazelPluginTest() {
         }
 
         subProject.doEvaluate()
-        val androidUnitTestData = defaultAndroidUnitTestDataExtractor.extract(subProject)
+        val androidUnitTestData = defaultAndroidUnitTestDataExtractor.extract(
+            subProject,
+            fakeVariant
+        )
 
         Truth.assertThat(androidUnitTestData.additionalSrcSets).apply {
             containsExactlyElementsIn(additionalTestSourceSets)

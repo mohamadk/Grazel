@@ -20,7 +20,7 @@ import com.grab.grazel.bazel.rules.Visibility
 import com.grab.grazel.bazel.rules.rule
 import java.io.PrintWriter
 
-class FunctionStatement(
+data class FunctionStatement(
     val name: String,
     private val params: List<AssignStatement>,
     private val multilineParams: Boolean = false

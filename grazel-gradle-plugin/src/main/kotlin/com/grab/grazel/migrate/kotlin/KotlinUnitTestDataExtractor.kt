@@ -20,9 +20,10 @@ import com.grab.grazel.GrazelExtension
 import com.grab.grazel.bazel.starlark.BazelDependency
 import com.grab.grazel.extension.KotlinExtension
 import com.grab.grazel.gradle.ConfigurationScope
+import com.grab.grazel.gradle.dependencies.BuildGraphType
 import com.grab.grazel.gradle.dependencies.DependenciesDataSource
 import com.grab.grazel.gradle.dependencies.DependencyGraphs
-import com.grab.grazel.gradle.dependencies.directProjectDependencies
+import com.grab.grazel.gradle.dependencies.GradleDependencyToBazelDependency
 import com.grab.grazel.migrate.android.FORMAT_UNIT_TEST_NAME
 import com.grab.grazel.migrate.android.SourceSetType
 import com.grab.grazel.migrate.android.collectMavenDeps
@@ -48,7 +49,8 @@ internal interface KotlinUnitTestDataExtractor {
 internal class DefaultKotlinUnitTestDataExtractor @Inject constructor(
     private val dependenciesDataSource: DependenciesDataSource,
     private val dependencyGraphsProvider: Lazy<DependencyGraphs>,
-    private val grazelExtension: GrazelExtension
+    private val grazelExtension: GrazelExtension,
+    private val gradleDependencyToBazelDependency: GradleDependencyToBazelDependency
 ) : KotlinUnitTestDataExtractor {
 
     private val kotlinExtension: KotlinExtension get() = grazelExtension.rules.kotlin
@@ -67,12 +69,19 @@ internal class DefaultKotlinUnitTestDataExtractor @Inject constructor(
 
         val deps: List<BazelDependency> = buildList {
             addAll(
-                projectDependencyGraphs.directProjectDependencies(
+                projectDependencyGraphs.directDependencies(
                     project,
-                    ConfigurationScope.TEST
+                    BuildGraphType(ConfigurationScope.TEST)
+                ).map { dependent ->
+                    gradleDependencyToBazelDependency.map(project, dependent)
+                }
+            )
+            addAll(
+                dependenciesDataSource.collectMavenDeps(
+                    project,
+                    BuildGraphType(ConfigurationScope.TEST)
                 )
             )
-            addAll(dependenciesDataSource.collectMavenDeps(project, ConfigurationScope.TEST))
             addAll(project.kotlinParcelizeDeps())
             if (projectDependency.toString() != associate.toString()) {
                 add(projectDependency)

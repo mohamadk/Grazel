@@ -17,11 +17,12 @@
 package com.grab.grazel.migrate.android
 
 import com.android.build.gradle.BaseExtension
+import com.android.build.gradle.api.BaseVariant
 import com.android.build.gradle.internal.dsl.DefaultConfig
 import com.grab.grazel.gradle.AndroidVariantDataSource
 import com.grab.grazel.gradle.ConfigurationScope
+import com.grab.grazel.gradle.dependencies.BuildGraphType
 import com.grab.grazel.gradle.dependencies.DependencyGraphs
-import com.grab.grazel.gradle.dependencies.dependenciesSubGraph
 import com.grab.grazel.gradle.getMigratableBuildVariants
 import com.grab.grazel.gradle.isAndroid
 import dagger.Lazy
@@ -32,6 +33,7 @@ import javax.inject.Inject
 internal interface ManifestValuesBuilder {
     fun build(
         project: Project,
+        variant: BaseVariant,
         defaultConfig: DefaultConfig,
         packageName: String
     ): Map<String, String?>
@@ -44,12 +46,16 @@ internal class DefaultManifestValuesBuilder @Inject constructor(
     private val projectDependencyGraphs get() = dependencyGraphsProvider.get()
     override fun build(
         project: Project,
+        variant: BaseVariant,
         defaultConfig: DefaultConfig,
         packageName: String
     ): Map<String, String?> {
         // Collect manifest values for all dependant projects
         val libraryFlavorManifestPlaceHolders =
-            projectDependencyGraphs.dependenciesSubGraph(project, ConfigurationScope.BUILD)
+            projectDependencyGraphs.dependenciesSubGraph(
+                project,
+                BuildGraphType(ConfigurationScope.BUILD, variant)
+            )
                 .asSequence()
                 .filter(Project::isAndroid)
                 .flatMap { depProject ->

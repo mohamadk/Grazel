@@ -1,5 +1,6 @@
 package com.grab.grazel.migrate
 
+import com.android.build.gradle.LibraryExtension
 import com.google.common.truth.Truth
 import com.grab.grazel.GrazelExtension
 import com.grab.grazel.bazel.starlark.asString
@@ -8,6 +9,7 @@ import com.grab.grazel.di.DaggerGrazelComponent
 import com.grab.grazel.gradle.ANDROID_LIBRARY_PLUGIN
 import com.grab.grazel.gradle.KOTLIN_ANDROID_PLUGIN
 import com.grab.grazel.migrate.internal.WorkspaceBuilder
+import com.grab.grazel.util.doEvaluate
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
@@ -34,6 +36,11 @@ class DaggerWorkspaceRuleTest {
                 apply(ANDROID_LIBRARY_PLUGIN)
                 apply(KOTLIN_ANDROID_PLUGIN)
             }
+            extensions.configure<LibraryExtension> {
+                defaultConfig {
+                    compileSdkVersion(30)
+                }
+            }
             repositories {
                 mavenCentral()
                 google()
@@ -49,6 +56,8 @@ class DaggerWorkspaceRuleTest {
         subProject.dependencies {
             add("implementation", "com.google.dagger:dagger:$daggerTag")
         }
+        subProject.doEvaluate()
+
         rootProject.configure<GrazelExtension> {
             rules {
                 dagger {

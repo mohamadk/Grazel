@@ -17,11 +17,11 @@
 rootProject.name = "grazel"
 
 include(":sample-android")
-include(":sample-android-lib")
+include(':sample-android-library')
 include(":sample-android-flavor")
-include(":sample-lib-flavor1")
-include(":sample-lib-flavor2")
-include(":sample-kotlin-lib")
+include(':sample-library-flavor1')
+include(":sample-library-flavor2")
+include(':sample-kotlin-library')
 
 
 includeBuild("grazel-gradle-plugin") {
