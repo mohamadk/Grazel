@@ -21,12 +21,8 @@ import com.google.common.truth.Truth
 import com.grab.grazel.GrazelExtension
 import com.grab.grazel.GrazelPluginTest
 import com.grab.grazel.buildProject
-import com.grab.grazel.fake.DEBUG_FLAVOR1
-import com.grab.grazel.fake.FLAVOR1
 import com.grab.grazel.fake.FakeDependencyGraphs
-import com.grab.grazel.fake.FakeVariant
 import com.grab.grazel.gradle.ANDROID_LIBRARY_PLUGIN
-import com.grab.grazel.gradle.AndroidVariantsExtractor
 import com.grab.grazel.gradle.DefaultAndroidVariantDataSource
 import com.grab.grazel.gradle.DefaultConfigurationDataSource
 import com.grab.grazel.gradle.DefaultRepositoryDataSource
@@ -39,6 +35,7 @@ import com.grab.grazel.gradle.dependencies.GradleDependencyToBazelDependency
 import com.grab.grazel.util.doEvaluate
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.the
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -55,7 +52,6 @@ class DefaultAndroidUnitTestDataExtractorTest : GrazelPluginTest() {
     private lateinit var defaultAndroidUnitTestDataExtractor: DefaultAndroidUnitTestDataExtractor
     private lateinit var androidVariantsExtractor: FakeAndroidVariantsExtractor
     private lateinit var gradleDependencyToBazelDependency: GradleDependencyToBazelDependency
-    private val fakeVariant = FakeVariant(DEBUG_FLAVOR1, FLAVOR1)
 
     @get:Rule
     val temporaryFolder = TemporaryFolder()
@@ -130,8 +126,11 @@ class DefaultAndroidUnitTestDataExtractorTest : GrazelPluginTest() {
         }
 
         subProject.doEvaluate()
-        val androidUnitTestData =
-            defaultAndroidUnitTestDataExtractor.extract(subProject, fakeVariant)
+
+        val androidUnitTestData = defaultAndroidUnitTestDataExtractor.extract(
+            subProject,
+            debugUnitTestVariant(subProject)
+        )
         Truth.assertThat(androidUnitTestData.resources).apply {
             contains("src/test/resources/test.json")
         }
@@ -150,8 +149,10 @@ class DefaultAndroidUnitTestDataExtractorTest : GrazelPluginTest() {
         }
 
         subProject.doEvaluate()
-        val androidUnitTestData =
-            defaultAndroidUnitTestDataExtractor.extract(subProject, fakeVariant)
+        val androidUnitTestData = defaultAndroidUnitTestDataExtractor.extract(
+            subProject,
+            debugUnitTestVariant(subProject)
+        )
         Truth.assertThat(androidUnitTestData.resources).apply {
             contains("src/test/resources/**")
         }
@@ -170,14 +171,19 @@ class DefaultAndroidUnitTestDataExtractorTest : GrazelPluginTest() {
         }
 
         subProject.doEvaluate()
+
         val androidUnitTestData = defaultAndroidUnitTestDataExtractor.extract(
             subProject,
-            fakeVariant
+            debugUnitTestVariant(subProject)
         )
-
         Truth.assertThat(androidUnitTestData.additionalSrcSets).apply {
             containsExactlyElementsIn(additionalTestSourceSets)
             containsNoneIn(defaultTestSourceSets)
         }
     }
+
+    private fun debugUnitTestVariant(project: Project) =
+        project.project.the<LibraryExtension>().unitTestVariants.first {
+            it.name == "debugUnitTest"
+        }
 }

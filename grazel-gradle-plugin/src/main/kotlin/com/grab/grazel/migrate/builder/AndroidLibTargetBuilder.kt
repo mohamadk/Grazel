@@ -17,7 +17,8 @@
 package com.grab.grazel.migrate.builder
 
 import com.grab.grazel.extension.TestExtension
-import com.grab.grazel.gradle.AndroidVariantsExtractor
+import com.grab.grazel.gradle.AndroidVariantDataSource
+import com.grab.grazel.gradle.ConfigurationScope
 import com.grab.grazel.gradle.isAndroid
 import com.grab.grazel.gradle.isAndroidApplication
 import com.grab.grazel.gradle.isKotlin
@@ -47,21 +48,29 @@ internal class AndroidLibTargetBuilder @Inject constructor(
     private val projectDataExtractor: AndroidLibraryDataExtractor,
     private val unitTestDataExtractor: AndroidUnitTestDataExtractor,
     private val testExtension: TestExtension,
-    private val androidVariantsExtractor: AndroidVariantsExtractor
+    private val androidVariantDataSource: AndroidVariantDataSource
 ) : TargetBuilder {
 
     override fun build(project: Project): List<BazelTarget> {
-        return androidVariantsExtractor.getVariants(project).flatMap { variant ->
-            if (testExtension.enableTestMigration) {
-                listOf(
-                    projectDataExtractor.extract(project, variant).toAndroidLibTarget(),
-                    unitTestDataExtractor.extract(project, variant).toUnitTestTarget()
-                )
-            } else {
-                listOf(projectDataExtractor.extract(project, variant).toAndroidLibTarget())
-            }
-        }
+        return androidVariantDataSource.getMigratableVariants(
+            project,
+            ConfigurationScope.BUILD
+        ).map { variant ->
+            projectDataExtractor.extract(project, variant).toAndroidLibTarget()
+        } + unitTestsTargets(project)
     }
+
+    private fun unitTestsTargets(project: Project) =
+        if (testExtension.enableTestMigration) {
+            androidVariantDataSource.getMigratableVariants(
+                project,
+                ConfigurationScope.TEST
+            ).map { variant ->
+                unitTestDataExtractor.extract(project, variant).toUnitTestTarget()
+            }
+        } else {
+            emptyList()
+        }
 
     override fun canHandle(project: Project): Boolean = with(project) {
         isAndroid && !isKotlin && !isAndroidApplication

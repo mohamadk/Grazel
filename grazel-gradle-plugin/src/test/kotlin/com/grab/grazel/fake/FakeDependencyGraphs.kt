@@ -19,6 +19,6 @@ internal class FakeDependencyGraphs(
 
     override fun directDependencies(
         project: Project,
-        buildGraphTypes: BuildGraphType?
+        buildGraphTypes: BuildGraphType
     ): Set<Project> = directDeps
 }

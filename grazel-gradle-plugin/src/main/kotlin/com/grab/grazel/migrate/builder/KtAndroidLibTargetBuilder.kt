@@ -19,7 +19,8 @@ package com.grab.grazel.migrate.builder
 import com.grab.grazel.bazel.rules.KotlinProjectType
 import com.grab.grazel.bazel.rules.Visibility
 import com.grab.grazel.extension.TestExtension
-import com.grab.grazel.gradle.AndroidVariantsExtractor
+import com.grab.grazel.gradle.AndroidVariantDataSource
+import com.grab.grazel.gradle.ConfigurationScope
 import com.grab.grazel.gradle.dependencies.variantNameSuffix
 import com.grab.grazel.gradle.isAndroid
 import com.grab.grazel.gradle.isAndroidApplication
@@ -67,41 +68,42 @@ internal interface KtAndroidLibTargetBuilderModule {
 internal class KtAndroidLibTargetBuilder @Inject constructor(
     private val projectDataExtractor: AndroidLibraryDataExtractor,
     private val unitTestDataExtractor: AndroidUnitTestDataExtractor,
-    private val androidVariantsExtractor: AndroidVariantsExtractor,
+    private val androidVariantDataSource: AndroidVariantDataSource,
     private val testExtension: TestExtension
 ) : TargetBuilder {
 
     override fun build(project: Project): List<BazelTarget> {
         return mutableListOf<BazelTarget>().apply {
-            androidVariantsExtractor.getVariants(project).forEach { variant ->
-                val projectData = projectDataExtractor.extract(
-                    project,
-                    sourceSetType = SourceSetType.JAVA_KOTLIN,
-                    variant = variant
-                )
-                var deps = projectData.deps
-                with(projectData) {
-                    toAarResTarget(variant.name.variantNameSuffix())?.also { add(it) }
-                    toBuildConfigTarget(variant.name.variantNameSuffix()).also {
-                        deps += it.toBazelDependency()
-                        add(it)
-                    }
-                }
-                projectData
-                    .copy(name = projectData.name + variant.name.variantNameSuffix(), deps = deps)
-                    .toKtLibraryTarget()
-                    ?.also { add(it) }
-
-
-            }
-            if (testExtension.enableTestMigration) {
-                androidVariantsExtractor.getUnitTestVariants(project).forEach { variant ->
-                    add(
-                        unitTestDataExtractor
-                            .extract(project, variant)
-                            .toUnitTestTarget()
+            androidVariantDataSource.getMigratableVariants(project, ConfigurationScope.BUILD)
+                .forEach { variant ->
+                    val projectData = projectDataExtractor.extract(
+                        project,
+                        sourceSetType = SourceSetType.JAVA_KOTLIN,
+                        variant = variant
                     )
+                    var deps = projectData.deps
+                    with(projectData) {
+                        toAarResTarget(variant.name.variantNameSuffix())?.also { add(it) }
+                        toBuildConfigTarget(variant.name.variantNameSuffix()).also {
+                            deps += it.toBazelDependency()
+                            add(it)
+                        }
+                    }
+                    projectData
+                        .copy(
+                            name = projectData.name + variant.name.variantNameSuffix(),
+                            deps = deps
+                        )
+                        .toKtLibraryTarget()
+                        ?.also { add(it) }
+
+
                 }
+            if (testExtension.enableTestMigration) {
+                androidVariantDataSource.getMigratableVariants(project, ConfigurationScope.TEST)
+                    .forEach { variant ->
+                        add(unitTestDataExtractor.extract(project, variant).toUnitTestTarget())
+                    }
             }
         }
     }

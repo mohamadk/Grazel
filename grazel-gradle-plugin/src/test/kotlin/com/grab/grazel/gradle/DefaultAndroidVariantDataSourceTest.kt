@@ -85,8 +85,7 @@ class DefaultAndroidVariantDataSourceTest : GrazelPluginTest() {
 
 class FakeAndroidVariantsExtractor : AndroidVariantsExtractor {
     override fun getVariants(
-        project: Project,
-        configurationScope: ConfigurationScope?
+        project: Project
     ): Set<BaseVariant> = setOf(
         FakeVariant(DEBUG_FLAVOR1, FLAVOR1),
         FakeVariant(DEBUG_FLAVOR2, FLAVOR2),

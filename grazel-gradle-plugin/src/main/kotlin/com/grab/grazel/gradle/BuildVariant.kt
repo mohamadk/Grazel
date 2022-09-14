@@ -52,12 +52,37 @@ internal interface AndroidVariantDataSource {
      * @return The list of variants that can be migrated.
      */
     fun getMigratableVariants(project: Project): List<BaseVariant>
+
+    /**
+     * return all variants minus the ones that declared in filtered variants
+     */
+    fun getMigratableVariants(
+        project: Project,
+        configurationScope: ConfigurationScope?
+    ): Set<BaseVariant>
 }
 
 internal class DefaultAndroidVariantDataSource(
     private val androidVariantsExtractor: AndroidVariantsExtractor = DefaultAndroidVariantsExtractor(),
     override val variantFilter: Action<VariantFilter>? = null
 ) : AndroidVariantDataSource {
+
+    override fun getMigratableVariants(
+        project: Project,
+        configurationScope: ConfigurationScope?
+    ): Set<BaseVariant> {
+        return when (configurationScope) {
+            ConfigurationScope.TEST -> {
+                androidVariantsExtractor.getUnitTestVariants(project)
+            }
+            ConfigurationScope.ANDROID_TEST -> {
+                androidVariantsExtractor.getTestVariants(project)
+            }
+            else -> {
+                androidVariantsExtractor.getVariants(project)
+            }
+        }.filterNot(::ignoredVariantFilter).toSet()
+    }
 
     override fun getIgnoredFlavors(project: Project): List<ProductFlavor> {
         val supportFlavors = getMigratableVariants(project).flatMap(BaseVariant::getProductFlavors)
@@ -87,11 +112,7 @@ internal class DefaultAndroidVariantDataSource(
 internal interface AndroidVariantsExtractor {
     fun getUnitTestVariants(project: Project): Set<BaseVariant>
     fun getTestVariants(project: Project): Set<BaseVariant>
-    fun getVariants(
-        project: Project,
-        configurationScope: ConfigurationScope? = null
-    ): Set<BaseVariant>
-
+    fun getVariants(project: Project): Set<BaseVariant>
     fun getFlavors(project: Project): Set<ProductFlavor>
     fun getBuildTypes(project: Project): Set<BuildType>
 }
@@ -102,24 +123,11 @@ internal class DefaultAndroidVariantsExtractor @Inject constructor() : AndroidVa
 
     private val Project.isAndroidAppOrDynFeature get() = project.isAndroidApplication || project.isAndroidDynamicFeature
 
-    override fun getVariants(
-        project: Project,
-        configurationScope: ConfigurationScope?
-    ): Set<BaseVariant> {
-        return when (configurationScope) {
-            ConfigurationScope.TEST -> {
-                getUnitTestVariants(project)
-            }
-            ConfigurationScope.ANDROID_TEST -> {
-                getTestVariants(project)
-            }
-            else -> {
-                when {
-                    project.isAndroidAppOrDynFeature -> project.the<AppExtension>().applicationVariants
-                    project.isAndroidLibrary -> project.the<LibraryExtension>().libraryVariants
-                    else -> emptySet()
-                }
-            }
+    override fun getVariants(project: Project): Set<BaseVariant> {
+        return when {
+            project.isAndroidAppOrDynFeature -> project.the<AppExtension>().applicationVariants
+            project.isAndroidLibrary -> project.the<LibraryExtension>().libraryVariants
+            else -> emptySet()
         }
     }
 
