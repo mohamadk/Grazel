@@ -20,6 +20,7 @@ import com.grab.grazel.GrazelExtension
 import com.grab.grazel.bazel.rules.MavenInstallArtifact
 import com.grab.grazel.bazel.rules.MavenInstallArtifact.Exclusion.SimpleExclusion
 import com.grab.grazel.di.qualifiers.RootProject
+import com.grab.grazel.gradle.AndroidVariantsExtractor
 import com.grab.grazel.gradle.ConfigurationDataSource
 import com.grab.grazel.gradle.ConfigurationScope
 import com.grab.grazel.gradle.RepositoryDataSource
@@ -83,7 +84,10 @@ internal interface DependenciesDataSource {
     /**
      * Return the project's maven dependencies before the resolution strategy and any other custom substitution by Gradle
      */
-    fun mavenDependencies(project: Project, vararg scopes: ConfigurationScope): Sequence<Dependency>
+    fun mavenDependencies(
+        project: Project,
+        vararg buildGraphTypes: BuildGraphType
+    ): Sequence<Dependency>
 
     /**
      * Return the project's project (module) dependencies before the resolution strategy and any other custom
@@ -142,7 +146,8 @@ internal class DefaultDependenciesDataSource @Inject constructor(
     private val configurationDataSource: ConfigurationDataSource,
     private val artifactsConfig: ArtifactsConfig,
     private val repositoryDataSource: RepositoryDataSource,
-    private val dependencyResolutionService: GradleProvider<DefaultDependencyResolutionService>
+    private val dependencyResolutionService: GradleProvider<DefaultDependencyResolutionService>,
+    private val androidVariantsExtractor: AndroidVariantsExtractor
 ) : DependenciesDataSource {
 
     private val configurationScopes by lazy { grazelExtension.configurationScopes() }
@@ -174,10 +179,12 @@ internal class DefaultDependenciesDataSource @Inject constructor(
             .toMap()
     }
 
-    private fun Project.resolvableConfigurations(): Sequence<Configuration> {
-        return configurationDataSource
-            .resolvedConfigurations(this, *configurationScopes)
-    }
+    private fun Project.buildGraphTypes() =
+        configurationScopes.flatMap { configurationScope ->
+            androidVariantsExtractor.getVariants(this).map { variant ->
+                BuildGraphType(configurationScope, variant)
+            }
+        }
 
     /**
      * Given a group, name and version will update version with following properties
@@ -228,7 +235,12 @@ internal class DefaultDependenciesDataSource @Inject constructor(
         // Filter out configurations we are interested in.
         val configurations = projects
             .asSequence()
-            .flatMap { configurationDataSource.configurations(it, *configurationScopes) }
+            .flatMap { project ->
+                configurationDataSource.configurations(
+                    project,
+                    *configurationScopes
+                )
+            }
             .toList()
 
         // Calculate all the external artifacts
@@ -243,7 +255,12 @@ internal class DefaultDependenciesDataSource @Inject constructor(
         // (Perf fix) - collecting all projects' forced modules is costly, hence take the first sub project
         // TODO Provide option to consider all forced versions backed by a flag.
         val forcedVersions = sequenceOf(rootProject.subprojects.first())
-            .flatMap { configurationDataSource.configurations(it, *configurationScopes) }
+            .flatMap { project ->
+                configurationDataSource.configurations(
+                    project,
+                    *configurationScopes
+                )
+            }
             .let(::collectForcedVersions)
 
         return (DEFAULT_MAVEN_ARTIFACTS + externalArtifacts + forcedVersions)
@@ -290,14 +307,25 @@ internal class DefaultDependenciesDataSource @Inject constructor(
 
     override fun mavenDependencies(
         project: Project,
-        vararg scopes: ConfigurationScope
-    ): Sequence<Dependency> = declaredDependencies(project, *scopes)
-        .map { it.second }
-        .filter { it.group != null && !DEP_GROUP_EMBEDDED_BY_RULES.contains(it.group) }
-        .filter {
-            val artifact = MavenArtifact(it.group, it.name)
-            !artifact.isExcluded && !artifact.isIgnored
-        }.filter { it !is ProjectDependency }
+        vararg buildGraphTypes: BuildGraphType
+    ): Sequence<Dependency> =
+        declaredDependencies(project, *buildGraphTypes.map { it.configurationScope }.toTypedArray())
+            .filter { (configuration, _) ->
+                if (buildGraphTypes.isEmpty()) {
+                    true
+                } else {
+                    configurationDataSource.isThisConfigurationBelongsToThisVariants(
+                        *buildGraphTypes.map { it.variant }.toTypedArray(),
+                        configuration = configuration
+                    )
+                }
+            }
+            .map { it.second }
+            .filter { it.group != null && !DEP_GROUP_EMBEDDED_BY_RULES.contains(it.group) }
+            .filter {
+                val artifact = MavenArtifact(it.group, it.name)
+                !artifact.isExcluded && !artifact.isIgnored
+            }.filter { it !is ProjectDependency }
 
     override fun projectDependencies(
         project: Project, vararg scopes: ConfigurationScope
@@ -343,7 +371,10 @@ internal class DefaultDependenciesDataSource @Inject constructor(
     private fun Project.externalResolvedDependencies() = dependencyResolutionService.get()
         .resolve(
             project = this,
-            configurations = resolvableConfigurations()
+            configurations = configurationDataSource.resolvedConfigurations(
+                this,
+                *buildGraphTypes().toTypedArray()
+            )
         )
 
     /**
@@ -362,7 +393,10 @@ internal class DefaultDependenciesDataSource @Inject constructor(
      * @return Sequence of [DefaultResolvedDependency] in the first level
      */
     private fun Project.firstLevelModuleDependencies(): Sequence<DefaultResolvedDependency> {
-        return resolvableConfigurations()
+        return configurationDataSource.resolvedConfigurations(
+            this,
+            *buildGraphTypes().toTypedArray()
+        )
             .map { it.resolvedConfiguration.lenientConfiguration }
             .flatMap {
                 try {

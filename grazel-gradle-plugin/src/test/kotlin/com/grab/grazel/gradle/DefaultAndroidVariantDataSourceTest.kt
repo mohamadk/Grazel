@@ -17,6 +17,7 @@
 package com.grab.grazel.gradle
 
 import com.android.build.gradle.api.BaseVariant
+import com.android.builder.model.BuildType
 import com.android.builder.model.ProductFlavor
 import com.grab.grazel.GrazelExtension
 import com.grab.grazel.GrazelPluginTest
@@ -82,8 +83,10 @@ class DefaultAndroidVariantDataSourceTest : GrazelPluginTest() {
     }
 }
 
-private class FakeAndroidVariantsExtractor : AndroidVariantsExtractor {
-    override fun getVariants(project: Project): Set<BaseVariant> = setOf(
+class FakeAndroidVariantsExtractor : AndroidVariantsExtractor {
+    override fun getVariants(
+        project: Project
+    ): Set<BaseVariant> = setOf(
         FakeVariant(DEBUG_FLAVOR1, FLAVOR1),
         FakeVariant(DEBUG_FLAVOR2, FLAVOR2),
         FakeVariant(RELEASE_FLAVOR1, FLAVOR1),
@@ -92,6 +95,10 @@ private class FakeAndroidVariantsExtractor : AndroidVariantsExtractor {
 
     override fun getFlavors(project: Project): Set<ProductFlavor> =
         listOf(FLAVOR1, FLAVOR2).map { FakeProductFlavor(it) }.toSet()
+
+    override fun getBuildTypes(project: Project): Set<BuildType> {
+        return getVariants(project).map { it.buildType }.toSet()
+    }
 
     override fun getUnitTestVariants(project: Project): Set<BaseVariant> = emptySet()
 

@@ -69,6 +69,7 @@ class DefaultDependenciesDataSourceTest : GrazelPluginTest() {
     private lateinit var repositoryDataSource: RepositoryDataSource
     private lateinit var fakeVariantDataSource: FakeAndroidVariantDataSource
     private lateinit var configurationDataSource: DefaultConfigurationDataSource
+    private lateinit var androidVariantsExtractor: AndroidVariantsExtractor
 
     @Before
     fun setUp() {
@@ -81,6 +82,7 @@ class DefaultDependenciesDataSourceTest : GrazelPluginTest() {
         fakeVariantDataSource = FakeAndroidVariantDataSource()
         configurationDataSource = DefaultConfigurationDataSource(fakeVariantDataSource)
         repositoryDataSource = DefaultRepositoryDataSource(rootProject)
+        androidVariantsExtractor = FakeAndroidVariantsExtractor()
 
         dependenciesDataSource = DefaultDependenciesDataSource(
             rootProject = rootProject,
@@ -88,7 +90,8 @@ class DefaultDependenciesDataSourceTest : GrazelPluginTest() {
             artifactsConfig = ArtifactsConfig(ignoredList = listOf(KOTLIN_STDLIB)),
             repositoryDataSource = repositoryDataSource,
             dependencyResolutionService = DefaultDependencyResolutionService.register(rootProject),
-            grazelExtension = GrazelExtension(rootProject)
+            grazelExtension = GrazelExtension(rootProject),
+            androidVariantsExtractor = androidVariantsExtractor
         )
     }
 
@@ -217,7 +220,8 @@ class DefaultDependenciesDataSourceTest : GrazelPluginTest() {
             artifactsConfig = ArtifactsConfig(ignoredList = listOf(DAGGER.split(":%s").first())),
             repositoryDataSource = repositoryDataSource,
             dependencyResolutionService = DefaultDependencyResolutionService.register(rootProject),
-            grazelExtension = GrazelExtension(rootProject)
+            grazelExtension = GrazelExtension(rootProject),
+            androidVariantsExtractor = androidVariantsExtractor
         )
         assertTrue(
             "hasIgnoredArtifacts returns true when project contains any ignored artifacts",
@@ -246,7 +250,8 @@ class DefaultDependenciesDataSourceTest : GrazelPluginTest() {
             artifactsConfig = ArtifactsConfig(excludedList = listOf(excludedDagger)),
             repositoryDataSource = repositoryDataSource,
             dependencyResolutionService = DefaultDependencyResolutionService.register(rootProject),
-            grazelExtension = GrazelExtension(rootProject)
+            grazelExtension = GrazelExtension(rootProject),
+            androidVariantsExtractor = androidVariantsExtractor
         )
         val resolvedArtifacts = dependenciesDataSource
             .resolvedArtifactsFor(listOf(rootProject, subProject))
@@ -285,7 +290,8 @@ class DefaultDependenciesDataSourceTest : GrazelPluginTest() {
             artifactsConfig = ArtifactsConfig(excludedList = listOf()),
             repositoryDataSource = repositoryDataSource,
             dependencyResolutionService = DefaultDependencyResolutionService.register(rootProject),
-            grazelExtension = GrazelExtension(rootProject)
+            grazelExtension = GrazelExtension(rootProject),
+            androidVariantsExtractor = DefaultAndroidVariantsExtractor()
         )
         val dependencyArtifactMap = dependenciesDataSource.dependencyArtifactMap(
             rootProject,

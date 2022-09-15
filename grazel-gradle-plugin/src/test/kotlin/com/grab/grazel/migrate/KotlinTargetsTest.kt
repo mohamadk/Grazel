@@ -115,7 +115,7 @@ class KotlinTargetsTest {
         val generatedStatements = projectBazelFileBuilder.build().asString()
         Truth.assertThat(generatedStatements).apply {
             contains("kt_db_android_library")
-            contains("""name = "android-library"""")
+            contains("""name = "android-library-debug"""")
             contains(""""src/main/res/activity_main.xml",""")
             contains("""custom_package = "com.example.androidlibrary"""")
             contains("""manifest = "src/main/AndroidManifest.xml"""")

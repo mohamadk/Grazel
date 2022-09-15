@@ -32,17 +32,17 @@ import org.gradle.api.Project
  * @param project The project for which associate needs to be calculated
  * @return The associate that was calculated, null otherwise
  */
-internal fun calculateTestAssociate(project: Project): BazelDependency? {
+internal fun calculateTestAssociate(project: Project, suffix: String = ""): BazelDependency? {
     return when {
         project.isKotlin && project.hasDatabinding -> {
             return BazelDependency.StringDependency(
-                """${ProjectDependency(project)}:${project.buildTargetName()}-kotlin"""
+                """${ProjectDependency(project, suffix)}-kotlin"""
             )
         }
         project.isKotlin && project.isAndroid -> return BazelDependency.StringDependency(
-            """${ProjectDependency(project)}:${project.buildTargetName()}_kt"""
+            """${ProjectDependency(project, suffix)}_kt"""
         )
-        project.isKotlin -> return ProjectDependency(project)
+        project.isKotlin -> return ProjectDependency(project, suffix)
         else -> null
     }
 }

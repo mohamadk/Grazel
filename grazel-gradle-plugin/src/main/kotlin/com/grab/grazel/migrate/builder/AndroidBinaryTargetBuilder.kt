@@ -16,6 +16,9 @@
 
 package com.grab.grazel.migrate.builder
 
+import com.grab.grazel.gradle.AndroidVariantDataSource
+import com.grab.grazel.gradle.ConfigurationScope
+import com.grab.grazel.gradle.dependencies.variantNameSuffix
 import com.grab.grazel.gradle.isAndroidApplication
 import com.grab.grazel.gradle.isKotlin
 import com.grab.grazel.migrate.BazelTarget
@@ -23,6 +26,7 @@ import com.grab.grazel.migrate.TargetBuilder
 import com.grab.grazel.migrate.android.AndroidBinaryDataExtractor
 import com.grab.grazel.migrate.android.AndroidBinaryTarget
 import com.grab.grazel.migrate.android.AndroidLibraryDataExtractor
+import com.grab.grazel.migrate.android.CrashlyticsTarget
 import com.grab.grazel.migrate.android.DefaultAndroidBinaryDataExtractor
 import com.grab.grazel.migrate.android.DefaultKeyStoreExtractor
 import com.grab.grazel.migrate.android.DefaultManifestValuesBuilder
@@ -36,7 +40,6 @@ import dagger.multibindings.IntoSet
 import org.gradle.api.Project
 import javax.inject.Inject
 import javax.inject.Singleton
-
 
 @Module
 internal interface AndroidBinaryTargetBuilderModule {
@@ -57,7 +60,8 @@ internal interface AndroidBinaryTargetBuilderModule {
 @Singleton
 internal class AndroidBinaryTargetBuilder @Inject constructor(
     private val androidLibDataExtractor: AndroidLibraryDataExtractor,
-    private val androidBinDataExtractor: AndroidBinaryDataExtractor
+    private val androidBinDataExtractor: AndroidBinaryDataExtractor,
+    private val androidVariantDataSource: AndroidVariantDataSource
 ) : TargetBuilder {
 
     override fun build(project: Project): List<BazelTarget> {
@@ -69,62 +73,110 @@ internal class AndroidBinaryTargetBuilder @Inject constructor(
         project: Project,
         intermediateTargets: List<BazelTarget>
     ): List<BazelTarget> {
-        var androidLibData = androidLibDataExtractor.extract(project)
-        val deps = if (project.isKotlin) {
-            // For kotlin project, don't duplicate Maven dependencies
-            intermediateTargets.map { it.toBazelDependency() }
-        } else {
-            intermediateTargets.map { it.toBazelDependency() } + androidLibData.deps
+
+        var targets =
+            androidVariantDataSource.getMigratableVariants(project, ConfigurationScope.BUILD)
+                .flatMap { variant ->
+                    var androidLibData = androidLibDataExtractor.extract(project, variant)
+                    val deps = if (project.isKotlin) {
+                        // For kotlin project, don't duplicate Maven dependencies
+                        intermediateTargets.filter { it.name.endsWith(variant.name.variantNameSuffix()) }
+                            .map { it.toBazelDependency() }
+                    } else {
+                        intermediateTargets.filter { it.name.endsWith(variant.name.variantNameSuffix()) }
+                            .map { it.toBazelDependency() } + androidLibData.deps
+                    }
+
+                    androidLibData = androidLibData.copy(deps = deps)
+                    val binaryData =
+                        androidBinDataExtractor.extract(project, variant, androidLibData)
+
+                    listOf(
+                        AndroidBinaryTarget(
+                            name = "${binaryData.name}${variant.name.variantNameSuffix()}",
+                            deps = androidLibData.deps + binaryData.deps,
+                            srcs = androidLibData.srcs,
+                            multidex = binaryData.multidex,
+                            debugKey = binaryData.debugKey,
+                            dexShards = binaryData.dexShards,
+                            incrementalDexing = binaryData.incrementalDexing,
+                            enableDataBinding = binaryData.hasDatabinding,
+                            packageName = androidLibData.packageName,
+                            manifest = androidLibData.manifestFile,
+                            manifestValues = binaryData.manifestValues,
+                            res = androidLibData.res,
+                            resValues = androidLibData.resValues,
+                            customResourceSets = androidLibData.extraRes,
+                            assetsGlob = androidLibData.assets,
+                            assetsDir = androidLibData.assetsDir,
+                            buildId = binaryData.buildId,
+                            googleServicesJson = binaryData.googleServicesJson,
+                            hasCrashlytics = binaryData.hasCrashlytics
+                        )
+                    )
+                } + intermediateTargets
+
+        targets = addCrashlyticsTarget(targets)
+
+        return targets
+    }
+
+    private fun addCrashlyticsTarget(targets: List<BazelTarget>): List<BazelTarget> {
+        var resultTargets = targets
+        val androidTargetWithCrashlytics = resultTargets.firstOrNull { bazelTarget ->
+            bazelTarget is AndroidBinaryTarget &&
+                bazelTarget.hasCrashlytics &&
+                bazelTarget.buildId != null &&
+                bazelTarget.googleServicesJson != null
+        } as AndroidBinaryTarget?
+        if (androidTargetWithCrashlytics != null) {
+            val crashlyticsTarget = with(androidTargetWithCrashlytics) {
+                CrashlyticsTarget(
+                    packageName = packageName,
+                    buildId = buildId!!,
+                    googleServicesJson = googleServicesJson!!
+                )
+            }
+
+            resultTargets = resultTargets.map { bazelTarget ->
+                if (bazelTarget is AndroidBinaryTarget) {
+                    bazelTarget.copy(deps = bazelTarget.deps + crashlyticsTarget.toBazelDependency())
+                } else {
+                    bazelTarget
+                }
+            }.toMutableList()
+            resultTargets.add(0, crashlyticsTarget)
         }
-
-        androidLibData = androidLibData.copy(deps = deps)
-        val binaryData = androidBinDataExtractor.extract(project, androidLibData)
-
-        return intermediateTargets + AndroidBinaryTarget(
-            name = binaryData.name,
-            deps = androidLibData.deps + binaryData.deps,
-            srcs = androidLibData.srcs,
-            multidex = binaryData.multidex,
-            debugKey = binaryData.debugKey,
-            dexShards = binaryData.dexShards,
-            incrementalDexing = binaryData.incrementalDexing,
-            enableDataBinding = binaryData.hasDatabinding,
-            packageName = androidLibData.packageName,
-            manifest = androidLibData.manifestFile,
-            manifestValues = binaryData.manifestValues,
-            res = androidLibData.res,
-            resValues = androidLibData.resValues,
-            customResourceSets = androidLibData.extraRes,
-            assetsGlob = androidLibData.assets,
-            assetsDir = androidLibData.assetsDir,
-            buildId = binaryData.buildId,
-            googleServicesJson = binaryData.googleServicesJson,
-            hasCrashlytics = binaryData.hasCrashlytics
-        )
+        return resultTargets
     }
 
     private fun buildKtAndroidTargets(project: Project): List<BazelTarget> {
         return buildList {
-            val androidProjectData = androidLibDataExtractor.extract(
-                project = project,
-                sourceSetType = SourceSetType.JAVA_KOTLIN
-            ).copy(name = "${project.name}_lib", hasDatabinding = false)
-            var deps = androidProjectData.deps
+            androidVariantDataSource.getMigratableVariants(project, ConfigurationScope.BUILD)
+                .forEach { variant ->
+                    val androidProjectData = androidLibDataExtractor.extract(
+                        project = project,
+                        sourceSetType = SourceSetType.JAVA_KOTLIN,
+                        variant = variant
+                    ).copy(name = "${project.name}_lib", hasDatabinding = false)
+                    var deps = androidProjectData.deps
 
-            with(androidProjectData) {
-                toBuildConfigTarget().also {
-                    deps += it.toBazelDependency()
-                    add(it)
+                    with(androidProjectData) {
+                        toBuildConfigTarget(variant.name.variantNameSuffix()).also {
+                            deps += it.toBazelDependency()
+                            add(it)
+                        }
+                    }
+
+                    androidProjectData
+                        .copy(
+                            name = "${androidProjectData.name}${variant.name.variantNameSuffix()}",
+                            deps = deps,
+                            tags = emptyList() // Don't generate classpath reduction tags for final binary target
+                        )
+                        .toKtLibraryTarget()
+                        ?.also { add(it) }
                 }
-            }
-
-            androidProjectData
-                .copy(
-                    deps = deps,
-                    tags = emptyList() // Don't generate classpath reduction tags for final binary target
-                )
-                .toKtLibraryTarget()
-                ?.also { add(it) }
         }
     }
 
