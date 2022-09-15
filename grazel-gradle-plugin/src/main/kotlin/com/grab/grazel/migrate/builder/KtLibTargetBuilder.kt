@@ -57,17 +57,16 @@ internal class KtLibTargetBuilder @Inject constructor(
     private val kotlinExtension: KotlinExtension,
     private val testExtension: TestExtension
 ) : TargetBuilder {
+
     override fun build(project: Project): List<BazelTarget> {
         val projectData = projectDataExtractor.extract(project)
-        val unitTestData = kotlinUnitTestDataExtractor.extract(project)
+        val ktLibTargets = projectData.toKtLibraryTarget(kotlinExtension.enabledTransitiveReduction)
 
         return if (testExtension.enableTestMigration) {
-            listOf(
-                projectData.toKtLibraryTarget(kotlinExtension.enabledTransitiveReduction),
-                unitTestData.toUnitTestTarget()
-            )
+            val unitTestsTargets = kotlinUnitTestDataExtractor.extract(project).toUnitTestTarget()
+            listOf(ktLibTargets, unitTestsTargets)
         } else {
-            listOf(projectData.toKtLibraryTarget(kotlinExtension.enabledTransitiveReduction))
+            listOf(ktLibTargets)
         }
     }
 

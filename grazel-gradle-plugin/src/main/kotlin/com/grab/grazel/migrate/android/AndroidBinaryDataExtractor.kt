@@ -17,6 +17,9 @@
 package com.grab.grazel.migrate.android
 
 import com.android.build.gradle.BaseExtension
+import com.android.build.gradle.api.BaseVariant
+import com.android.build.gradle.internal.variant.BaseVariantFactory
+import com.android.builder.model.Variant
 import com.grab.grazel.GrazelExtension
 import com.grab.grazel.bazel.rules.DATABINDING_ARTIFACTS
 import com.grab.grazel.bazel.rules.Multidex
@@ -34,7 +37,7 @@ import javax.inject.Singleton
 
 
 internal interface AndroidBinaryDataExtractor {
-    fun extract(project: Project, androidLibraryData: AndroidLibraryData): AndroidBinaryData
+    fun extract(project: Project, variant: BaseVariant, androidLibraryData: AndroidLibraryData): AndroidBinaryData
 }
 
 @Singleton
@@ -47,11 +50,13 @@ internal class DefaultAndroidBinaryDataExtractor @Inject constructor(
 
     override fun extract(
         project: Project,
+        variant: BaseVariant,
         androidLibraryData: AndroidLibraryData
     ): AndroidBinaryData {
         val extension = project.extensions.getByType<BaseExtension>()
         val manifestValues = manifestValuesBuilder.build(
             project,
+            variant,
             extension.defaultConfig,
             androidLibraryData.packageName
         )

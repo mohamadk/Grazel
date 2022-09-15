@@ -18,6 +18,7 @@ package com.grab.grazel.migrate.android
 
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.api.AndroidSourceSet
+import com.android.build.gradle.api.BaseVariant
 import com.grab.grazel.GrazelExtension
 import com.grab.grazel.bazel.rules.ANDROIDX_GROUP
 import com.grab.grazel.bazel.rules.ANNOTATION_ARTIFACT
@@ -26,10 +27,10 @@ import com.grab.grazel.bazel.rules.DATABINDING_GROUP
 import com.grab.grazel.bazel.starlark.BazelDependency
 import com.grab.grazel.gradle.AndroidVariantDataSource
 import com.grab.grazel.gradle.ConfigurationScope
+import com.grab.grazel.gradle.dependencies.BuildGraphType
 import com.grab.grazel.gradle.dependencies.DependenciesDataSource
 import com.grab.grazel.gradle.dependencies.DependencyGraphs
-import com.grab.grazel.gradle.dependencies.directProjectDependencies
-import com.grab.grazel.gradle.getMigratableBuildVariants
+import com.grab.grazel.gradle.dependencies.GradleDependencyToBazelDependency
 import com.grab.grazel.gradle.hasDatabinding
 import com.grab.grazel.gradle.isAndroid
 import com.grab.grazel.migrate.dependencies.calculateDirectDependencyTags
@@ -44,6 +45,7 @@ import javax.inject.Singleton
 internal interface AndroidLibraryDataExtractor {
     fun extract(
         project: Project,
+        variant: BaseVariant,
         sourceSetType: SourceSetType = SourceSetType.JAVA
     ): AndroidLibraryData
 }
@@ -55,33 +57,41 @@ internal class DefaultAndroidLibraryDataExtractor @Inject constructor(
     private val dependencyGraphsProvider: Lazy<DependencyGraphs>,
     private val androidManifestParser: AndroidManifestParser,
     private val grazelExtension: GrazelExtension,
+    private val gradleDependencyToBazelDependency: GradleDependencyToBazelDependency
 ) : AndroidLibraryDataExtractor {
     private val projectDependencyGraphs get() = dependencyGraphsProvider.get()
 
-    override fun extract(project: Project, sourceSetType: SourceSetType): AndroidLibraryData {
+    override fun extract(
+        project: Project,
+        variant: BaseVariant,
+        sourceSetType: SourceSetType
+    ): AndroidLibraryData {
         if (project.isAndroid) {
             val extension = project.extensions.getByType<BaseExtension>()
             val deps = projectDependencyGraphs
-                .directProjectDependencies(project, ConfigurationScope.BUILD) +
+                .directDependencies(
+                    project,
+                    BuildGraphType(ConfigurationScope.BUILD, variant)
+                ).map { dependent ->
+                    gradleDependencyToBazelDependency.map(project, dependent, variant)
+                } +
                 dependenciesDataSource.collectMavenDeps(project) +
                 project.kotlinParcelizeDeps()
 
-            return project.extract(extension, sourceSetType, deps)
+            return project.extract(variant, extension, sourceSetType, deps)
         } else {
             throw IllegalArgumentException("${project.name} is not an Android project")
         }
     }
 
     private fun Project.extract(
+        variant: BaseVariant,
         extension: BaseExtension,
         sourceSetType: SourceSetType = SourceSetType.JAVA,
         deps: List<BazelDependency>
     ): AndroidLibraryData {
         // Only consider source sets from migratable variants
-        val migratableSourceSets = variantDataSource
-            .getMigratableBuildVariants(this)
-            .asSequence()
-            .flatMap { it.sourceSets.asSequence() }
+        val migratableSourceSets = variant.sourceSets
             .filterIsInstance<AndroidSourceSet>()
             .toList()
 
@@ -197,8 +207,8 @@ internal class DefaultAndroidLibraryDataExtractor @Inject constructor(
 }
 
 internal fun DependenciesDataSource.collectMavenDeps(
-    project: Project, vararg scopes: ConfigurationScope
-): List<BazelDependency> = mavenDependencies(project, *scopes)
+    project: Project, vararg buildGraphTypes: BuildGraphType
+): List<BazelDependency> = mavenDependencies(project, *buildGraphTypes)
     .filter {
         if (project.hasDatabinding) {
             it.group != DATABINDING_GROUP && (it.group != ANDROIDX_GROUP && it.name != ANNOTATION_ARTIFACT)

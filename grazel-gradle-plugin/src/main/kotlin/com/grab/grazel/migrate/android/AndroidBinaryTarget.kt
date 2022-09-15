@@ -16,15 +16,14 @@
 
 package com.grab.grazel.migrate.android
 
+import com.grab.grazel.bazel.rules.GOOGLE_SERVICES_XML
 import com.grab.grazel.bazel.rules.Multidex
 import com.grab.grazel.bazel.rules.Visibility
 import com.grab.grazel.bazel.rules.androidBinary
-import com.grab.grazel.bazel.rules.crashlyticsAndroidLibrary
-import com.grab.grazel.bazel.rules.googleServicesXml
 import com.grab.grazel.bazel.starlark.BazelDependency
 import com.grab.grazel.bazel.starlark.Statement
-import com.grab.grazel.bazel.starlark.asString
 import com.grab.grazel.bazel.starlark.statements
+import com.grab.grazel.bazel.starlark.toStatement
 import com.grab.grazel.migrate.BazelBuildTarget
 
 internal data class AndroidBinaryTarget(
@@ -54,18 +53,7 @@ internal data class AndroidBinaryTarget(
         var resourceFiles = buildResources(res, ResValues(), customResourceSets, name)
         var finalDeps = deps
         if (googleServicesJson != null) {
-            val googleServicesXmlRes = googleServicesXml(
-                packageName = packageName,
-                googleServicesJson = googleServicesJson
-            )
-            resourceFiles += googleServicesXmlRes
-            if (hasCrashlytics && buildId != null) {
-                finalDeps += crashlyticsAndroidLibrary(
-                    packageName = packageName,
-                    buildId = buildId,
-                    resourceFiles = googleServicesXmlRes.asString()
-                )
-            }
+            resourceFiles += GOOGLE_SERVICES_XML.toStatement()
         }
 
         androidBinary(

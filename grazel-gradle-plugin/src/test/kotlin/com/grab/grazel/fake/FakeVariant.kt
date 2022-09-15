@@ -52,7 +52,8 @@ internal const val RELEASE_FLAVOR2 = "releaseFlavor2"
 
 class FakeVariant(
     private val name: String,
-    private val flavor: String? = null
+    private val flavor: String? = null,
+    private val sourceSets: List<SourceProvider> = emptyList()
 ) : BaseVariant {
     override fun getProductFlavors(): MutableList<ProductFlavor> =
         if (flavor != null) mutableListOf(FakeProductFlavor(flavor))
@@ -88,7 +89,7 @@ class FakeVariant(
     }
 
     override fun getSourceSets(): MutableList<SourceProvider> {
-        TODO("Not yet implemented")
+        return sourceSets.toMutableList()
     }
 
     override fun getJavaCompileOptions(): JavaCompileOptions {
@@ -314,6 +315,6 @@ class FakeBuildType : BuildType {
         get() = TODO("Not yet implemented")
 
     override fun getName(): String {
-        TODO("Not yet implemented")
+        return "debug"
     }
 }

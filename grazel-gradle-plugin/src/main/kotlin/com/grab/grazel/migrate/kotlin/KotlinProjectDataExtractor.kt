@@ -21,9 +21,10 @@ import com.grab.grazel.bazel.rules.KOTLIN_PARCELIZE_TARGET
 import com.grab.grazel.bazel.starlark.BazelDependency
 import com.grab.grazel.extension.KotlinExtension
 import com.grab.grazel.gradle.ConfigurationScope
+import com.grab.grazel.gradle.dependencies.BuildGraphType
 import com.grab.grazel.gradle.dependencies.DependenciesDataSource
 import com.grab.grazel.gradle.dependencies.DependencyGraphs
-import com.grab.grazel.gradle.dependencies.directProjectDependencies
+import com.grab.grazel.gradle.dependencies.GradleDependencyToBazelDependency
 import com.grab.grazel.gradle.hasKotlinAndroidExtensions
 import com.grab.grazel.migrate.android.SourceSetType
 import com.grab.grazel.migrate.android.collectMavenDeps
@@ -48,6 +49,7 @@ internal class DefaultKotlinProjectDataExtractor @Inject constructor(
     private val dependenciesDataSource: DependenciesDataSource,
     private val dependencyGraphsProvider: Lazy<DependencyGraphs>,
     private val grazelExtension: GrazelExtension,
+    private val gradleDependencyToBazelDependency: GradleDependencyToBazelDependency
 ) : KotlinProjectDataExtractor {
 
     private val kotlinExtension: KotlinExtension get() = grazelExtension.rules.kotlin
@@ -61,7 +63,12 @@ internal class DefaultKotlinProjectDataExtractor @Inject constructor(
         val resources = project.kotlinSources(sourceSets, SourceSetType.RESOURCES).toList()
 
         val deps = projectDependencyGraphs
-            .directProjectDependencies(project, ConfigurationScope.BUILD) +
+            .directDependencies(
+                project,
+                BuildGraphType(ConfigurationScope.BUILD)
+            ).map { dependent ->
+                gradleDependencyToBazelDependency.map(project, dependent, null)
+            } +
             dependenciesDataSource.collectMavenDeps(project) +
             project.androidJarDeps() +
             project.kotlinParcelizeDeps()
