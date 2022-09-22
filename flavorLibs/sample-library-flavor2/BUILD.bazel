@@ -18,7 +18,7 @@ grab_kt_jvm_test(
         "src/test/java/com/grab/grazel/flavor2/ModuleNameTest.kt",
     ]),
     associates = [
-        "//sample-library-flavor2:sample-library-flavor2",
+        "//flavorLibs/sample-library-flavor2:sample-library-flavor2",
     ],
     visibility = [
         "//visibility:public",

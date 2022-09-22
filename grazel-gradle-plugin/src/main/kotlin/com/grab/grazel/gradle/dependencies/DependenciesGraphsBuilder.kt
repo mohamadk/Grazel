@@ -25,6 +25,8 @@ import com.grab.grazel.gradle.AndroidVariantDataSource
 import com.grab.grazel.gradle.ConfigurationDataSource
 import com.grab.grazel.gradle.ConfigurationScope
 import com.grab.grazel.gradle.isAndroid
+import com.grab.grazel.gradle.isJava
+import com.grab.grazel.gradle.isKotlinJvm
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import javax.inject.Inject
@@ -117,8 +119,13 @@ internal class DependenciesGraphsBuilder @Inject constructor(
                 .forEach { variant ->
                     buildGraphs.addNode(BuildGraphType(configurationScope, variant), sourceProject)
                 }
-        } else {
+        } else if (
+            !sourceProject.isAndroid &&
+            (sourceProject.isJava || sourceProject.isKotlinJvm)
+        ) {
             buildGraphs.addNode(BuildGraphType(configurationScope, null), sourceProject)
+        } else {
+            // project is a simple directory
         }
     }
 }

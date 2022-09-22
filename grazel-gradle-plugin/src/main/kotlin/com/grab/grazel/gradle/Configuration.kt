@@ -17,7 +17,6 @@
 package com.grab.grazel.gradle
 
 import com.android.build.gradle.api.BaseVariant
-import com.android.build.gradle.internal.variant.BaseVariantFactory
 import com.grab.grazel.GrazelExtension
 import com.grab.grazel.gradle.dependencies.BuildGraphType
 import org.gradle.api.Project
@@ -25,8 +24,8 @@ import org.gradle.api.artifacts.Configuration
 import javax.inject.Inject
 import javax.inject.Singleton
 
-enum class ConfigurationScope {
-    BUILD, TEST, ANDROID_TEST;
+enum class ConfigurationScope(val scopeName:String) {
+    BUILD(""), TEST("UnitTest"), ANDROID_TEST("AndroidTest");
 }
 
 internal fun GrazelExtension.configurationScopes(): Array<ConfigurationScope> {

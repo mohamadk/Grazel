@@ -26,7 +26,7 @@ kt_db_android_library(
     deps = [
         ":sample-android-flavor-flavor1-debug-build-config",
         "//:parcelize",
-        "//sample-library-flavor1",
+        "//flavorLibs/sample-library-flavor1",
         "@maven//:androidx_appcompat_appcompat",
         "@maven//:androidx_constraintlayout_constraintlayout",
         "@maven//:androidx_constraintlayout_constraintlayout_core",
