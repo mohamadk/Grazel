@@ -50,20 +50,36 @@ internal class VariantsMerger @Inject constructor(
             androidVariantDataSource.getMigratableVariants(getApp(), scope).map { it.buildType }
                 .toSet()
 
-        return appFlavors.flatMap { appFlavor ->
+        return if (appFlavors.isNotEmpty()) {
+            appFlavors.flatMap { appFlavor ->
+                appBuildTypes.map { appBuildType ->
+                    val mergedFlavor = mergedFlavor(moduleFlavors, appFlavor, project)
+                    val mergedBuildType = mergedBuildType(moduleBuildTypes, appBuildType, project)
+
+                    val moduleVariant = moduleVariant(
+                        scope,
+                        moduleFlavors.isNotEmpty(),
+                        mergedBuildType,
+                        mergedFlavor,
+                        moduleVariants
+                    )
+
+                    MergedVariant(appFlavor.name, appBuildType.name, moduleVariant)
+                }
+            }
+        } else {
             appBuildTypes.map { appBuildType ->
-                val mergedFlavor = mergedFlavor(moduleFlavors, appFlavor, project)
                 val mergedBuildType = mergedBuildType(moduleBuildTypes, appBuildType, project)
 
                 val moduleVariant = moduleVariant(
                     scope,
                     moduleFlavors.isNotEmpty(),
                     mergedBuildType,
-                    mergedFlavor,
+                    "",
                     moduleVariants
                 )
 
-                MergedVariant(appFlavor.name, appBuildType.name, moduleVariant)
+                MergedVariant("", appBuildType.name, moduleVariant)
             }
         }.toSet()
     }
@@ -82,13 +98,13 @@ internal class VariantsMerger @Inject constructor(
         } + scope.scopeName
 
         return moduleVariants.first(
-            "expectedModuleVariantName=$expectedModuleVariantName is not existed in " +
+            "ExpectedModuleVariantName=$expectedModuleVariantName is not existed in " +
                 "moduleVariants= ${moduleVariants.map { it.name }}"
         ) { variant -> variant.name == expectedModuleVariantName }
     }
 
     /**
-     * find if the build type or any of its matching fallbacks exist in the target module
+     * Find if the build type or any of its matching fallbacks exist in the target module
      * throws exception if it cannot find anything
      */
     private fun mergedBuildType(
@@ -105,14 +121,14 @@ internal class VariantsMerger @Inject constructor(
                     fallBackBuildType == moduleBuildType.name
                 } != null
             } ?: throw IllegalStateException(
-                "buildType ${appBuildType.name} doesn't exist in module ${project.name} consider " +
+                "BuildType ${appBuildType.name} doesn't exist in module ${project.name} consider " +
                     "adding it to the module or add a matching fallback to the " +
                     "${appBuildType.name} in app module"
             ))
     }
 
     /**
-     * find if the flavor or any of its matching fallbacks exist in the target module
+     * Find if the flavor or any of its matching fallbacks exist in the target module
      *
      * throws exception if it cannot find anything
      */
@@ -135,7 +151,7 @@ internal class VariantsMerger @Inject constructor(
                     fallBackFlavor == moduleFlavor.name
                 } != null
             } ?: throw IllegalStateException(
-                "flavor ${appFlavor.name} its not present in module ${project.name} consider" +
+                "Flavor ${appFlavor.name} its not present in module ${project.name} consider" +
                     " adding it to the module or add a matchingFallback in the app module"
             )
     }
@@ -145,7 +161,7 @@ internal class VariantsMerger @Inject constructor(
             androidApplicationsModules.first()
         } else {
             throw java.lang.IllegalStateException(
-                "root project should have at least and just one application module"
+                "Root project should have at least and just one application module"
             )
         }
     }

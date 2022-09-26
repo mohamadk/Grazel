@@ -36,7 +36,7 @@ internal class DependenciesGraphsBuilder @Inject constructor(
     private val dependenciesDataSource: DependenciesDataSource,
     private val configurationDataSource: ConfigurationDataSource,
     private val androidVariantDataSource: AndroidVariantDataSource,
-    private val testExtension: TestExtension
+    private val testExtension: TestExtension,
 ) {
 
     fun build(): DependencyGraphs {
@@ -63,6 +63,7 @@ internal class DependenciesGraphsBuilder @Inject constructor(
                         )
                             .forEach { variant ->
                                 if (configurationDataSource.isThisConfigurationBelongsToThisVariants(
+                                        sourceProject,
                                         variant,
                                         configuration = configuration
                                     )
@@ -95,8 +96,10 @@ internal class DependenciesGraphsBuilder @Inject constructor(
     ) {
         dependenciesDataSource.projectDependencies(project, configurationScope)
             .forEach { (configuration, projectDependency) ->
-                androidVariantDataSource.getMigratableVariants(project, configurationScope)
-                    .forEach { variant ->
+                val variants =
+                    androidVariantDataSource.getMigratableVariants(project, configurationScope)
+                if (variants.isNotEmpty()) {
+                    variants.forEach { variant ->
                         if (variant.compileConfiguration.hierarchy.contains(configuration)) {
                             graph.putEdgeValue(
                                 BuildGraphType(configurationScope, variant),
@@ -106,6 +109,14 @@ internal class DependenciesGraphsBuilder @Inject constructor(
                             )
                         }
                     }
+                } else {
+                    graph.putEdgeValue(
+                        BuildGraphType(configurationScope),
+                        project,
+                        projectDependency.dependencyProject,
+                        configuration
+                    )
+                }
             }
     }
 
@@ -125,6 +136,7 @@ internal class DependenciesGraphsBuilder @Inject constructor(
         ) {
             buildGraphs.addNode(BuildGraphType(configurationScope, null), sourceProject)
         } else {
+            rootProject.logger.warn("${sourceProject.name} is a simple directory")
             // project is a simple directory
         }
     }

@@ -98,8 +98,6 @@ internal class KtAndroidLibTargetBuilder @Inject constructor(
                         ?.also {
                             add(it)
                         }
-
-
                 }
             if (testExtension.enableTestMigration) {
                 variantsMerger.merge(project, ConfigurationScope.TEST)
@@ -139,7 +137,7 @@ internal fun AndroidLibraryData.toAarResTarget(variantName: String): AndroidLibr
     return if (res.isNotEmpty() && !hasDatabinding) {
         // For hybrid builds we need separate AAR for resources
         // When it is a pure resource module, keep the res target as the main target
-        val targetName = if (srcs.isEmpty()) name else "${name}-res$variantName"
+        val targetName = if (srcs.isEmpty()) "$name$variantName" else "${name}-res$variantName"
         AndroidLibraryTarget(
             name = targetName,
             packageName = packageName,

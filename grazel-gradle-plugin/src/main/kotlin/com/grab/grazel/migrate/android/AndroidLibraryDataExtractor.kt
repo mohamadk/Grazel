@@ -74,7 +74,10 @@ internal class DefaultAndroidLibraryDataExtractor @Inject constructor(
                 ).map { dependent ->
                     gradleDependencyToBazelDependency.map(project, dependent, mergedVariant)
                 } +
-                dependenciesDataSource.collectMavenDeps(project) +
+                dependenciesDataSource.collectMavenDeps(
+                    project,
+                    BuildGraphType(ConfigurationScope.BUILD, mergedVariant.variant)
+                ) +
                 project.kotlinParcelizeDeps()
 
             return project.extract(mergedVariant, extension, sourceSetType, deps)
@@ -126,7 +129,7 @@ internal class DefaultAndroidLibraryDataExtractor @Inject constructor(
             manifestFile = manifestFile,
             packageName = packageName,
             hasDatabinding = project.hasDatabinding,
-            buildConfigData = extension.extractBuildConfig(this, variantDataSource),
+            buildConfigData = extension.extractBuildConfig(this, mergedVariant.variant),
             resValues = extension.extractResValue(),
             extraRes = extraRes,
             deps = deps,

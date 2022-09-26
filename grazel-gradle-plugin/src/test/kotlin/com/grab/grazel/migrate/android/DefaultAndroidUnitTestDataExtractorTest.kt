@@ -183,7 +183,7 @@ class DefaultAndroidUnitTestDataExtractorTest : GrazelPluginTest() {
     }
 
     private fun debugUnitTestVariant(project: Project): MergedVariant {
-        val variant = project.project.the<LibraryExtension>().unitTestVariants.first {
+        val variant = project.the<LibraryExtension>().unitTestVariants.first {
             it.name == "debugUnitTest"
         }
 

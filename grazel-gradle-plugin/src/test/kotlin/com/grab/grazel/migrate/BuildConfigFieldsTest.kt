@@ -23,6 +23,7 @@ import com.grab.grazel.GrazelExtension
 import com.grab.grazel.GrazelExtension.Companion.GRAZEL_EXTENSION
 import com.grab.grazel.GrazelPluginTest
 import com.grab.grazel.buildProject
+import com.grab.grazel.fake.FakeVariant
 import com.grab.grazel.gradle.ANDROID_APPLICATION_PLUGIN
 import com.grab.grazel.gradle.AndroidVariantDataSource
 import com.grab.grazel.gradle.DefaultAndroidVariantDataSource
@@ -72,7 +73,7 @@ class BuildConfigFieldsTest : GrazelPluginTest() {
         androidBinary.doEvaluate()
         androidBinary
             .the<BaseExtension>()
-            .extractBuildConfig(androidBinary, androidVariantDataSource)
+            .extractBuildConfig(androidBinary, variant = FakeVariant("debug"))
             .let { buildConfigData ->
                 Truth.assertThat(buildConfigData.strings).apply {
                     hasSize(2)
