@@ -97,10 +97,12 @@ internal class VariantsMerger @Inject constructor(
             mergedBuildType
         } + scope.scopeName
 
-        return moduleVariants.first(
-            "ExpectedModuleVariantName=$expectedModuleVariantName is not existed in " +
-                "moduleVariants= ${moduleVariants.map { it.name }}"
-        ) { variant -> variant.name == expectedModuleVariantName }
+        return moduleVariants.firstOrNull { variant ->
+            variant.name == expectedModuleVariantName
+        } ?: throw VariantIsNotPresentException(
+            expectedModuleVariantName,
+            moduleVariants.map { it.name }
+        )
     }
 
     /**
@@ -120,11 +122,7 @@ internal class VariantsMerger @Inject constructor(
                 moduleBuildTypes.firstOrNull { moduleBuildType ->
                     fallBackBuildType == moduleBuildType.name
                 } != null
-            } ?: throw IllegalStateException(
-                "BuildType ${appBuildType.name} doesn't exist in module ${project.name} consider " +
-                    "adding it to the module or add a matching fallback to the " +
-                    "${appBuildType.name} in app module"
-            ))
+            } ?: throw BuildTypesIsNotPresentException(project.name, appBuildType.name))
     }
 
     /**
@@ -150,19 +148,14 @@ internal class VariantsMerger @Inject constructor(
                 moduleFlavors.firstOrNull { moduleFlavor ->
                     fallBackFlavor == moduleFlavor.name
                 } != null
-            } ?: throw IllegalStateException(
-                "Flavor ${appFlavor.name} its not present in module ${project.name} consider" +
-                    " adding it to the module or add a matchingFallback in the app module"
-            )
+            } ?: throw FlavorIsNotPresentException(project.name, appFlavor.name)
     }
 
     private fun getApp(): Project {
         return if (androidApplicationsModules.size == 1) {
             androidApplicationsModules.first()
         } else {
-            throw java.lang.IllegalStateException(
-                "Root project should have at least and just one application module"
-            )
+            throw ProjectShouldHaveOnlyOneAppModuleException()
         }
     }
 
@@ -186,9 +179,26 @@ fun <E> Collection<E>.first(errorMessage: String, function: (E) -> Boolean): E {
 
 data class MergedVariant(val flavor: String, val buildType: String, val variant: BaseVariant) {
     val variantName = flavor + buildType.capitalize()
-
-    override fun toString(): String {
-        return super.toString() + ", variantName=$variantName:: "
-    }
 }
 
+class FlavorIsNotPresentException(project: String, flavor: String) : IllegalStateException(
+    "Flavor $flavor its not present in module $project consider" +
+        " adding it to the module or add a matchingFallback in the app module"
+)
+
+class BuildTypesIsNotPresentException(project: String, buildType: String) : IllegalStateException(
+    "BuildType $buildType doesn't exist in module $project consider " +
+        "adding it to the module or add a matching fallback to the " +
+        "$buildType in app module"
+)
+
+class ProjectShouldHaveOnlyOneAppModuleException :
+    IllegalStateException("Root project should have at least and just one application module")
+
+class VariantIsNotPresentException(
+    expectedModuleVariantName: String,
+    moduleVariants: List<String>
+) : IllegalStateException(
+    "ExpectedModuleVariantName=$expectedModuleVariantName is not existed in " +
+        "moduleVariants= $moduleVariants"
+)

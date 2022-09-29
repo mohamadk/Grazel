@@ -58,6 +58,9 @@ internal class MigrationChecker @Inject constructor(
     private val migratableProjectCache = ConcurrentSkipListMap<String, Boolean>()
 
     override fun canMigrate(project: Project): Boolean {
+        if (!project.isAndroid && !project.isJava && !project.isKotlinJvm) {
+            return false
+        }
         fun canMigrateInternal(project: Project): Boolean {
             return migratableProjectCache.getOrPut(project.path) {
                 migrationCriteria.all { criterion -> criterion.canMigrate(project) }
