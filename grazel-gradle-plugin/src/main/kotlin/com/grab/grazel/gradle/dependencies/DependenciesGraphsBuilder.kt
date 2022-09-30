@@ -137,7 +137,6 @@ internal class DependenciesGraphsBuilder @Inject constructor(
             buildGraphs.addNode(BuildGraphType(configurationScope, null), sourceProject)
         } else {
             rootProject.logger.warn("${sourceProject.name} is a simple directory")
-            // project is a simple directory
         }
     }
 }

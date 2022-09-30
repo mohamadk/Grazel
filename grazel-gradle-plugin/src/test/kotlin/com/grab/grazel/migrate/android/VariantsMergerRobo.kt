@@ -28,9 +28,7 @@ class VariantsMergerRobo {
     private lateinit var appVariants: Set<BaseVariant>
     private lateinit var depVariants: Set<BaseVariant>
     private val androidVariantDataSource: AndroidVariantDataSource = mock()
-    private val root = buildProject(
-        "root"
-    )
+    private val root = buildProject("root")
     private lateinit var scope: ConfigurationScope
 
     init {

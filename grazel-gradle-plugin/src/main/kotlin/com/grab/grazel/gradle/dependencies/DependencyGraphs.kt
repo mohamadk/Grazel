@@ -39,7 +39,11 @@ internal class DefaultDependencyGraphs(
     ): Set<Project> =
         if (buildGraphTypes.isEmpty()) {
             buildGraphs.values.flatMap {
-                Graphs.reachableNodes(it.asGraph(), project)
+                if (it.nodes().contains(project)) {
+                    Graphs.reachableNodes(it.asGraph(), project)
+                } else {
+                    emptyList()
+                }
             }
         } else {
             buildGraphTypes.flatMap { buildGraphType ->
