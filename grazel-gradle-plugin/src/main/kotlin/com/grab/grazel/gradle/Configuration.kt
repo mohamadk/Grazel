@@ -25,7 +25,7 @@ import org.jetbrains.kotlin.gradle.internal.Kapt3GradleSubplugin.Companion.findK
 import javax.inject.Inject
 import javax.inject.Singleton
 
-enum class ConfigurationScope(val scopeName:String) {
+enum class ConfigurationScope(val scopeName: String) {
     BUILD(""), TEST("UnitTest"), ANDROID_TEST("AndroidTest");
 }
 
@@ -111,9 +111,10 @@ internal class DefaultConfigurationDataSource @Inject constructor(
             variant.compileConfiguration.hierarchy.contains(configuration) ||
             variant.runtimeConfiguration.hierarchy.contains(configuration) ||
             variant.annotationProcessorConfiguration.hierarchy.contains(configuration) ||
-            variant.sourceSets.map { it.name }.any { sourceSetName->
+            variant.sourceSets.map { it.name }.any { sourceSetName ->
                 project.findKaptConfiguration(sourceSetName)?.name == configuration.name
-            }
+            } ||
+            configuration.name == "kotlin-extension"
     }
 
     override fun resolvedConfigurations(
