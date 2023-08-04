@@ -24,7 +24,6 @@ import com.grab.grazel.buildProject
 import com.grab.grazel.fake.FakeDependencyGraphs
 import com.grab.grazel.gradle.ANDROID_LIBRARY_PLUGIN
 import com.grab.grazel.gradle.DefaultConfigurationDataSource
-import com.grab.grazel.gradle.DefaultRepositoryDataSource
 import com.grab.grazel.gradle.KOTLIN_ANDROID_PLUGIN
 import com.grab.grazel.gradle.dependencies.ArtifactsConfig
 import com.grab.grazel.gradle.dependencies.DefaultDependenciesDataSource
@@ -33,6 +32,7 @@ import com.grab.grazel.gradle.dependencies.GradleDependencyToBazelDependency
 import com.grab.grazel.gradle.variant.AndroidVariantsExtractor
 import com.grab.grazel.gradle.variant.DefaultAndroidVariantDataSource
 import com.grab.grazel.gradle.variant.DefaultAndroidVariantsExtractor
+import com.grab.grazel.gradle.variant.DefaultVariantBuilder
 import com.grab.grazel.gradle.variant.MatchedVariant
 import com.grab.grazel.util.doEvaluate
 import org.gradle.api.Project
@@ -94,16 +94,18 @@ class DefaultAndroidUnitTestDataExtractorTest : GrazelPluginTest() {
 
         val variantDataSource = DefaultAndroidVariantDataSource(DefaultAndroidVariantsExtractor())
         val configurationDataSource = DefaultConfigurationDataSource(variantDataSource)
-        val repositoryDataSource = DefaultRepositoryDataSource(rootProject)
 
         val dependenciesDataSource = DefaultDependenciesDataSource(
-            rootProject = rootProject,
             configurationDataSource = configurationDataSource,
             artifactsConfig = ArtifactsConfig(ignoredList = listOf(KOTLIN_STDLIB)),
-            repositoryDataSource = repositoryDataSource,
             dependencyResolutionService = DefaultDependencyResolutionService.register(rootProject),
             grazelExtension = GrazelExtension(rootProject),
             androidVariantsExtractor = androidVariantsExtractor,
+            variantBuilder = DefaultVariantBuilder(
+                DefaultAndroidVariantDataSource(
+                    androidVariantsExtractor
+                )
+            ),
         )
 
         val dependencyGraphs = FakeDependencyGraphs()

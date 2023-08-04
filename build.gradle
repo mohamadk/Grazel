@@ -49,8 +49,8 @@ allprojects {
     configurations.configureEach {
         resolutionStrategy {
             // Force a dependency to test if Grazel picks it up correctly.
-            force "com.google.dagger:dagger:2.29"
-            force "com.google.dagger:dagger-compiler:2.29"
+            force "com.google.dagger:dagger:2.47"
+            force "com.google.dagger:dagger-compiler:2.47"
         }
     }
 
@@ -92,7 +92,8 @@ grazel {
     }
     dependencies {
         overrideArtifactVersions.addAll(
-            "androidx.constraintlayout:constraintlayout:2.1.4"
+            "androidx.constraintlayout:constraintlayout:2.1.4",
+            "androidx.annotation:annotation:1.7.0-alpha03"
         )
     }
     rules {
@@ -102,7 +103,7 @@ grazel {
         }
         bazelCommon {
             gitRepository {
-                commit = "120019c5290cceda3c795d9ddb2a3253b9b32b3e"
+                commit = "7415aab81c8cfec7ea05bb9bcb2b16d595bbc88e"
                 remote = "https://github.com/grab/grab-bazel-common.git"
             }
             toolchains {
@@ -135,10 +136,11 @@ grazel {
             jetifyIncludeList.add("com.android.support:cardview-v7")
             jetifyExcludeList.add("androidx.appcompat:appcompat")
             artifactPinning {
-                enabled.set(true)
+                enabled.set(false)
             }
             overrideTargetLabels.putAll(
-                ["androidx.appcompat:appcompat": "@//third_party:androidx_appcompat_appcompat"]
+                // Workaround for https://issuetracker.google.com/issues/285353844
+                ["androidx.annotation:annotation": "@maven//:androidx_annotation_annotation_jvm"]
             )
             versionConflictPolicy = "pinned"
         }
@@ -163,8 +165,8 @@ grazel {
             }
         }
         dagger {
-            tag = "2.46.1"
-            sha = "bbd75275faa3186ebaa08e6779dc5410741a940146d43ef532306eb2682c13f7"
+            tag = "2.47"
+            sha = "154cdfa4f6f552a9873e2b4448f7a80415cb3427c4c771a50c6a8a8b434ffd0a"
         }
     }
 }

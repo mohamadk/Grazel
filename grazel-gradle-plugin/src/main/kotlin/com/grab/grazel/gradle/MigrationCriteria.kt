@@ -37,10 +37,8 @@ internal object MigrationCriteriaModule {
     @Provides
     fun migrationCriteria(
         pluginsMigrationCriteria: PluginsMigrationCriteria,
-        dependenciesMigrationCriteria: DependenciesMigrationCriteria
     ): Set<MigrationCriteria> = setOf(
         pluginsMigrationCriteria,
-        dependenciesMigrationCriteria
     )
 }
 
@@ -96,7 +94,7 @@ internal class DependenciesMigrationCriteria @Inject constructor(
     override fun canMigrate(project: Project): Boolean {
         val hasPrivateDependencies =
             dependenciesDataSource.hasDepsFromUnsupportedRepositories(project)
-        val hasIgnoredArtifacts = dependenciesDataSource.hasIgnoredArtifacts(project)
+        val hasIgnoredArtifacts = false // TODO(arun) Refactor
         return !hasPrivateDependencies && !hasIgnoredArtifacts
     }
 }
